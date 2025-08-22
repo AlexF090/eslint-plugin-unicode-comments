@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const unicodePatterns = {
     // Trojan Source (Bidirectional Overrides)
     trojanSource: /[\u202A-\u202E\u2066-\u2069]/,
@@ -123,5 +125,5 @@ const rule = {
     },
 };
 // eslint-disable-next-line import/no-default-export
-export default rule;
+exports.default = rule;
 //# sourceMappingURL=dangerous-literals.js.map

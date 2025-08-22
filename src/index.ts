@@ -12,6 +12,7 @@ const plugin = {
   },
   configs: {
     recommended: {
+      // Legacy config (ESLint 8 and below)
       plugins: ["unicode-comments"],
       rules: {
         "unicode-comments/dangerous-unicode": "error",

@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const rule = {
     meta: {
         type: 'suggestion',
@@ -28,5 +30,5 @@ const rule = {
     },
 };
 // eslint-disable-next-line import/no-default-export
-export default rule;
+exports.default = rule;
 //# sourceMappingURL=dangerous-identifiers.js.map

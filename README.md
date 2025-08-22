@@ -4,8 +4,20 @@ A comprehensive ESLint plugin that provides Unicode security checks to prevent v
 
 ## Installation
 
+### From npm (when published)
+
 ```bash
 npm install eslint-plugin-unicode-comments --save-dev
+```
+
+### Local Development Installation
+
+```bash
+# Install locally from project directory
+npm install /path/to/eslint-plugin-unicode-comments
+
+# Example:
+npm install /Users/af/Developer/private/eslint-plugin-unicode-comments
 ```
 
 ## Usage
@@ -13,10 +25,10 @@ npm install eslint-plugin-unicode-comments --save-dev
 ### ESLint 9+ (Flat Config)
 
 ```javascript
-// eslint.config.js
-import unicodeCommentsPlugin from "eslint-plugin-unicode-comments";
+// eslint.config.js (CommonJS style)
+const unicodeCommentsPlugin = require("eslint-plugin-unicode-comments");
 
-export default [
+module.exports = [
   {
     plugins: {
       "unicode-comments": unicodeCommentsPlugin,
@@ -49,22 +61,13 @@ module.exports = {
 ### Using Recommended Config
 
 ```javascript
-// ESLint 9+ (Flat Config)
-import unicodeCommentsPlugin from "eslint-plugin-unicode-comments";
-
-export default [
-  {
-    plugins: {
-      "unicode-comments": unicodeCommentsPlugin,
-    },
-    ...unicodeCommentsPlugin.configs.recommended,
-  },
-];
-
 // ESLint 8 and below (Legacy Config)
 module.exports = {
   extends: ["plugin:unicode-comments/recommended"],
 };
+
+// Note: Flat Config (ESLint 9+) doesn't support extends syntax
+// Use the explicit rules configuration above instead
 ```
 
 ## Rules
@@ -126,6 +129,24 @@ npm test
 
 # Lint source code
 npm run lint
+```
+
+### Local Development Workflow
+
+```bash
+# 1. Make changes to source code
+# 2. Build the plugin
+npm run build
+
+# 3. Install locally in consumer project
+cd /path/to/consumer-project
+npm install /path/to/eslint-plugin-unicode-comments
+
+# 4. Test the plugin
+npx eslint path/to/test-file.js
+
+# 5. Use --fix to test auto-fixing
+npx eslint path/to/test-file.js --fix
 ```
 
 ## Contributing

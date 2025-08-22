@@ -1,16 +1,22 @@
-import dangerousComments from "./rules/dangerous-comments";
-import dangerousIdentifiers from "./rules/dangerous-identifiers";
-import dangerousLiterals from "./rules/dangerous-literals";
-import dangerousTemplateLiterals from "./rules/dangerous-template-literals";
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const dangerous_comments_1 = __importDefault(require("./rules/dangerous-comments"));
+const dangerous_identifiers_1 = __importDefault(require("./rules/dangerous-identifiers"));
+const dangerous_literals_1 = __importDefault(require("./rules/dangerous-literals"));
+const dangerous_template_literals_1 = __importDefault(require("./rules/dangerous-template-literals"));
 const plugin = {
     rules: {
-        "dangerous-unicode": dangerousComments,
-        "dangerous-unicode-literals": dangerousLiterals,
-        "dangerous-unicode-template-literals": dangerousTemplateLiterals,
-        "dangerous-unicode-identifiers": dangerousIdentifiers,
+        "dangerous-unicode": dangerous_comments_1.default,
+        "dangerous-unicode-literals": dangerous_literals_1.default,
+        "dangerous-unicode-template-literals": dangerous_template_literals_1.default,
+        "dangerous-unicode-identifiers": dangerous_identifiers_1.default,
     },
     configs: {
         recommended: {
+            // Legacy config (ESLint 8 and below)
             plugins: ["unicode-comments"],
             rules: {
                 "unicode-comments/dangerous-unicode": "error",
@@ -22,7 +28,7 @@ const plugin = {
     },
 };
 // ESLint Flat Config support
-export default plugin;
+exports.default = plugin;
 // Legacy ESLint Config support - ensure CommonJS compatibility
 if (typeof module !== "undefined" && module.exports) {
     module.exports = plugin;

@@ -1,4 +1,6 @@
-import { unicodeToAsciiMap } from "../utils/unicode-mapping";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const unicode_mapping_1 = require("../utils/unicode-mapping");
 const dangerousPattern = new RegExp([
     /[\u202A-\u202E\u2066-\u2069]/.source, // Trojan Source
     /[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/.source, // Unicode Hyphens
@@ -27,7 +29,7 @@ const rule = {
     create(context) {
         return {
             Program() {
-                const sourceCode = context.getSourceCode();
+                const sourceCode = context.sourceCode || context.getSourceCode();
                 const comments = sourceCode.getAllComments();
                 comments.forEach((comment) => {
                     if (dangerousPattern.test(comment.value)) {
@@ -37,8 +39,9 @@ const rule = {
                             fix(fixer) {
                                 let fixedValue = comment.value;
                                 // Ersetze alle gefährlichen Unicode-Zeichen
-                                Object.entries(unicodeToAsciiMap).forEach(([unicode, ascii]) => {
-                                    fixedValue = fixedValue.replace(new RegExp(unicode, "g"), ascii);
+                                Object.keys(unicode_mapping_1.unicodeToAsciiMap).forEach((unicode) => {
+                                    const asciiValue = unicode_mapping_1.unicodeToAsciiMap[unicode];
+                                    fixedValue = fixedValue.replace(new RegExp(unicode, "g"), asciiValue);
                                 });
                                 // Erstelle den neuen Kommentar
                                 const commentType = comment.type === "Block" ? "/*" : "//";
@@ -54,5 +57,5 @@ const rule = {
     },
 };
 // eslint-disable-next-line import/no-default-export
-export default rule;
+exports.default = rule;
 //# sourceMappingURL=dangerous-comments.js.map

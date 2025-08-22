@@ -33,7 +33,7 @@ const rule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
       Program() {
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode || context.getSourceCode();
         const comments = sourceCode.getAllComments();
 
         comments.forEach((comment) => {
@@ -46,14 +46,13 @@ const rule: Rule.RuleModule = {
                 let fixedValue = comment.value;
 
                 // Ersetze alle gefährlichen Unicode-Zeichen
-                Object.entries(unicodeToAsciiMap).forEach(
-                  ([unicode, ascii]) => {
-                    fixedValue = fixedValue.replace(
-                      new RegExp(unicode, "g"),
-                      ascii
-                    );
-                  }
-                );
+                Object.keys(unicodeToAsciiMap).forEach((unicode) => {
+                  const asciiValue = unicodeToAsciiMap[unicode];
+                  fixedValue = fixedValue.replace(
+                    new RegExp(unicode, "g"),
+                    asciiValue
+                  );
+                });
 
                 // Erstelle den neuen Kommentar
                 const commentType = comment.type === "Block" ? "/*" : "//";

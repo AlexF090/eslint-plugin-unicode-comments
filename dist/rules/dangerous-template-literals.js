@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const dangerousPattern = new RegExp([
     /[\u202A-\u202E\u2066-\u2069]/.source, // Trojan Source
     /[\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/.source, // Unicode Hyphens
@@ -41,5 +43,5 @@ const rule = {
     },
 };
 // eslint-disable-next-line import/no-default-export
-export default rule;
+exports.default = rule;
 //# sourceMappingURL=dangerous-template-literals.js.map
