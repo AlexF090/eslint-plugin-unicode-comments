@@ -9,7 +9,7 @@
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
+    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,

@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-unicode-comments",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "ESLint plugin for Unicode security checks to prevent various Unicode-based attacks",
   "main": "dist/index.js",
   "type": "module",
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/AlexF090/eslint-plugin-unicode-comments#readme",
   "peerDependencies": {
-    "eslint": ">=9.0.0"
+    "eslint": ">=8.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
