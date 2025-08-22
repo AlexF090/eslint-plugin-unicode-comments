@@ -1,0 +1,48 @@
+{
+  "name": "eslint-plugin-unicode-comments",
+  "version": "1.0.0",
+  "description": "ESLint plugin for Unicode security checks to prevent various Unicode-based attacks",
+  "main": "index.js",
+  "types": "index.ts",
+  "files": [
+    "index.js",
+    "rules/**/*.js",
+    "utils/**/*.js",
+    "README.md"
+  ],
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "unicode",
+    "security",
+    "trojan-source",
+    "homograph-attack"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexF090/eslint-plugin-unicode-comments.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexF090/eslint-plugin-unicode-comments/issues"
+  },
+  "homepage": "https://github.com/AlexF090/eslint-plugin-unicode-comments#readme",
+  "peerDependencies": {
+    "eslint": ">=8.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/**/*.ts",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  }
+}
