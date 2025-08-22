@@ -2,12 +2,12 @@
   "name": "eslint-plugin-unicode-comments",
   "version": "1.0.0",
   "description": "ESLint plugin for Unicode security checks to prevent various Unicode-based attacks",
-  "main": "index.js",
-  "types": "index.ts",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
   "files": [
-    "index.js",
-    "rules/**/*.js",
-    "utils/**/*.js",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
     "README.md"
   ],
   "keywords": [
@@ -29,20 +29,31 @@
   },
   "homepage": "https://github.com/AlexF090/eslint-plugin-unicode-comments#readme",
   "peerDependencies": {
-    "eslint": ">=8.0.0"
+    "eslint": ">=9.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
   },
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "lint": "eslint src/**/*.ts",
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "eslint": "^8.0.0",
+    "@babel/core": "^7.28.3",
+    "@babel/preset-typescript": "^7.27.1",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.0.0",
     "typescript": "^5.0.0",
-    "@types/node": "^18.0.0"
+    "vitest": "^3.2.4"
   }
 }
