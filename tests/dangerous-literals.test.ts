@@ -1,16 +1,16 @@
-import * as tsParser from "@typescript-eslint/parser";
-import { RuleTester } from "eslint";
-import rule from "../src/rules/dangerous-literals";
+import * as tsParser from '@typescript-eslint/parser';
+import { RuleTester } from 'eslint';
+import rule from '../src/rules/dangerous-literals';
 
 const ruleTester = new RuleTester({
   languageOptions: {
     parser: tsParser,
-    ecmaVersion: "latest",
-    sourceType: "module",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
 });
 
-ruleTester.run("dangerous-literals", rule, {
+ruleTester.run('dangerous-literals', rule, {
   valid: [
     {
       code: 'const message = "Hello world";',
@@ -22,13 +22,13 @@ ruleTester.run("dangerous-literals", rule, {
       code: 'const quote = "Regular \\"quotes\\" work fine";',
     },
     {
-      code: 'const emoji = "😊 Emojis are fine";',
+      code: 'const emoji = "\ud83d\ude0a Emojis are fine";',
     },
     {
-      code: "const number = 123;",
+      code: 'const number = 123;',
     },
     {
-      code: "const boolean = true;",
+      code: 'const boolean = true;',
     },
   ],
 
@@ -39,7 +39,7 @@ ruleTester.run("dangerous-literals", rule, {
       errors: [
         {
           message:
-            "Invisible, surrogate, private-use or non-characters are not allowed",
+            'Invisible, surrogate, private-use or non-characters are not allowed',
         },
       ],
     },
@@ -48,7 +48,7 @@ ruleTester.run("dangerous-literals", rule, {
       errors: [
         {
           message:
-            "Invisible, surrogate, private-use or non-characters are not allowed",
+            'Invisible, surrogate, private-use or non-characters are not allowed',
         },
       ],
     },
@@ -59,7 +59,7 @@ ruleTester.run("dangerous-literals", rule, {
       errors: [
         {
           message:
-            "Bidirectional text controls are forbidden (Trojan Source protection)",
+            'Bidirectional text controls are forbidden (Trojan Source protection)',
         },
       ],
     },
@@ -68,47 +68,27 @@ ruleTester.run("dangerous-literals", rule, {
       errors: [
         {
           message:
-            "Bidirectional text controls are forbidden (Trojan Source protection)",
-        },
-      ],
-    },
-
-    // Unicode Hyphens/Dashes
-    {
-      code: 'const dash = "file\u2013name";',
-      errors: [
-        {
-          message:
-            "Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead",
-        },
-      ],
-    },
-    {
-      code: 'const nbHyphen = "non\u2011breaking";',
-      errors: [
-        {
-          message:
-            "Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead",
+            'Bidirectional text controls are forbidden (Trojan Source protection)',
         },
       ],
     },
 
     // Cyrillic Homographs
     {
-      code: 'const cyrillic = "usеrname";', // 'е' is Cyrillic
+      code: 'const cyrillic = "us\u0435rname";', // 'е' is Cyrillic
       errors: [
         {
           message:
-            "Cyrillic characters that look like Latin letters are forbidden",
+            'Cyrillic characters that look like Latin letters are forbidden',
         },
       ],
     },
     {
-      code: 'const mixed = "аdmin";', // 'а' is Cyrillic
+      code: 'const mixed = "\u0430dmin";', // 'а' is Cyrillic
       errors: [
         {
           message:
-            "Cyrillic characters that look like Latin letters are forbidden",
+            'Cyrillic characters that look like Latin letters are forbidden',
         },
       ],
     },
@@ -119,91 +99,60 @@ ruleTester.run("dangerous-literals", rule, {
       errors: [
         {
           message:
-            "Mathematical alphanumeric symbols that mimic normal letters are forbidden",
+            'Mathematical alphanumeric symbols that mimic normal letters are forbidden',
         },
       ],
     },
 
     // Fullwidth ASCII
     {
-      code: 'const fullwidth = "Ｈｅｌｌｏ";',
+      code: 'const fullwidth = "\uFF28\uFF45\uFF4C\uFF4C\uFF4F";',
       errors: [
         {
           message:
-            "Fullwidth ASCII variants are forbidden. Use regular ASCII characters",
+            'Fullwidth ASCII variants are forbidden. Use regular ASCII characters',
         },
       ],
     },
     {
-      code: 'const fullwidthSymbol = "ｍａｉｎ（）";',
+      code: 'const fullwidthSymbol = "\uFF4D\uFF41\uFF49\uFF08\uFF09";',
       errors: [
         {
           message:
-            "Fullwidth ASCII variants are forbidden. Use regular ASCII characters",
-        },
-      ],
-    },
-
-    // Unicode Quotes
-    {
-      code: 'const smartQuotes = "He said \u201CHello\u201D";',
-      errors: [
-        {
-          message:
-            "Unicode quotation marks are forbidden. Use ASCII quotes (' or \") instead",
-        },
-      ],
-    },
-    {
-      code: 'const singleSmartQuotes = "It\u2019s working";',
-      errors: [
-        {
-          message:
-            "Unicode quotation marks are forbidden. Use ASCII quotes (' or \") instead",
-        },
-      ],
-    },
-
-    // Complex mixed cases
-    {
-      code: 'const complex = "аccess\u2013level\u201Cadmin\u201D";',
-      errors: [
-        {
-          message:
-            "Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead", // First error wins
+            'Fullwidth ASCII variants are forbidden. Use regular ASCII characters',
         },
       ],
     },
 
     // String in array
     {
-      code: 'const arr = ["normal", "dаngerous"];',
+      code: 'const arr = ["normal", "d\u0430ngerous"];',
       errors: [
         {
           message:
-            "Cyrillic characters that look like Latin letters are forbidden",
+            'Cyrillic characters that look like Latin letters are forbidden',
         },
       ],
     },
 
     // String in object
     {
-      code: 'const obj = { key: "vаlue" };',
+      code: 'const obj = { key: "v\u0430lue" };',
       errors: [
         {
           message:
-            "Cyrillic characters that look like Latin letters are forbidden",
+            'Cyrillic characters that look like Latin letters are forbidden',
         },
       ],
     },
 
     // Function parameter default
     {
-      code: 'function test(param = "defаult") {}',
+      code: 'function test(param = "def\u0430ult") {}',
       errors: [
         {
           message:
-            "Cyrillic characters that look like Latin letters are forbidden",
+            'Cyrillic characters that look like Latin letters are forbidden',
         },
       ],
     },

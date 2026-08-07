@@ -1,6 +1,4 @@
 "use strict";
-/* eslint-disable unicode-comments/dangerous-unicode-literals */
-/* eslint-disable unicode-comments/dangerous-unicode */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.unicodeToAsciiMap = void 0;
 // Mapping of dangerous Unicode characters to safe ASCII equivalents
@@ -23,5 +21,10 @@ exports.unicodeToAsciiMap = {
     '\u201E': ',,', // double low-9 quotation mark („)
     '\u2039': '<', // single left-pointing angle quotation mark (‹)
     '\u203A': '>', // single right-pointing angle quotation mark (›)
+    '\u2026': '...', // horizontal ellipsis (…) - common AI-generated text artifact
+    '\u00A0': ' ', // non-breaking space - common AI-generated text artifact
+    '\u2009': ' ', // thin space - common AI-generated text artifact
+    '\u2007': ' ', // figure space - common AI-generated text artifact
+    '\u2022': '-', // bullet (•) - common AI-generated list artifact
 };
 //# sourceMappingURL=unicode-mapping.js.map

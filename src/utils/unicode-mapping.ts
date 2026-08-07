@@ -1,6 +1,3 @@
-/* eslint-disable unicode-comments/dangerous-unicode-literals */
-/* eslint-disable unicode-comments/dangerous-unicode */
-
 // Mapping of dangerous Unicode characters to safe ASCII equivalents
 export const unicodeToAsciiMap: Record<string, string> = {
   '\u2013': '-', // en dash (–)
@@ -21,4 +18,9 @@ export const unicodeToAsciiMap: Record<string, string> = {
   '\u201E': ',,', // double low-9 quotation mark („)
   '\u2039': '<', // single left-pointing angle quotation mark (‹)
   '\u203A': '>', // single right-pointing angle quotation mark (›)
+  '\u2026': '...', // horizontal ellipsis (…) - common AI-generated text artifact
+  '\u00A0': ' ', // non-breaking space - common AI-generated text artifact
+  '\u2009': ' ', // thin space - common AI-generated text artifact
+  '\u2007': ' ', // figure space - common AI-generated text artifact
+  '\u2022': '-', // bullet (•) - common AI-generated list artifact
 };

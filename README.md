@@ -1,6 +1,6 @@
 # eslint-plugin-unicode-comments
 
-A comprehensive ESLint plugin that provides Unicode security checks to prevent various Unicode-based attacks and ensure code safety.
+A comprehensive ESLint plugin that flags dangerous and suspicious Unicode characters in your code — catching both security risks (Trojan Source, homograph attacks) and typographic tells of unedited AI-generated code (em dashes, curly quotes, ellipsis characters, non-breaking spaces).
 
 ## Installation
 
@@ -26,18 +26,21 @@ npm install /Users/af/Developer/private/eslint-plugin-unicode-comments
 
 ```javascript
 // eslint.config.js (CommonJS style)
-const unicodeCommentsPlugin = require("eslint-plugin-unicode-comments");
+const unicodeCommentsPlugin = require('eslint-plugin-unicode-comments');
 
 module.exports = [
   {
     plugins: {
-      "unicode-comments": unicodeCommentsPlugin,
+      'unicode-comments': unicodeCommentsPlugin,
     },
     rules: {
-      "unicode-comments/dangerous-unicode": "error",
-      "unicode-comments/dangerous-unicode-literals": "error",
-      "unicode-comments/dangerous-unicode-template-literals": "error",
-      "unicode-comments/dangerous-unicode-identifiers": "error",
+      'unicode-comments/dangerous-unicode': 'error',
+      'unicode-comments/dangerous-unicode-literals': 'error',
+      'unicode-comments/dangerous-unicode-template-literals': 'error',
+      'unicode-comments/dangerous-unicode-identifiers': 'error',
+      'unicode-comments/dangerous-unicode-style': 'warn',
+      'unicode-comments/dangerous-unicode-literals-style': 'warn',
+      'unicode-comments/dangerous-unicode-template-literals-style': 'warn',
     },
   },
 ];
@@ -48,12 +51,15 @@ module.exports = [
 ```javascript
 // .eslintrc.js
 module.exports = {
-  plugins: ["unicode-comments"],
+  plugins: ['unicode-comments'],
   rules: {
-    "unicode-comments/dangerous-unicode": "error",
-    "unicode-comments/dangerous-unicode-literals": "error",
-    "unicode-comments/dangerous-unicode-template-literals": "error",
-    "unicode-comments/dangerous-unicode-identifiers": "error",
+    'unicode-comments/dangerous-unicode': 'error',
+    'unicode-comments/dangerous-unicode-literals': 'error',
+    'unicode-comments/dangerous-unicode-template-literals': 'error',
+    'unicode-comments/dangerous-unicode-identifiers': 'error',
+    'unicode-comments/dangerous-unicode-style': 'warn',
+    'unicode-comments/dangerous-unicode-literals-style': 'warn',
+    'unicode-comments/dangerous-unicode-template-literals-style': 'warn',
   },
 };
 ```
@@ -63,33 +69,46 @@ module.exports = {
 ```javascript
 // ESLint 8 and below (Legacy Config)
 module.exports = {
-  extends: ["plugin:unicode-comments/recommended"],
+  extends: ['plugin:unicode-comments/recommended'],
 };
+```
 
-// Note: Flat Config (ESLint 9+) doesn't support extends syntax
-// Use the explicit rules configuration above instead
+```javascript
+// ESLint 9+ (Flat Config)
+const unicodeCommentsPlugin = require('eslint-plugin-unicode-comments');
+
+module.exports = [unicodeCommentsPlugin.configs['flat/recommended']];
 ```
 
 ## Rules
+
+Rules are split into two families with different severities in the `recommended` presets, because a Trojan Source attack and a stray em dash are not the same kind of problem:
+
+**Security** (`error`) — Trojan Source, homograph attacks, mathematical alphanumeric spoofing, fullwidth ASCII, invisible/zero-width characters:
 
 - `dangerous-unicode`: Detects dangerous Unicode characters in comments
 - `dangerous-unicode-literals`: Prevents dangerous Unicode in string literals
 - `dangerous-unicode-template-literals`: Blocks dangerous Unicode in template literals
 - `dangerous-unicode-identifiers`: Identifies dangerous Unicode in identifiers
 
+**Style** (`warn`) — typographic tells commonly left behind by unedited AI-generated text (Unicode dashes/quotes, ellipsis, non-breaking/thin/figure space, bullet):
+
+- `dangerous-unicode-style`: Flags typographic artifacts in comments (auto-fixable)
+- `dangerous-unicode-literals-style`: Flags typographic artifacts in string literals
+- `dangerous-unicode-template-literals-style`: Flags typographic artifacts in template literals
+
 ## Features
 
 - Trojan Source attack prevention
 - Homograph attack detection
-- Unicode hyphen/dash blocking
 - Invisible character detection
 - Mathematical symbol blocking
 - Fullwidth ASCII variant prevention
-- Unicode quotation mark blocking
+- Typographic AI-generated text tell detection (em/en dash, curly quotes, ellipsis, non-breaking/thin/figure space, bullet) as a separate, lower-severity rule family
 
 ## Blocked Characters
 
-The plugin blocks the following dangerous Unicode characters:
+The plugin blocks the following dangerous Unicode characters. Hyphens/Dashes, Quotation Marks and Typographic Artifacts below are flagged by the `-style` rules (`warn`); everything else is flagged by the security rules (`error`).
 
 ### Hyphens and Dashes:
 
@@ -114,6 +133,14 @@ The plugin blocks the following dangerous Unicode characters:
 - `„` (double low-9 quotation mark, U+201E) → `,,`
 - `‹` (single left-pointing angle quotation mark, U+2039) → `<`
 - `›` (single right-pointing angle quotation mark, U+203A) → `>`
+
+### Typographic Artifacts (common AI-generated text tells):
+
+- `…` (horizontal ellipsis, U+2026) → `...`
+- ` ` (non-breaking space, U+00A0) → ` ` (regular space)
+- ` ` (thin space, U+2009) → ` ` (regular space)
+- ` ` (figure space, U+2007) → ` ` (regular space)
+- `•` (bullet, U+2022) → `-`
 
 ## Development
 
