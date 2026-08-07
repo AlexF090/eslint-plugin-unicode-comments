@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-07
+
 ### Added
 
 - New `-style` rule variants (`dangerous-unicode-style`,
@@ -88,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   rules detecting Trojan Source, homograph, invisible/zero-width, and
   fullwidth Unicode characters in comments, literals, and identifiers.
 
-[unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.0.1...HEAD
+[unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/releases/tag/v1.0.0
