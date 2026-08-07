@@ -25,6 +25,19 @@ There is no separate type-check script; `npm run build` (tsc) is the type-check 
 
 `eslint.config.mjs` is ESM (`.mjs` extension) even though the package itself is CommonJS (`package.json` has no `"type": "module"`) — a plain `eslint.config.js` with `import` statements would fail to load under Node's default CJS resolution.
 
+## CI/CD & Release
+
+- `.github/workflows/ci.yml` — runs on every push/PR against `main`: `npm ci`, `build`, `lint`, `format:check`, `test`, `test:coverage`. Merging to `main` does **not** publish anything by itself.
+- `.github/workflows/release.yml` — triggers only on a pushed tag matching `v*.*.*`. Publishes to npm via **Trusted Publishing (OIDC)** — no `NPM_TOKEN` secret, but requires the npmjs.com package's "Trusted Publisher" settings to reference this repo (`AlexF090/eslint-plugin-unicode-comments`) and workflow filename `release.yml`.
+- Tagging is **manual, not automated** (no semantic-release/release-please). After merging to `main`, cut a release with:
+  ```bash
+  git checkout main && git pull
+  npm version patch   # or minor/major — bumps package.json and creates the local git tag
+  git push --tags     # this push is what triggers release.yml
+  ```
+- `.husky/pre-commit` runs `lint-staged` (`eslint --fix` + `prettier --write` on staged files) — configured in `package.json`'s `lint-staged` field.
+- `.npmrc` pins `save-exact=true`, so all `devDependencies` are exact versions (no `^`/`~`); `ignore-scripts` is deliberately _not_ set since it would break Husky's own `prepare` hook.
+
 ## Architecture
 
 - `src/index.ts` — plugin entry point. Exports the plugin object (`rules`, `configs.recommended`) as both an ESM default export and, defensively, via `module.exports` for legacy CommonJS consumers (ESLint 8 `.eslintrc` `plugins`/`extends`). `index.ts` at the repo root re-exports from `dist` after build; `dist/index.js` is what `package.json`'s `main` points to.
