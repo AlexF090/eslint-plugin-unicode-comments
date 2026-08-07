@@ -38,6 +38,9 @@ module.exports = [
       'unicode-comments/dangerous-unicode-literals': 'error',
       'unicode-comments/dangerous-unicode-template-literals': 'error',
       'unicode-comments/dangerous-unicode-identifiers': 'error',
+      'unicode-comments/dangerous-unicode-style': 'warn',
+      'unicode-comments/dangerous-unicode-literals-style': 'warn',
+      'unicode-comments/dangerous-unicode-template-literals-style': 'warn',
     },
   },
 ];
@@ -54,6 +57,9 @@ module.exports = {
     'unicode-comments/dangerous-unicode-literals': 'error',
     'unicode-comments/dangerous-unicode-template-literals': 'error',
     'unicode-comments/dangerous-unicode-identifiers': 'error',
+    'unicode-comments/dangerous-unicode-style': 'warn',
+    'unicode-comments/dangerous-unicode-literals-style': 'warn',
+    'unicode-comments/dangerous-unicode-template-literals-style': 'warn',
   },
 };
 ```
@@ -76,25 +82,33 @@ module.exports = [unicodeCommentsPlugin.configs['flat/recommended']];
 
 ## Rules
 
+Rules are split into two families with different severities in the `recommended` presets, because a Trojan Source attack and a stray em dash are not the same kind of problem:
+
+**Security** (`error`) — Trojan Source, homograph attacks, mathematical alphanumeric spoofing, fullwidth ASCII, invisible/zero-width characters:
+
 - `dangerous-unicode`: Detects dangerous Unicode characters in comments
 - `dangerous-unicode-literals`: Prevents dangerous Unicode in string literals
 - `dangerous-unicode-template-literals`: Blocks dangerous Unicode in template literals
 - `dangerous-unicode-identifiers`: Identifies dangerous Unicode in identifiers
 
+**Style** (`warn`) — typographic tells commonly left behind by unedited AI-generated text (Unicode dashes/quotes, ellipsis, non-breaking/thin/figure space, bullet):
+
+- `dangerous-unicode-style`: Flags typographic artifacts in comments (auto-fixable)
+- `dangerous-unicode-literals-style`: Flags typographic artifacts in string literals
+- `dangerous-unicode-template-literals-style`: Flags typographic artifacts in template literals
+
 ## Features
 
 - Trojan Source attack prevention
 - Homograph attack detection
-- Unicode hyphen/dash blocking
 - Invisible character detection
 - Mathematical symbol blocking
 - Fullwidth ASCII variant prevention
-- Unicode quotation mark blocking
-- Typographic AI-generated text tell detection (ellipsis, non-breaking space)
+- Typographic AI-generated text tell detection (em/en dash, curly quotes, ellipsis, non-breaking/thin/figure space, bullet) as a separate, lower-severity rule family
 
 ## Blocked Characters
 
-The plugin blocks the following dangerous Unicode characters:
+The plugin blocks the following dangerous Unicode characters. Hyphens/Dashes, Quotation Marks and Typographic Artifacts below are flagged by the `-style` rules (`warn`); everything else is flagged by the security rules (`error`).
 
 ### Hyphens and Dashes:
 
@@ -124,6 +138,9 @@ The plugin blocks the following dangerous Unicode characters:
 
 - `…` (horizontal ellipsis, U+2026) → `...`
 - ` ` (non-breaking space, U+00A0) → ` ` (regular space)
+- ` ` (thin space, U+2009) → ` ` (regular space)
+- ` ` (figure space, U+2007) → ` ` (regular space)
+- `•` (bullet, U+2022) → `-`
 
 ## Development
 

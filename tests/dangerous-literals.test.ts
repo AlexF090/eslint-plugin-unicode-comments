@@ -22,7 +22,7 @@ ruleTester.run('dangerous-literals', rule, {
       code: 'const quote = "Regular \\"quotes\\" work fine";',
     },
     {
-      code: 'const emoji = "😊 Emojis are fine";',
+      code: 'const emoji = "\ud83d\ude0a Emojis are fine";',
     },
     {
       code: 'const number = 123;',
@@ -73,29 +73,9 @@ ruleTester.run('dangerous-literals', rule, {
       ],
     },
 
-    // Unicode Hyphens/Dashes
-    {
-      code: 'const dash = "file\u2013name";',
-      errors: [
-        {
-          message:
-            'Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead',
-        },
-      ],
-    },
-    {
-      code: 'const nbHyphen = "non\u2011breaking";',
-      errors: [
-        {
-          message:
-            'Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead',
-        },
-      ],
-    },
-
     // Cyrillic Homographs
     {
-      code: 'const cyrillic = "usеrname";', // 'е' is Cyrillic
+      code: 'const cyrillic = "us\u0435rname";', // 'е' is Cyrillic
       errors: [
         {
           message:
@@ -104,7 +84,7 @@ ruleTester.run('dangerous-literals', rule, {
       ],
     },
     {
-      code: 'const mixed = "аdmin";', // 'а' is Cyrillic
+      code: 'const mixed = "\u0430dmin";', // 'а' is Cyrillic
       errors: [
         {
           message:
@@ -126,7 +106,7 @@ ruleTester.run('dangerous-literals', rule, {
 
     // Fullwidth ASCII
     {
-      code: 'const fullwidth = "Ｈｅｌｌｏ";',
+      code: 'const fullwidth = "\uFF28\uFF45\uFF4C\uFF4C\uFF4F";',
       errors: [
         {
           message:
@@ -135,49 +115,18 @@ ruleTester.run('dangerous-literals', rule, {
       ],
     },
     {
-      code: 'const fullwidthSymbol = "ｍａｉｎ（）";',
+      code: 'const fullwidthSymbol = "\uFF4D\uFF41\uFF49\uFF08\uFF09";',
       errors: [
         {
           message:
             'Fullwidth ASCII variants are forbidden. Use regular ASCII characters',
-        },
-      ],
-    },
-
-    // Unicode Quotes
-    {
-      code: 'const smartQuotes = "He said \u201CHello\u201D";',
-      errors: [
-        {
-          message:
-            'Unicode quotation marks are forbidden. Use ASCII quotes (\' or ") instead',
-        },
-      ],
-    },
-    {
-      code: 'const singleSmartQuotes = "It\u2019s working";',
-      errors: [
-        {
-          message:
-            'Unicode quotation marks are forbidden. Use ASCII quotes (\' or ") instead',
-        },
-      ],
-    },
-
-    // Complex mixed cases
-    {
-      code: 'const complex = "аccess\u2013level\u201Cadmin\u201D";',
-      errors: [
-        {
-          message:
-            'Unicode hyphens/dashes not allowed. Use ASCII hyphen (-) instead', // First error wins
         },
       ],
     },
 
     // String in array
     {
-      code: 'const arr = ["normal", "dаngerous"];',
+      code: 'const arr = ["normal", "d\u0430ngerous"];',
       errors: [
         {
           message:
@@ -188,7 +137,7 @@ ruleTester.run('dangerous-literals', rule, {
 
     // String in object
     {
-      code: 'const obj = { key: "vаlue" };',
+      code: 'const obj = { key: "v\u0430lue" };',
       errors: [
         {
           message:
@@ -199,31 +148,11 @@ ruleTester.run('dangerous-literals', rule, {
 
     // Function parameter default
     {
-      code: 'function test(param = "defаult") {}',
+      code: 'function test(param = "def\u0430ult") {}',
       errors: [
         {
           message:
             'Cyrillic characters that look like Latin letters are forbidden',
-        },
-      ],
-    },
-
-    // Typographic artifacts (AI-generated text tells)
-    {
-      code: 'const ellipsis = "Loading\u2026";',
-      errors: [
-        {
-          message:
-            'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
-        },
-      ],
-    },
-    {
-      code: 'const nbsp = "Hello\u00A0World";',
-      errors: [
-        {
-          message:
-            'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
         },
       ],
     },

@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-ESLint plugin (`eslint-plugin-unicode-comments`) that detects and blocks dangerous Unicode characters (Trojan Source bidi overrides, homograph attacks, zero-width/invisible characters, fullwidth ASCII variants, Unicode quotes/hyphens) in comments, string literals, template literals, and identifiers.
+ESLint plugin (`eslint-plugin-unicode-comments`) that detects dangerous and suspicious Unicode characters in comments, string literals, template literals, and identifiers. Rules are split into two severity-driven families:
+
+- **Security** (`error` in `recommended`): Trojan Source bidi overrides, homograph attacks (Cyrillic/Greek), zero-width/invisible characters, fullwidth ASCII variants, mathematical alphanumeric spoofing — real obfuscation/attack vectors.
+- **Style** (`warn` in `recommended`, `-style` rule name suffix): Unicode hyphens/dashes, Unicode quotes, and other typographic artifacts (ellipsis, non-breaking/thin/figure space, bullet) — this is the plugin's primary practical use case: flagging tells of unedited, AI-generated code. Not a security concern, hence lower default severity.
 
 ## Commands
 
@@ -40,17 +43,17 @@ There is no separate type-check script; `npm run build` (tsc) is the type-check 
 
 ## Architecture
 
-- `src/index.ts` — plugin entry point. Exports the plugin object (`rules`, `configs.recommended`) as both an ESM default export and, defensively, via `module.exports` for legacy CommonJS consumers (ESLint 8 `.eslintrc` `plugins`/`extends`). `index.ts` at the repo root re-exports from `dist` after build; `dist/index.js` is what `package.json`'s `main` points to.
-- `src/rules/*.ts` — one rule per file, each a standalone `Rule.RuleModule`:
-  - `dangerous-comments.ts` (`dangerous-unicode`) — scans all comments via `sourceCode.getAllComments()`, **auto-fixable**: replaces dangerous chars using `unicodeToAsciiMap` and rewrites the comment text.
-  - `dangerous-literals.ts` (`dangerous-unicode-literals`) — checks `Literal` string nodes against a sequence of category-specific regexes (invisible chars, trojan source, hyphens, Cyrillic/Greek homographs, math symbols, fullwidth ASCII, zero-width, quotes), reporting the first category that matches with a category-specific message. Not fixable.
-  - `dangerous-template-literals.ts` (`dangerous-unicode-template-literals`) — checks `TemplateLiteral` quasis (raw text) against one combined pattern. Not fixable.
-  - `dangerous-identifiers.ts` (`dangerous-unicode-identifiers`) — checks `Identifier` names, currently only for Cyrillic/Greek homograph ranges (narrower scope than the other three rules).
-- `src/utils/unicode-mapping.ts` — the only fix-data source: `unicodeToAsciiMap` maps individual dangerous Unicode dashes/quotes to ASCII equivalents. Used exclusively by the comments rule's fixer.
+- `src/index.ts` — plugin entry point. Registers 10 rule ids in `rules` (4 security rules — also exposed under their original pre-split names for backwards compatibility — plus 3 `-security` aliases, 3 `-style` rules, and `dangerous-unicode-identifiers`), and exports `configs.recommended`/`configs['flat/recommended']` with mixed severities (`error` for security rule names, `warn` for `-style` rule names). Exports as both an ESM default export and, defensively, via `module.exports` for legacy CommonJS consumers (ESLint 8 `.eslintrc` `plugins`/`extends`). `index.ts` at the repo root re-exports from `dist` after build; `dist/index.js` is what `package.json`'s `main` points to.
+- `src/rules/*.ts` — each file is a standalone `Rule.RuleModule`, split by file type into a security variant and a style variant:
+  - `dangerous-comments.ts` (`dangerous-unicode`) / `dangerous-comments-style.ts` (`dangerous-unicode-style`) — scan all comments via `sourceCode.getAllComments()`. Only the style rule is **auto-fixable**: it replaces dangerous chars using `unicodeToAsciiMap` and rewrites the comment text; the security rule has no ASCII equivalent for its categories (Trojan Source, homographs, math spoofing) so it's detect-only.
+  - `dangerous-literals.ts` (`dangerous-unicode-literals`) / `dangerous-literals-style.ts` (`dangerous-unicode-literals-style`) — check `Literal` string nodes against a sequence of category-specific regexes, reporting the first category that matches with a category-specific message. Not fixable (raw string literal editing isn't attempted).
+  - `dangerous-template-literals.ts` (`dangerous-unicode-template-literals`) / `dangerous-template-literals-style.ts` (`dangerous-unicode-template-literals-style`) — check `TemplateLiteral` quasis (raw text) against one combined pattern per variant. Not fixable.
+  - `dangerous-identifiers.ts` (`dangerous-unicode-identifiers`) — checks `Identifier` names, only for Cyrillic/Greek homograph ranges (security-only; no style variant, since NBSP/ellipsis/etc. aren't valid identifier characters).
+- `src/utils/unicode-mapping.ts` — the only fix-data source: `unicodeToAsciiMap` maps individual dangerous Unicode dashes/quotes/spacing/bullet characters to ASCII equivalents. Used exclusively by `dangerous-comments-style.ts`'s fixer.
 
 ### Important asymmetry between rules
 
-The four rules do **not** share a single canonical pattern set — `dangerous-comments` and `dangerous-template-literals` each redefine their own combined regex inline (same categories, same union pattern), `dangerous-literals` defines the categories as a separate `unicodePatterns` object and checks them one-by-one for granular messages, and `dangerous-identifiers` only checks two of the eight categories. When adding a new dangerous Unicode category or character, update it in all relevant rule files individually — there is no single shared pattern module to edit.
+The security/style rule pairs do **not** share a single canonical pattern set across file types — `dangerous-comments(-style)` and `dangerous-template-literals(-style)` each redefine their own combined regex inline (same categories, same union pattern), while `dangerous-literals(-style)` defines the categories as a separate `unicodePatterns` object and checks them one-by-one for granular messages. `dangerous-identifiers` only checks the homograph categories (no style equivalent). When adding a new dangerous Unicode category or character, update it in all relevant rule files individually — there is no single shared pattern module to edit. Decide first whether the new category is a security concern (add to the non-style file, `error` severity) or a stylistic/AI-tell (add to the `-style` file and `unicodeToAsciiMap`, `warn` severity).
 
 ### Testing
 

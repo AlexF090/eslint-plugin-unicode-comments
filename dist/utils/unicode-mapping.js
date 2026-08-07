@@ -23,5 +23,8 @@ exports.unicodeToAsciiMap = {
     '\u203A': '>', // single right-pointing angle quotation mark (›)
     '\u2026': '...', // horizontal ellipsis (…) - common AI-generated text artifact
     '\u00A0': ' ', // non-breaking space - common AI-generated text artifact
+    '\u2009': ' ', // thin space - common AI-generated text artifact
+    '\u2007': ' ', // figure space - common AI-generated text artifact
+    '\u2022': '-', // bullet (•) - common AI-generated list artifact
 };
 //# sourceMappingURL=unicode-mapping.js.map

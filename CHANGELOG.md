@@ -7,18 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Changed
-
-- Updated dependencies to latest compatible versions: ESLint 10, Vitest 4,
-  TypeScript 6.0, `@types/node` 20.
-- Corrected `peerDependencies.eslint` floor from `>=8.0.0` to `>=8.40.0`
-  (the minimum version providing `context.sourceCode`, which the
-  `dangerous-unicode` rule relies on).
-- Raised `engines.node` to `>=24.0.0` to track the current Node.js LTS line.
-- Added a modern `exports` map alongside `main`/`types` in `package.json`.
-
 ### Added
 
+- New `-style` rule variants (`dangerous-unicode-style`,
+  `dangerous-unicode-literals-style`, `dangerous-unicode-template-literals-style`)
+  covering typographic tells of unedited AI-generated text (Unicode
+  hyphens/dashes, Unicode quotes, ellipsis, non-breaking/thin/figure space,
+  bullet). Registered at `warn` severity in the `recommended` presets,
+  separate from the `error`-level security rules (Trojan Source, homograph,
+  math spoofing, fullwidth ASCII, invisible characters).
+- Detection of three additional typographic AI-generated text tells: thin
+  space (U+2009), figure space (U+2007), and bullet (U+2022), all
+  auto-fixable in comments via the existing `unicodeToAsciiMap`.
 - CI workflow (`.github/workflows/ci.yml`) running build, lint, format-check,
   and tests on every push/PR against `main`.
 - Release workflow (`.github/workflows/release.yml`) publishing to npm via
@@ -27,6 +27,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `.npmrc` with supply-chain hardening (`save-exact`, `engine-strict`,
   `strict-ssl`).
 - `LICENSE` file (MIT).
+
+### Changed
+
+- Narrowed Cyrillic/Greek homograph detection across all rules to a
+  consistent, visually-confusable subset (previously inconsistent between
+  `dangerous-literals` and the other rules, which used full alphabet ranges).
+- Corrected the Mathematical Alphanumeric Symbols check in
+  `dangerous-comments`/`dangerous-template-literals` to match the full
+  UTF-16 surrogate pair instead of the bare high surrogate.
+- The original rule names (`dangerous-unicode`, `dangerous-unicode-literals`,
+  `dangerous-unicode-template-literals`) now cover security categories only;
+  enable the corresponding `-style` rule to keep flagging Unicode
+  dashes/quotes/typographic artifacts under those rule names.
+- Updated dependencies to latest compatible versions: ESLint 10, Vitest 4,
+  TypeScript 6.0, `@types/node` 20.
+- Corrected `peerDependencies.eslint` floor from `>=8.0.0` to `>=8.40.0`
+  (the minimum version providing `context.sourceCode`, which the
+  `dangerous-unicode` rule relies on).
+- Raised `engines.node` to `>=24.0.0` to track the current Node.js LTS line.
+- Added a modern `exports` map alongside `main`/`types` in `package.json`.
+
+### Fixed
+
+- Removed dead/unreachable zero-width character check in
+  `dangerous-literals` (shadowed by an identical earlier check).
+- The `dangerous-comments` fixer no longer reports a no-op fix for
+  categories it cannot actually fix (Trojan Source, homographs, math
+  spoofing, fullwidth ASCII, invisible characters) — those categories moved
+  to the detect-only security rule, while fixable categories moved to the
+  new `-style` rule.
+- Added `dist/**/*.js.map` and `dist/**/*.d.ts.map` to the published `files`
+  allowlist so source maps ship with the package.
+- Added a Flat Config-compatible preset (`configs['flat/recommended']`) so
+  ESLint 9+ users no longer have to list all rules manually.
 
 ## [2.0.1] - 2025-08-22
 

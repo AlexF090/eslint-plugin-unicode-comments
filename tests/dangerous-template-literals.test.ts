@@ -25,7 +25,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       code: 'const withQuotes = `Regular "quotes" work fine`;',
     },
     {
-      code: 'const emoji = `😊 Emojis are fine ${user}`;',
+      code: 'const emoji = `\ud83d\ude0a Emojis are fine ${user}`;',
     },
     {
       code: 'const complex = `${prefix}-${id}-${suffix}`;',
@@ -65,38 +65,9 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
 
-    // Unicode Hyphens/Dashes
-    {
-      code: 'const dash = `file\u2013name.txt`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-    {
-      code: 'const nbHyphen = `non\u2011breaking hyphen`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-    {
-      code: 'const templateDash = `${prefix}\u2014${suffix}`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-
     // Cyrillic Homographs
     {
-      code: 'const cyrillic = `usеrname: ${user}`;', // 'е' is Cyrillic
+      code: 'const cyrillic = `us\u0435rname: ${user}`;', // 'е' is Cyrillic
       errors: [
         {
           message:
@@ -105,7 +76,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const mixed = `Welcome аdmin!`;', // 'а' is Cyrillic in text
+      code: 'const mixed = `Welcome \u0430dmin!`;', // 'а' is Cyrillic in text
       errors: [
         {
           message:
@@ -114,7 +85,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const query = `SELECT * FROM usеrs WHERE id = ${id}`;', // 'е' is Cyrillic
+      code: 'const query = `SELECT * FROM us\u0435rs WHERE id = ${id}`;', // 'е' is Cyrillic
       errors: [
         {
           message:
@@ -125,7 +96,7 @@ ruleTester.run('dangerous-template-literals', rule, {
 
     // Greek Homographs
     {
-      code: 'const greek = `αlpha value: ${value}`;', // α is Greek alpha
+      code: 'const greek = `\u03B1lpha value: ${value}`;', // α is Greek alpha
       errors: [
         {
           message:
@@ -134,7 +105,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const greekTemplate = `Εpsilon point reached`;', // Ε is Greek Epsilon
+      code: 'const greekTemplate = `\u0395psilon point reached`;', // Ε is Greek Epsilon
       errors: [
         {
           message:
@@ -165,7 +136,7 @@ ruleTester.run('dangerous-template-literals', rule, {
 
     // Fullwidth ASCII
     {
-      code: 'const fullwidth = `Ｈｅｌｌｏ ${name}`;',
+      code: 'const fullwidth = `\uFF28\uFF45\uFF4C\uFF4C\uFF4F ${name}`;',
       errors: [
         {
           message:
@@ -174,7 +145,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const fullwidthSymbol = `ｍａｉｎ（${args}）`;',
+      code: 'const fullwidthSymbol = `\uFF4D\uFF41\uFF49\uFF08${args}\uFF09`;',
       errors: [
         {
           message:
@@ -203,40 +174,9 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
 
-    // Unicode Quotes
-    {
-      code: 'const smartQuotes = `He said \u201CHello\u201D to ${name}`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-    {
-      code: 'const singleSmartQuotes = `It\u2019s working with ${value}`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-
-    // Complex mixed cases
-    {
-      code: 'const complex = `аccess\u2013level\u201Cadmin\u201D: ${level}`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-
     // HTML/CSS with dangerous unicode
     {
-      code: 'const html = `<div class="usеr-card">${content}</div>`;', // 'е' is Cyrillic
+      code: 'const html = `<div class="us\u0435r-card">${content}</div>`;', // 'е' is Cyrillic
       errors: [
         {
           message:
@@ -245,7 +185,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const css = `color: ${color}; fоnt-size: 14px;`;', // 'о' is Cyrillic
+      code: 'const css = `color: ${color}; f\u043Ent-size: 14px;`;', // 'о' is Cyrillic
       errors: [
         {
           message:
@@ -256,36 +196,7 @@ ruleTester.run('dangerous-template-literals', rule, {
 
     // URL/Path templates with dangerous chars
     {
-      code: 'const url = `https://api.example.com/usеrs/${id}`;', // 'е' is Cyrillic
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-    {
-      code: 'const path = `/admin\u2013panel/${section}`;', // unicode dash
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-
-    // Typographic artifacts (AI-generated text tells)
-    {
-      code: 'const ellipsis = `Loading\u2026 ${status}`;',
-      errors: [
-        {
-          message:
-            'Template literal contains dangerous Unicode characters. Use ASCII only.',
-        },
-      ],
-    },
-    {
-      code: 'const nbsp = `Hello\u00A0World`;',
+      code: 'const url = `https://api.example.com/us\u0435rs/${id}`;', // 'е' is Cyrillic
       errors: [
         {
           message:
