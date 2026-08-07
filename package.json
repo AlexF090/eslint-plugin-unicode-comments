@@ -40,6 +40,8 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "lint": "eslint src/**/*.ts",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
     "prepare": "npm run build"
   },
   "devDependencies": {
@@ -52,7 +54,10 @@
     "@vitest/ui": "^3.2.4",
     "cross-env": "^7.0.3",
     "eslint": "^9.0.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.6",
     "typescript": "^5.0.0",
+    "typescript-eslint": "8.66.0",
     "vitest": "^3.2.4"
   }
 }

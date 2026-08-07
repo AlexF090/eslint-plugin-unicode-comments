@@ -11,19 +11,19 @@ const dangerousPattern = new RegExp([
     /[\u00AD\u061C\u180E\u200B-\u200F\u2028\u2029\u202F\u2060-\u2064\uFEFF]/
         .source, // Zero-width/Invisible
     /[\u2018-\u201F\u2039\u203A]/.source, // Unicode Quotes
-].join("|"));
+].join('|'));
 const rule = {
     meta: {
-        type: "suggestion",
+        type: 'suggestion',
         docs: {
-            description: "Disallow dangerous Unicode characters in comments",
-            category: "Best Practices",
+            description: 'Disallow dangerous Unicode characters in comments',
+            category: 'Best Practices',
             recommended: true,
         },
-        fixable: "code",
+        fixable: 'code',
         schema: [],
         messages: {
-            dangerousUnicode: "Comment contains dangerous Unicode characters. Use ASCII only.",
+            dangerousUnicode: 'Comment contains dangerous Unicode characters. Use ASCII only.',
         },
     },
     create(context) {
@@ -35,17 +35,17 @@ const rule = {
                     if (dangerousPattern.test(comment.value)) {
                         context.report({
                             loc: comment.loc,
-                            message: "Comment contains dangerous Unicode characters. Use ASCII only.",
+                            message: 'Comment contains dangerous Unicode characters. Use ASCII only.',
                             fix(fixer) {
                                 let fixedValue = comment.value;
                                 // Ersetze alle gefährlichen Unicode-Zeichen
                                 Object.keys(unicode_mapping_1.unicodeToAsciiMap).forEach((unicode) => {
                                     const asciiValue = unicode_mapping_1.unicodeToAsciiMap[unicode];
-                                    fixedValue = fixedValue.replace(new RegExp(unicode, "g"), asciiValue);
+                                    fixedValue = fixedValue.replace(new RegExp(unicode, 'g'), asciiValue);
                                 });
                                 // Erstelle den neuen Kommentar
-                                const commentType = comment.type === "Block" ? "/*" : "//";
-                                const commentEnd = comment.type === "Block" ? "*/" : "";
+                                const commentType = comment.type === 'Block' ? '/*' : '//';
+                                const commentEnd = comment.type === 'Block' ? '*/' : '';
                                 const newComment = `${commentType}${fixedValue}${commentEnd}`;
                                 return fixer.replaceTextRange(comment.range, newComment);
                             },
@@ -56,6 +56,5 @@ const rule = {
         };
     },
 };
-// eslint-disable-next-line import/no-default-export
 exports.default = rule;
 //# sourceMappingURL=dangerous-comments.js.map

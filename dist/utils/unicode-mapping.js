@@ -1,6 +1,4 @@
 "use strict";
-/* eslint-disable unicode-comments/dangerous-unicode-literals */
-/* eslint-disable unicode-comments/dangerous-unicode */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.unicodeToAsciiMap = void 0;
 // Mapping of dangerous Unicode characters to safe ASCII equivalents

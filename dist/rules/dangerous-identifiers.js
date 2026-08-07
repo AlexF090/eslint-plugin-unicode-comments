@@ -29,6 +29,5 @@ const rule = {
         };
     },
 };
-// eslint-disable-next-line import/no-default-export
 exports.default = rule;
 //# sourceMappingURL=dangerous-identifiers.js.map

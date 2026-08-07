@@ -1,6 +1,3 @@
-/* eslint-disable unicode-comments/dangerous-unicode-literals */
-/* eslint-disable unicode-comments/dangerous-unicode */
-
 // Mapping of dangerous Unicode characters to safe ASCII equivalents
 export const unicodeToAsciiMap: Record<string, string> = {
   '\u2013': '-', // en dash (–)

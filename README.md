@@ -26,18 +26,18 @@ npm install /Users/af/Developer/private/eslint-plugin-unicode-comments
 
 ```javascript
 // eslint.config.js (CommonJS style)
-const unicodeCommentsPlugin = require("eslint-plugin-unicode-comments");
+const unicodeCommentsPlugin = require('eslint-plugin-unicode-comments');
 
 module.exports = [
   {
     plugins: {
-      "unicode-comments": unicodeCommentsPlugin,
+      'unicode-comments': unicodeCommentsPlugin,
     },
     rules: {
-      "unicode-comments/dangerous-unicode": "error",
-      "unicode-comments/dangerous-unicode-literals": "error",
-      "unicode-comments/dangerous-unicode-template-literals": "error",
-      "unicode-comments/dangerous-unicode-identifiers": "error",
+      'unicode-comments/dangerous-unicode': 'error',
+      'unicode-comments/dangerous-unicode-literals': 'error',
+      'unicode-comments/dangerous-unicode-template-literals': 'error',
+      'unicode-comments/dangerous-unicode-identifiers': 'error',
     },
   },
 ];
@@ -48,12 +48,12 @@ module.exports = [
 ```javascript
 // .eslintrc.js
 module.exports = {
-  plugins: ["unicode-comments"],
+  plugins: ['unicode-comments'],
   rules: {
-    "unicode-comments/dangerous-unicode": "error",
-    "unicode-comments/dangerous-unicode-literals": "error",
-    "unicode-comments/dangerous-unicode-template-literals": "error",
-    "unicode-comments/dangerous-unicode-identifiers": "error",
+    'unicode-comments/dangerous-unicode': 'error',
+    'unicode-comments/dangerous-unicode-literals': 'error',
+    'unicode-comments/dangerous-unicode-template-literals': 'error',
+    'unicode-comments/dangerous-unicode-identifiers': 'error',
   },
 };
 ```
@@ -63,7 +63,7 @@ module.exports = {
 ```javascript
 // ESLint 8 and below (Legacy Config)
 module.exports = {
-  extends: ["plugin:unicode-comments/recommended"],
+  extends: ['plugin:unicode-comments/recommended'],
 };
 
 // Note: Flat Config (ESLint 9+) doesn't support extends syntax
