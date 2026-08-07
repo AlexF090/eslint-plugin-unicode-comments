@@ -5,7 +5,6 @@ const rule: Rule.RuleModule = {
     type: 'suggestion' as const,
     docs: {
       description: 'Disallow dangerous Unicode characters in identifiers',
-      category: 'Best Practices',
       recommended: true,
     },
     fixable: undefined,

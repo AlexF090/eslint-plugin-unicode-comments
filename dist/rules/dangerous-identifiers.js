@@ -5,7 +5,6 @@ const rule = {
         type: 'suggestion',
         docs: {
             description: 'Disallow dangerous Unicode characters in identifiers',
-            category: 'Best Practices',
             recommended: true,
         },
         fixable: undefined,

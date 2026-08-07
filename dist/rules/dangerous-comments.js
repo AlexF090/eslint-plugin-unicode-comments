@@ -17,7 +17,6 @@ const rule = {
         type: 'suggestion',
         docs: {
             description: 'Disallow dangerous Unicode characters in comments',
-            category: 'Best Practices',
             recommended: true,
         },
         fixable: 'code',
@@ -29,7 +28,7 @@ const rule = {
     create(context) {
         return {
             Program() {
-                const sourceCode = context.sourceCode || context.getSourceCode();
+                const sourceCode = context.sourceCode;
                 const comments = sourceCode.getAllComments();
                 comments.forEach((comment) => {
                     if (dangerousPattern.test(comment.value)) {

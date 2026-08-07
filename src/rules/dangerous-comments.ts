@@ -20,7 +20,6 @@ const rule: Rule.RuleModule = {
     type: 'suggestion' as const,
     docs: {
       description: 'Disallow dangerous Unicode characters in comments',
-      category: 'Best Practices',
       recommended: true,
     },
     fixable: 'code' as const,
@@ -33,7 +32,7 @@ const rule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
       Program() {
-        const sourceCode = context.sourceCode || context.getSourceCode();
+        const sourceCode = context.sourceCode;
         const comments = sourceCode.getAllComments();
 
         comments.forEach((comment) => {

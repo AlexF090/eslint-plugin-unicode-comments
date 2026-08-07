@@ -43,7 +43,6 @@ const rule: Rule.RuleModule = {
     type: 'suggestion' as const,
     docs: {
       description: 'Disallow dangerous Unicode characters in string literals',
-      category: 'Best Practices',
       recommended: true,
     },
     fixable: undefined,
