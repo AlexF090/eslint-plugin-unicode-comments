@@ -3,12 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const unicodePatterns = {
     // Trojan Source (Bidirectional Overrides)
     trojanSource: /[\u202A-\u202E\u2066-\u2069]/,
-    // Cyrillic Homographs
-    cyrillicHomographs: /[\u0430-\u044F\u0451]/,
-    // Greek Homographs
-    greekHomographs: /[\u0391-\u03A9\u03B1-\u03C9]/,
-    // Mathematical Alphanumeric
-    mathSymbols: /[\uD835]/,
     // Fullwidth ASCII
     fullwidthAscii: /[\uFF01-\uFF5E]/,
 };

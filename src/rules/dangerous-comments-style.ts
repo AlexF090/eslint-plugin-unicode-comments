@@ -9,6 +9,10 @@ const dangerousPattern = new RegExp(
   ].join('|'),
 );
 
+const replacements: [RegExp, string][] = Object.entries(unicodeToAsciiMap).map(
+  ([unicode, ascii]) => [new RegExp(unicode, 'g'), ascii],
+);
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion' as const,
@@ -34,12 +38,8 @@ const rule: Rule.RuleModule = {
           if (dangerousPattern.test(comment.value)) {
             let fixedValue = comment.value;
 
-            Object.keys(unicodeToAsciiMap).forEach((unicode) => {
-              const asciiValue = unicodeToAsciiMap[unicode];
-              fixedValue = fixedValue.replace(
-                new RegExp(unicode, 'g'),
-                asciiValue,
-              );
+            replacements.forEach(([pattern, ascii]) => {
+              fixedValue = fixedValue.replace(pattern, ascii);
             });
 
             const hasFix = fixedValue !== comment.value;

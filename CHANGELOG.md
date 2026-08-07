@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Corrected `peerDependencies.eslint` floor from `>=8.0.0` to `>=8.40.0`
   (the minimum version providing `context.sourceCode`, which the
   `dangerous-unicode` rule relies on).
-- Raised `engines.node` to `>=24.0.0` to track the current Node.js LTS line.
+- Raised `engines.node` to `>=20.0.0` to track the current Active LTS line.
 - Added a modern `exports` map alongside `main`/`types` in `package.json`.
 
 ### Fixed

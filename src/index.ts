@@ -1,3 +1,4 @@
+import type { Rule } from 'eslint';
 import dangerousComments from './rules/dangerous-comments';
 import dangerousCommentsStyle from './rules/dangerous-comments-style';
 import dangerousIdentifiers from './rules/dangerous-identifiers';
@@ -7,7 +8,7 @@ import dangerousTemplateLiterals from './rules/dangerous-template-literals';
 import dangerousTemplateLiteralsStyle from './rules/dangerous-template-literals-style';
 
 const plugin: {
-  rules: Record<string, unknown>;
+  rules: Record<string, Rule.RuleModule>;
   configs: Record<string, unknown>;
 } = {
   rules: {

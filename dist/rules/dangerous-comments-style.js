@@ -6,6 +6,7 @@ const dangerousPattern = new RegExp([
     /[\u2018-\u201F\u2039\u203A]/.source, // Unicode Quotes
     /[\u00A0\u2026\u2007\u2009\u2022]/.source, // Typographic artifacts (NBSP, ellipsis, thin/figure space, bullet)
 ].join('|'));
+const replacements = Object.entries(unicode_mapping_1.unicodeToAsciiMap).map(([unicode, ascii]) => [new RegExp(unicode, 'g'), ascii]);
 const rule = {
     meta: {
         type: 'suggestion',
@@ -27,9 +28,8 @@ const rule = {
                 comments.forEach((comment) => {
                     if (dangerousPattern.test(comment.value)) {
                         let fixedValue = comment.value;
-                        Object.keys(unicode_mapping_1.unicodeToAsciiMap).forEach((unicode) => {
-                            const asciiValue = unicode_mapping_1.unicodeToAsciiMap[unicode];
-                            fixedValue = fixedValue.replace(new RegExp(unicode, 'g'), asciiValue);
+                        replacements.forEach(([pattern, ascii]) => {
+                            fixedValue = fixedValue.replace(pattern, ascii);
                         });
                         const hasFix = fixedValue !== comment.value;
                         context.report({
