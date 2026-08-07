@@ -207,5 +207,25 @@ ruleTester.run('dangerous-literals', rule, {
         },
       ],
     },
+
+    // Typographic artifacts (AI-generated text tells)
+    {
+      code: 'const ellipsis = "Loading\u2026";',
+      errors: [
+        {
+          message:
+            'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
+        },
+      ],
+    },
+    {
+      code: 'const nbsp = "Hello\u00A0World";',
+      errors: [
+        {
+          message:
+            'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
+        },
+      ],
+    },
   ],
 });

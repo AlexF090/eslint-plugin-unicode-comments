@@ -21,5 +21,7 @@ exports.unicodeToAsciiMap = {
     '\u201E': ',,', // double low-9 quotation mark („)
     '\u2039': '<', // single left-pointing angle quotation mark (‹)
     '\u203A': '>', // single right-pointing angle quotation mark (›)
+    '\u2026': '...', // horizontal ellipsis (…) - common AI-generated text artifact
+    '\u00A0': ' ', // non-breaking space - common AI-generated text artifact
 };
 //# sourceMappingURL=unicode-mapping.js.map

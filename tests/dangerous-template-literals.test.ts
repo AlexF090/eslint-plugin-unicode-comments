@@ -134,7 +134,7 @@ ruleTester.run('dangerous-template-literals', rule, {
       ],
     },
     {
-      code: 'const greekTemplate = `Ωmega point reached`;', // Ω is Greek Omega
+      code: 'const greekTemplate = `Εpsilon point reached`;', // Ε is Greek Epsilon
       errors: [
         {
           message:
@@ -266,6 +266,26 @@ ruleTester.run('dangerous-template-literals', rule, {
     },
     {
       code: 'const path = `/admin\u2013panel/${section}`;', // unicode dash
+      errors: [
+        {
+          message:
+            'Template literal contains dangerous Unicode characters. Use ASCII only.',
+        },
+      ],
+    },
+
+    // Typographic artifacts (AI-generated text tells)
+    {
+      code: 'const ellipsis = `Loading\u2026 ${status}`;',
+      errors: [
+        {
+          message:
+            'Template literal contains dangerous Unicode characters. Use ASCII only.',
+        },
+      ],
+    },
+    {
+      code: 'const nbsp = `Hello\u00A0World`;',
       errors: [
         {
           message:

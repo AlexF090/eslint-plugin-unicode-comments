@@ -163,5 +163,27 @@ ruleTester.run('dangerous-comments', rule, {
       ],
       output: '// Mixed-dash and "quotes" with cyrillіc',
     },
+
+    // Typographic artifacts (AI-generated text tells) - can be fixed
+    {
+      code: '// Loading\u2026 please wait',
+      errors: [
+        {
+          message:
+            'Comment contains dangerous Unicode characters. Use ASCII only.',
+        },
+      ],
+      output: '// Loading... please wait',
+    },
+    {
+      code: '// Hello\u00A0World',
+      errors: [
+        {
+          message:
+            'Comment contains dangerous Unicode characters. Use ASCII only.',
+        },
+      ],
+      output: '// Hello World',
+    },
   ],
 });

@@ -7,8 +7,8 @@ interface UnicodePatterns {
   greekHomographs: RegExp;
   mathSymbols: RegExp;
   fullwidthAscii: RegExp;
-  zeroWidth: RegExp;
   unicodeQuotes: RegExp;
+  typographicArtifacts: RegExp;
 }
 
 const unicodePatterns: UnicodePatterns = {
@@ -30,12 +30,11 @@ const unicodePatterns: UnicodePatterns = {
   // Fullwidth ASCII
   fullwidthAscii: /[\uFF01-\uFF5E]/,
 
-  // Zero-width/Invisible characters
-  zeroWidth:
-    /[\u00AD\u061C\u180E\u200B-\u200F\u2028\u2029\u202F\u2060-\u2064\uFEFF]/,
-
   // Unicode Quotes
   unicodeQuotes: /[\u2018-\u201F\u2039\u203A]/,
+
+  // Typographic artifacts (non-breaking space, ellipsis) - common AI-generated text tells
+  typographicArtifacts: /[\u00A0\u2026]/,
 };
 
 const rule: Rule.RuleModule = {
@@ -64,9 +63,10 @@ const rule: Rule.RuleModule = {
         'Mathematical alphanumeric symbols that mimic normal letters are forbidden',
       fullwidthAscii:
         'Fullwidth ASCII variants are forbidden. Use regular ASCII characters',
-      zeroWidth: 'Zero-width and invisible formatting characters are forbidden',
       unicodeQuotes:
         'Unicode quotation marks are forbidden. Use ASCII quotes (\' or ") instead',
+      typographicArtifacts:
+        'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
     },
   },
   create(context: Rule.RuleContext): Rule.RuleListener {
@@ -160,22 +160,22 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // 8. Zero-width/Invisible characters
-        if (unicodePatterns.zeroWidth.test(value)) {
-          context.report({
-            node,
-            message:
-              'Zero-width and invisible formatting characters are forbidden',
-          });
-          return;
-        }
-
-        // 9. Unicode Quotes
+        // 8. Unicode Quotes
         if (unicodePatterns.unicodeQuotes.test(value)) {
           context.report({
             node,
             message:
               'Unicode quotation marks are forbidden. Use ASCII quotes (\' or ") instead',
+          });
+          return;
+        }
+
+        // 9. Typographic artifacts (non-breaking space, ellipsis)
+        if (unicodePatterns.typographicArtifacts.test(value)) {
+          context.report({
+            node,
+            message:
+              'Non-breaking space or ellipsis character detected. Use a regular space or three dots (...) instead',
           });
           return;
         }

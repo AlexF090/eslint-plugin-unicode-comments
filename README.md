@@ -1,6 +1,6 @@
 # eslint-plugin-unicode-comments
 
-A comprehensive ESLint plugin that provides Unicode security checks to prevent various Unicode-based attacks and ensure code safety.
+A comprehensive ESLint plugin that flags dangerous and suspicious Unicode characters in your code — catching both security risks (Trojan Source, homograph attacks) and typographic tells of unedited AI-generated code (em dashes, curly quotes, ellipsis characters, non-breaking spaces).
 
 ## Installation
 
@@ -65,9 +65,13 @@ module.exports = {
 module.exports = {
   extends: ['plugin:unicode-comments/recommended'],
 };
+```
 
-// Note: Flat Config (ESLint 9+) doesn't support extends syntax
-// Use the explicit rules configuration above instead
+```javascript
+// ESLint 9+ (Flat Config)
+const unicodeCommentsPlugin = require('eslint-plugin-unicode-comments');
+
+module.exports = [unicodeCommentsPlugin.configs['flat/recommended']];
 ```
 
 ## Rules
@@ -86,6 +90,7 @@ module.exports = {
 - Mathematical symbol blocking
 - Fullwidth ASCII variant prevention
 - Unicode quotation mark blocking
+- Typographic AI-generated text tell detection (ellipsis, non-breaking space)
 
 ## Blocked Characters
 
@@ -114,6 +119,11 @@ The plugin blocks the following dangerous Unicode characters:
 - `„` (double low-9 quotation mark, U+201E) → `,,`
 - `‹` (single left-pointing angle quotation mark, U+2039) → `<`
 - `›` (single right-pointing angle quotation mark, U+203A) → `>`
+
+### Typographic Artifacts (common AI-generated text tells):
+
+- `…` (horizontal ellipsis, U+2026) → `...`
+- ` ` (non-breaking space, U+00A0) → ` ` (regular space)
 
 ## Development
 

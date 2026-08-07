@@ -14,17 +14,24 @@ const plugin = {
         'dangerous-unicode-template-literals': dangerous_template_literals_1.default,
         'dangerous-unicode-identifiers': dangerous_identifiers_1.default,
     },
-    configs: {
-        recommended: {
-            // Legacy config (ESLint 8 and below)
-            plugins: ['unicode-comments'],
-            rules: {
-                'unicode-comments/dangerous-unicode': 'error',
-                'unicode-comments/dangerous-unicode-literals': 'error',
-                'unicode-comments/dangerous-unicode-template-literals': 'error',
-                'unicode-comments/dangerous-unicode-identifiers': 'error',
-            },
-        },
+    configs: {},
+};
+const recommendedRules = {
+    'unicode-comments/dangerous-unicode': 'error',
+    'unicode-comments/dangerous-unicode-literals': 'error',
+    'unicode-comments/dangerous-unicode-template-literals': 'error',
+    'unicode-comments/dangerous-unicode-identifiers': 'error',
+};
+plugin.configs = {
+    recommended: {
+        // Legacy config (ESLint 8 and below)
+        plugins: ['unicode-comments'],
+        rules: recommendedRules,
+    },
+    'flat/recommended': {
+        // Flat config (ESLint 9+)
+        plugins: { 'unicode-comments': plugin },
+        rules: recommendedRules,
     },
 };
 // ESLint Flat Config support

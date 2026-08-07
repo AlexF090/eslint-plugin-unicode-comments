@@ -86,7 +86,7 @@ ruleTester.run('dangerous-identifiers', rule, {
       ],
     },
     {
-      code: 'function βeta() {}', // β is Greek beta U+03B2
+      code: 'function νeta() {}', // ν is Greek nu U+03BD
       errors: [
         {
           message:
@@ -95,7 +95,7 @@ ruleTester.run('dangerous-identifiers', rule, {
       ],
     },
     {
-      code: 'const Ωmega = "end";', // Ω is Greek Omega U+03A9
+      code: 'const Εpsilon = "end";', // Ε is Greek Epsilon U+0395
       errors: [
         {
           message:
