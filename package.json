@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-unicode-comments",
   "version": "2.0.1",
-  "description": "ESLint plugin for Unicode security checks to prevent various Unicode-based attacks",
+  "description": "ESLint plugin flagging dangerous Unicode characters (Trojan Source, homograph attacks) and typographic tells of unedited AI-generated code (em dashes, curly quotes, ellipsis, non-breaking spaces)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@types/eslint": "9.6.1",
-    "@types/node": "20.19.43",
+    "@types/node": "26.1.2",
     "@typescript-eslint/parser": "8.66.0",
     "@vitest/coverage-v8": "4.1.10",
     "@vitest/ui": "4.1.10",
