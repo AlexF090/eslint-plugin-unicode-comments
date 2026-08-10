@@ -6,8 +6,9 @@ const require = createRequire(import.meta.url);
 const eslintMajor = Number.parseInt(version.split('.')[0], 10);
 
 // ESLint 8's default RuleTester rejects flat-config options like
-// `languageOptions`; the flat-config-aware tester lives under this
-// subpath until it becomes the default in ESLint 9+.
+// `languageOptions`, so it needs the flat-config-aware tester from this
+// subpath instead. ESLint 9 and 10 ship that tester as the default
+// RuleTester, so no subpath import is needed there.
 const RuleTester =
   eslintMajor < 9
     ? (

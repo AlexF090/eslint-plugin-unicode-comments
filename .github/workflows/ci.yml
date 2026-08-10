@@ -8,8 +8,10 @@ on:
 
 jobs:
   build-lint-test:
+    name: build-lint-test (eslint ${{ matrix.eslint-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         eslint-version: ['8.57.1', '9.39.5', '10.8.1']
     steps:
