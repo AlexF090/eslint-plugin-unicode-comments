@@ -1,4 +1,4 @@
-import { RuleTester } from 'eslint';
+import { RuleTester } from './rule-tester';
 import rule from '../src/rules/dangerous-comments-style';
 import * as tsParser from '@typescript-eslint/parser';
 
