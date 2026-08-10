@@ -15,9 +15,6 @@ npm install eslint-plugin-unicode-comments --save-dev
 ```bash
 # Install locally from project directory
 npm install /path/to/eslint-plugin-unicode-comments
-
-# Example:
-npm install /Users/af/Developer/private/eslint-plugin-unicode-comments
 ```
 
 ## Usage
