@@ -1,9 +1,8 @@
-import { RuleTester as EslintRuleTester } from 'eslint';
-import { version } from 'eslint/package.json';
+import { RuleTester as EslintRuleTester, Linter } from 'eslint';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const eslintMajor = Number.parseInt(version.split('.')[0], 10);
+const eslintMajor = Number.parseInt(Linter.version, 10);
 
 // ESLint 8's default RuleTester rejects flat-config options like
 // `languageOptions`, so it needs the flat-config-aware tester from this
