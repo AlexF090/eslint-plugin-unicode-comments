@@ -30,7 +30,8 @@ There is no separate type-check script; `npm run build` (tsc) is the type-check 
 
 ## CI/CD & Release
 
-- `.github/workflows/ci.yml` — runs on every push/PR against `main`: `npm ci`, `build`, `lint`, `format:check`, `test`, `test:coverage`. Runs as a matrix over `eslint-version: ['8.57.1', '9.39.5', '10.8.1']` — after `npm ci` (which installs the `devDependencies`-pinned ESLint), each matrix leg overrides it via `npm install eslint@<version> --no-save` before the rest of the steps run, verifying the `peerDependencies.eslint: ">=8.40.0"` claim actually holds across all three majors. Merging to `main` does **not** publish anything by itself.
+- `.github/workflows/ci.yml` — runs on every push/PR against `main`: `npm ci`, `npm audit --audit-level=moderate`, `build`, `lint`, `format:check`, `test`, `test:coverage`. Runs as a matrix over `eslint-version: ['8.57.1', '9.39.5', '10.8.1']` with `fail-fast: false` (so a failure on one ESLint major doesn't cancel the others) — after `npm ci` (which installs the `devDependencies`-pinned ESLint), each matrix leg overrides it via `npm install eslint@<version> --no-save` before the rest of the steps run, verifying the `peerDependencies.eslint: ">=8.40.0"` claim actually holds across all three majors. Merging to `main` does **not** publish anything by itself.
+- `.github/dependabot.yml` — weekly automated PRs for npm dependencies and GitHub Actions versions.
 - `.github/workflows/release.yml` — triggers only on a pushed tag matching `v*.*.*`. Publishes to npm via **Trusted Publishing (OIDC)** — no `NPM_TOKEN` secret, but requires the npmjs.com package's "Trusted Publisher" settings to reference this repo (`AlexF090/eslint-plugin-unicode-comments`) and workflow filename `release.yml`.
 - Tagging is **manual, not automated** (no semantic-release/release-please). After merging to `main`, cut a release with:
   ```bash

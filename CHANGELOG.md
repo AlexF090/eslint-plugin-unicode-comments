@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - CI now runs a matrix against ESLint `8.x`, `9.x`, and `10.x`, verifying
   the `peerDependencies.eslint: ">=8.40.0"` claim across all three majors
   instead of only the pinned devDependency version.
+- CI now runs `npm audit --audit-level=moderate` as a required gate.
+- Weekly automated dependency updates via Dependabot (`npm` and
+  `github-actions` ecosystems).
 
 ### Fixed
 
