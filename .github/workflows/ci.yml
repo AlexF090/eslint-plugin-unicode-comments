@@ -7,8 +7,23 @@ on:
     branches: [main]
 
 jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+
   build-lint-test:
     name: build-lint-test (eslint ${{ matrix.eslint-version }})
+    needs: audit
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -23,7 +38,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm audit --audit-level=moderate
       - run: npm install eslint@${{ matrix.eslint-version }} --no-save
       - run: npm run build
       - run: npm run type-check:tests
