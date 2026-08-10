@@ -9,6 +9,9 @@ on:
 jobs:
   build-lint-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        eslint-version: ['8.57.1', '9.39.5', '10.8.1']
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +21,7 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm install eslint@${{ matrix.eslint-version }} --no-save
       - run: npm run build
       - run: npm run lint
       - run: npm run format:check
