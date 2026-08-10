@@ -24,13 +24,14 @@ npm run format:write    # prettier --write .
 
 Run a single test file: `npx vitest run tests/dangerous-comments.test.ts`
 
-There is no separate type-check script; `npm run build` (tsc) is the type-check for `src/`. Test files are checked separately via `tsconfig.test.json` (not wired to an npm script).
+`npm run build` (tsc) is the type-check for `src/`. Test files are checked separately via `npm run type-check:tests` (`tsc -p tsconfig.test.json`), run in CI right after `npm run build`.
 
 `eslint.config.mjs` is ESM (`.mjs` extension) even though the package itself is CommonJS (`package.json` has no `"type": "module"`) — a plain `eslint.config.js` with `import` statements would fail to load under Node's default CJS resolution.
 
 ## CI/CD & Release
 
-- `.github/workflows/ci.yml` — runs on every push/PR against `main`: `npm ci`, `build`, `lint`, `format:check`, `test`, `test:coverage`. Merging to `main` does **not** publish anything by itself.
+- `.github/workflows/ci.yml` — runs on every push/PR against `main` with two jobs. `audit` runs once (`npm ci`, `npm audit --audit-level=moderate`) against the checked-in `package-lock.json` — it's a single job rather than part of the matrix below because the lockfile is identical across all three ESLint majors, so auditing it three times would be redundant. `build-lint-test` (`needs: audit`) runs `npm ci`, `build`, `type-check:tests`, `lint`, `format:check`, `test`, `test:coverage` as a matrix over `eslint-version: ['8.57.1', '9.39.5', '10.8.1']` with `fail-fast: false` (so a failure on one ESLint major doesn't cancel the others) — after `npm ci` (which installs the `devDependencies`-pinned ESLint), each matrix leg overrides it via `npm install eslint@<version> --no-save` before the rest of the steps run, verifying the `peerDependencies.eslint: ">=8.40.0"` claim actually holds across all three majors. Merging to `main` does **not** publish anything by itself.
+- `.github/dependabot.yml` — weekly automated PRs for npm dependencies and GitHub Actions versions; ignores semver-major bumps of `eslint` since the CI matrix above pins specific ESLint majors by hand and needs a deliberate update, not an unattended Dependabot PR.
 - `.github/workflows/release.yml` — triggers only on a pushed tag matching `v*.*.*`. Publishes to npm via **Trusted Publishing (OIDC)** — no `NPM_TOKEN` secret, but requires the npmjs.com package's "Trusted Publisher" settings to reference this repo (`AlexF090/eslint-plugin-unicode-comments`) and workflow filename `release.yml`.
 - Tagging is **manual, not automated** (no semantic-release/release-please). After merging to `main`, cut a release with:
   ```bash
@@ -57,4 +58,4 @@ The security/style rule pairs do **not** share a single canonical pattern set ac
 
 ### Testing
 
-Tests live in `tests/*.test.ts`, one file per rule, using vitest (`globals: true`, `environment: "node"`). Use ESLint's `RuleTester` (or equivalent invocation) patterns consistent with the existing test files when adding cases for new dangerous-character categories.
+Tests live in `tests/*.test.ts`, one file per rule, using vitest (`globals: true`, `environment: "node"`). Import `RuleTester` from `./rule-tester` (not directly from `'eslint'`) — `tests/rule-tester.ts` picks `FlatRuleTester` from `eslint/use-at-your-own-risk` on ESLint <9 and the default flat-config-native `RuleTester` on 9+, since ESLint 8's default `RuleTester` rejects flat-config options like `languageOptions` that these tests use. Follow this import pattern consistent with the existing test files when adding cases for new dangerous-character categories.

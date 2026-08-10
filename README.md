@@ -2,6 +2,10 @@
 
 A comprehensive ESLint plugin that flags dangerous and suspicious Unicode characters in your code — catching both security risks (Trojan Source, homograph attacks) and typographic tells of unedited AI-generated code (em dashes, curly quotes, ellipsis characters, non-breaking spaces).
 
+## Compatibility
+
+Tested and supported on ESLint 8, 9, and 10 (both legacy `.eslintrc` and flat `eslint.config.js` formats). CI runs the full test suite against ESLint `8.x`, `9.x`, and `10.x` on every change.
+
 ## Installation
 
 ### From npm (when published)

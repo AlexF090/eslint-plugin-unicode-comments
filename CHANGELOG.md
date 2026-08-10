@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- CI now runs a matrix against ESLint `8.x`, `9.x`, and `10.x`, verifying
+  the `peerDependencies.eslint: ">=8.40.0"` claim across all three majors
+  instead of only the pinned devDependency version.
+- CI now runs `npm audit --audit-level=moderate` as a required gate.
+- Weekly automated dependency updates via Dependabot (`npm` and
+  `github-actions` ecosystems).
+
+### Fixed
+
+- Test suite's `RuleTester` usage now works under ESLint 8, whose default
+  `RuleTester` rejects flat-config options like `languageOptions`.
+
 ## [2.1.0] - 2026-08-07
 
 ### Added
