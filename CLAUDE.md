@@ -24,7 +24,7 @@ npm run format:write    # prettier --write .
 
 Run a single test file: `npx vitest run tests/dangerous-comments.test.ts`
 
-There is no separate type-check script; `npm run build` (tsc) is the type-check for `src/`. Test files are checked separately via `tsconfig.test.json` (not wired to an npm script).
+`npm run build` (tsc) is the type-check for `src/`. Test files are checked separately via `npm run type-check:tests` (`tsc -p tsconfig.test.json`), run in CI right after `npm run build`.
 
 `eslint.config.mjs` is ESM (`.mjs` extension) even though the package itself is CommonJS (`package.json` has no `"type": "module"`) — a plain `eslint.config.js` with `import` statements would fail to load under Node's default CJS resolution.
 
