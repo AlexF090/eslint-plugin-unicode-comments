@@ -84,26 +84,6 @@ describe('correctWithReplacement', () => {
     ).toBeUndefined();
   });
 
-  it.each([
-    ['-\u2192 b', '->', 'suggestion'],
-    ['\u2013\u2192', '-', 'suggestion'],
-    ['a\u2014>', '--', 'suggestion'],
-    ['*\u2215', '/', 'suggestion'],
-    ['a\u2013b', '-', 'fix'],
-    [' \u2192 ', '->', 'fix'],
-  ] as const)(
-    'in Markdown prose %j with replacement %j returns %s',
-    (sourceText, replacement, kind) => {
-      expect(
-        correctWithReplacement(
-          createFinding('text', replacement),
-          createEnvironment(true, sourceText),
-          { fixesCode: false },
-        )?.kind,
-      ).toBe(kind);
-    },
-  );
-
   it('only suggests in code when the language does not fix code', () => {
     const { adapter, sourceText } = createEnvironment(false);
     expect(

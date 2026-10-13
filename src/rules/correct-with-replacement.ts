@@ -13,15 +13,6 @@ export interface CorrectionOptions {
 
 const lineBreakPattern = /[\n\r]/u;
 
-/**
- * Characters that comment terminators are made of: an asterisk followed by
- * a slash ends block comments in JavaScript, CSS, and JSON with comments;
- * `-->` and `--!>` end HTML comments.
- */
-const commentTerminatorCharacterPattern = /^[!*/>-]$/u;
-
-const LAST_ASCII_CODE_POINT = 0x7f;
-
 /** Characters that start Markdown inline HTML, links, images, and definitions. */
 const markdownMarkupPattern = /[<[\]]/u;
 const blankLinePattern = /\r?\n[\t ]*\r?\n/gu;
@@ -86,42 +77,6 @@ const isInBlockWithMarkup = (sourceText: string, offset: number): boolean => {
   return true;
 };
 
-/**
- * Whether `character` could be part of a comment terminator once fixes are
- * applied: a terminator character itself, or a non-ASCII character that
- * another fix in the same pass may turn into one.
- */
-const mayFormCommentTerminator = (character: string | undefined): boolean => {
-  if (character === undefined || character === '') {
-    return false;
-  }
-  return (
-    commentTerminatorCharacterPattern.test(character) ||
-    (character.codePointAt(0) ?? 0) > LAST_ASCII_CODE_POINT
-  );
-};
-
-/**
- * Whether replacing the finding with `replacement` joins two characters
- * that could form a comment terminator, such as `-` followed by the `->`
- * that replaces a rightwards arrow, which would end an HTML comment early
- * and turn the rest of it into live markup.
- */
-const joinsCommentTerminator = (
-  finding: Finding,
-  replacement: string,
-  sourceText: string,
-): boolean => {
-  const before = sourceText.at(finding.offset - 1);
-  const after = sourceText.at(finding.offset + finding.length);
-  const first = replacement.at(0);
-  const last = replacement.at(-1);
-  return (
-    (mayFormCommentTerminator(before) && mayFormCommentTerminator(first)) ||
-    (mayFormCommentTerminator(last) && mayFormCommentTerminator(after))
-  );
-};
-
 /** Signs that a word is, or could become, a GFM email, www, or URL autolink. */
 const autolinkSignPattern = /[:@]|www/iu;
 const whitespacePattern = /\s/u;
@@ -171,10 +126,9 @@ const isInPossibleAutolink = (
  * block that contains `<`, `[`, or `]` and a word that could be an autolink
  * are only suggested, so a fix cannot create markup or retarget a link.
  *
- * A replacement that inserts a line break is only ever suggested (in YAML,
- * TOML, and JSON with comments a line break ends a comment, and in Markdown
- * it could start a new block), and so is a replacement that joins characters
- * of a comment terminator with its neighbors.
+ * A replacement that inserts a line break is only ever suggested: in
+ * Markdown it could start a new block, and in code it could end a comment
+ * or a string.
  */
 export const correctWithReplacement = (
   finding: Finding,
@@ -190,11 +144,9 @@ export const correctWithReplacement = (
     text: replacement,
     messageId: SUGGEST_REPLACEMENT_MESSAGE_ID,
   };
-  const fix: Correction =
-    lineBreakPattern.test(replacement) ||
-    joinsCommentTerminator(finding, replacement, sourceText)
-      ? suggestion
-      : { kind: 'fix', text: replacement };
+  const fix: Correction = lineBreakPattern.test(replacement)
+    ? suggestion
+    : { kind: 'fix', text: replacement };
   switch (finding.context) {
     case 'comment':
       return suggestion;

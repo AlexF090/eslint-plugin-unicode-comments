@@ -14,7 +14,7 @@ export const noTypographicCharacters = createFindingRule({
     typographic:
       'Typographic character {{character}} in {{context}}. Use "{{replacement}}" instead.',
     [SUGGEST_REPLACEMENT_MESSAGE_ID]:
-      'Replace with "{{replacement}}" (not applied automatically: it could change a value or rendered text, or end a comment early).',
+      'Replace with "{{replacement}}" (not applied automatically: it could change a value, rendered text, or markup, or turn a comment into a directive).',
   },
   fixable: true,
   hasSuggestions: true,
