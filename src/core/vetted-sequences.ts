@@ -1,5 +1,5 @@
 import type { SourceContext } from './source-context.ts';
-import { isProseContext } from './source-context.ts';
+import { acceptsVettedSequences } from './source-context.ts';
 import { standardizedVariationSequences } from './standardized-variation-sequences.ts';
 
 /**
@@ -230,7 +230,7 @@ export const findVettedOffsets = (
   const vettedOffsets = new Set<number>();
 
   for (const match of text.matchAll(subdivisionFlagPattern)) {
-    if (!isProseContext(resolveContext(match.index))) {
+    if (!acceptsVettedSequences(resolveContext(match.index))) {
       continue;
     }
     const BLACK_FLAG_LENGTH = 2;
@@ -247,7 +247,10 @@ export const findVettedOffsets = (
   for (const match of text.matchAll(joinerOrSelectorPattern)) {
     const offset = match.index;
     const codePoint = match[0].codePointAt(0);
-    if (codePoint === undefined || !isProseContext(resolveContext(offset))) {
+    if (
+      codePoint === undefined ||
+      !acceptsVettedSequences(resolveContext(offset))
+    ) {
       continue;
     }
     const previous = characterBefore(text, offset);

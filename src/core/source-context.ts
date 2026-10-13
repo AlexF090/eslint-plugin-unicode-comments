@@ -14,8 +14,8 @@ export interface ContextRange {
   context: SourceContext;
 }
 
-/** Contexts in which legitimate multi-character sequences (emoji, joiners in joining scripts) are accepted. */
-export const isProseContext = (context: SourceContext): boolean =>
+/** Whether vetted sequences (emoji, joiners in joining scripts) are accepted in `context`: comments, strings, and text, not code or identifiers. */
+export const acceptsVettedSequences = (context: SourceContext): boolean =>
   context === 'comment' || context === 'string' || context === 'text';
 
 /**
