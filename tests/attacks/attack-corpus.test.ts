@@ -297,6 +297,17 @@ describe('attack corpus: autofix as the attack vector', () => {
     expect(fixFile('README.md', code)).toBe(code);
   });
 
+  it.each([
+    'Mail admin\u2013evil@example.com now\n',
+    'Mail a\u2010b@bank.com\n',
+    'Mail admin@bank\u2013evil.com now\n',
+    'Mail admin\u00D7@bank.com\n',
+    'Go www\u2026evil.com now\n',
+    'See https://bank.com\u2013evil now\n',
+  ])('does not let --fix create or retarget the autolink in %j', (code) => {
+    expect(fixFile('README.md', code)).toBe(code);
+  });
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

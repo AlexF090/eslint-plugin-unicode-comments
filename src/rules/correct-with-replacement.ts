@@ -122,6 +122,42 @@ const joinsCommentTerminator = (
   );
 };
 
+/** Signs that a word is, or could become, a GFM email, www, or URL autolink. */
+const autolinkSignPattern = /[:@]|www/iu;
+const whitespacePattern = /\s/u;
+// Words longer than this are treated as autolinks without scanning further.
+const MAXIMUM_SCANNED_WORD_LENGTH = 512;
+
+/**
+ * Whether the whitespace-delimited word around the finding contains `@`,
+ * `:`, or `www`. GFM turns such words into links without any markup, so
+ * replacing a character in them could create a link or change its target
+ * (`admin<U+2013>evil@example.com` would link to `admin-evil@example.com`).
+ */
+const isInPossibleAutolink = (
+  sourceText: string,
+  finding: Finding,
+): boolean => {
+  let start = finding.offset;
+  while (start > 0 && !whitespacePattern.test(sourceText.charAt(start - 1))) {
+    start -= 1;
+    if (finding.offset - start > MAXIMUM_SCANNED_WORD_LENGTH) {
+      return true;
+    }
+  }
+  let end = finding.offset + finding.length;
+  while (
+    end < sourceText.length &&
+    !whitespacePattern.test(sourceText.charAt(end))
+  ) {
+    end += 1;
+    if (end - finding.offset > MAXIMUM_SCANNED_WORD_LENGTH) {
+      return true;
+    }
+  }
+  return autolinkSignPattern.test(sourceText.slice(start, end));
+};
+
 /**
  * Corrects a finding with its ASCII replacement where that is safe: fixed
  * in comments and prose, suggested in strings and rendered or unstructured
@@ -160,7 +196,8 @@ export const correctWithReplacement = (
       return fix;
     case 'text':
       return adapter.fixesText === true &&
-        !isInBlockWithMarkup(sourceText, finding.offset)
+        !isInBlockWithMarkup(sourceText, finding.offset) &&
+        !isInPossibleAutolink(sourceText, finding)
         ? fix
         : suggestion;
     case 'string':
