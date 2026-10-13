@@ -8,7 +8,7 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 - **Allowlist instead of denylist.** Characters are classified by Unicode properties, so new attack characters are covered without a plugin update. Code and identifiers are ASCII only by default; comments, strings, and prose may contain any visible character in any script.
 - **Few false positives.** Emoji ZWJ sequences, variation selectors after emoji, subdivision flags, and joiners in Arabic or Indic text are recognised as legitimate.
 - **Readable reports.** `Invisible tag characters in a comment encode the hidden text "Ignore all previous instructions" (ASCII smuggling).`
-- **Fixes only where provably safe.** `--fix` replaces unusual whitespace between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Everything else gets an editor suggestion, because tools and renderers read comments, strings, and prose: a fixed dash can turn a comment into an `eslint-disable` directive, and a fixed quote or space in Markdown can complete inline HTML, a link, or front matter.
+- **Fixes only where provably safe.** `--fix` replaces unusual whitespace between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Editor suggestions are offered only when they insert ASCII letters or digits (a Cyrillic `<U+0430>` becomes `a`) or remove an invisible character between letters. Every other replacement, such as a dash, quote, or space, is only named in the message, because applying it could turn a comment, string, or text into live code or markup: a dash before `>` ends an HTML comment, and a comma splits a YAML list.
 
 ## Installation
 
@@ -111,7 +111,7 @@ HTML works the same way with `@html-eslint/eslint-plugin` and `language: 'html/h
 | [no-private-use-or-unassigned-characters](docs/rules/no-private-use-or-unassigned-characters.md) | private-use characters, unassigned code points, noncharacters, unpaired surrogates                              | error       |            |
 | [no-confusable-characters](docs/rules/no-confusable-characters.md)                               | ASCII lookalikes and mixed-script words (homographs)                                                            | error       | suggestion |
 | [no-unusual-whitespace](docs/rules/no-unusual-whitespace.md)                                     | no-break, thin, ideographic, and other non-ASCII whitespace                                                     | error       | JS fix     |
-| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        | suggestion |
+| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        | message    |
 | [allowed-characters](docs/rules/allowed-characters.md)                                           | any other non-ASCII character not allowed in its context                                                        | error       |            |
 
 Every character is reported by exactly one rule, so a finding never appears twice.
