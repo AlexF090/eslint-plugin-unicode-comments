@@ -55,13 +55,6 @@ export type Correction =
   | { kind: 'suggestion'; text: string; messageId: string }
   | undefined;
 
-/** What a correction may depend on besides the finding itself. */
-export interface CorrectionEnvironment {
-  adapter: LanguageAdapter;
-  /** The full text of the file, to inspect the characters around a finding. */
-  sourceText: string;
-}
-
 export interface FindingRuleSettings {
   name: string;
   type: RuleType;
@@ -85,7 +78,7 @@ export interface FindingRuleSettings {
     compileAllowEntries: AllowEntryCompiler,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
-  correction?(finding: Finding, environment: CorrectionEnvironment): Correction;
+  correction?(finding: Finding, adapter: LanguageAdapter): Correction;
 }
 
 const contextPhrases: Record<SourceContext, string> = {
@@ -192,12 +185,8 @@ export const createFindingRule = (
           return;
         }
         const locate = createOffsetLocator(sourceCode);
-        const environment: CorrectionEnvironment = {
-          adapter,
-          sourceText: sourceCode.text,
-        };
         const report = (finding: Finding): void => {
-          const correction = settings.correction?.(finding, environment);
+          const correction = settings.correction?.(finding, adapter);
           const range = toRange(finding);
           context.report({
             loc: { start: locate(range[0]), end: locate(range[1]) },

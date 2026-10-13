@@ -3,7 +3,7 @@
 Disallow typographic characters that word processors and language models insert where a developer types ASCII.
 
 - Recommended: `warn`, strict: `error`
-- Fixable: in Markdown prose. Comments get a suggestion instead, because tools read them: a fixed dash turns `eslint<U+2010>disable` or `@ts<U+2013>ignore` into a live directive, and a fixed shebang changes the command that runs a file. Strings, Markdown code blocks, inline code, and link targets, JSX and HTML text, embedded scripts and styles, and files linted with `unicode-guard/text` get a suggestion instead, because a fix there could change a value, rendered text, or code. In Markdown, prose in a block (text between blank lines) that contains `<`, `[`, or `]`, a word that contains `@`, `:`, or `www`, and a line without letters or digits (which a fix could turn into a front matter fence or table row) only get suggestions: a fixed quote or space there could complete inline HTML, a link title, or a link reference definition, and a fixed dash could create an email or web autolink or change its target. Characters in code and identifiers get neither.
+- Suggestions: replace the character with its ASCII replacement. Nothing is fixed automatically: tools and renderers read comments, strings, and prose, so a fixed dash can turn `eslint<U+2010>disable` into a live directive, and a fixed quote in Markdown can complete inline HTML, a link title, or front matter. Characters in code and identifiers get no suggestion.
 
 ## Rule details
 

@@ -8,7 +8,7 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 - **Allowlist instead of denylist.** Characters are classified by Unicode properties, so new attack characters are covered without a plugin update. Code and identifiers are ASCII only by default; comments, strings, and prose may contain any visible character in any script.
 - **Few false positives.** Emoji ZWJ sequences, variation selectors after emoji, subdivision flags, and joiners in Arabic or Indic text are recognised as legitimate.
 - **Readable reports.** `Invisible tag characters in a comment encode the hidden text "Ignore all previous instructions" (ASCII smuggling).`
-- **Fixes where safe.** Typographic characters and unusual whitespace are fixed automatically in Markdown prose (whitespace also between JavaScript and TypeScript tokens). In comments (tools read directives such as `eslint-disable` and shebangs there), strings, code blocks, link targets, rendered JSX or HTML text, the code of other languages, Markdown blocks with links or inline HTML, and plain text files, a suggestion is offered instead, because a fix could change a value, break code, or turn text into live markup.
+- **Fixes only where provably safe.** `--fix` replaces unusual whitespace between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Everything else gets an editor suggestion, because tools and renderers read comments, strings, and prose: a fixed dash can turn a comment into an `eslint-disable` directive, and a fixed quote or space in Markdown can complete inline HTML, a link, or front matter.
 
 ## Installation
 
@@ -110,8 +110,8 @@ HTML works the same way with `@html-eslint/eslint-plugin` and `language: 'html/h
 | [no-invisible-characters](docs/rules/no-invisible-characters.md)                                 | zero-width and format characters, Hangul fillers, tag characters, stray variation selectors, control characters | error       | suggestion |
 | [no-private-use-or-unassigned-characters](docs/rules/no-private-use-or-unassigned-characters.md) | private-use characters, unassigned code points, noncharacters, unpaired surrogates                              | error       |            |
 | [no-confusable-characters](docs/rules/no-confusable-characters.md)                               | ASCII lookalikes and mixed-script words (homographs)                                                            | error       | suggestion |
-| [no-unusual-whitespace](docs/rules/no-unusual-whitespace.md)                                     | no-break, thin, ideographic, and other non-ASCII whitespace                                                     | error       | autofix    |
-| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        | autofix    |
+| [no-unusual-whitespace](docs/rules/no-unusual-whitespace.md)                                     | no-break, thin, ideographic, and other non-ASCII whitespace                                                     | error       | JS fix     |
+| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        | suggestion |
 | [allowed-characters](docs/rules/allowed-characters.md)                                           | any other non-ASCII character not allowed in its context                                                        | error       |            |
 
 Every character is reported by exactly one rule, so a finding never appears twice.
@@ -164,8 +164,7 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 - **Ideographic variation selectors** (VS17 to VS256) are always reported, also in legitimate ideographic variation sequences. Allow `U+E0100..U+E01EF` in `no-invisible-characters` if you need them.
 - **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
 - **Emoji sequences.** VARIATION SELECTOR-15/16 after any pictographic character (including COPYRIGHT SIGN and TRADE MARK SIGN) and up to three ZERO WIDTH JOINERs between pictographic characters are accepted, not only the recommended emoji sequences, so the choice of selector or joiner there can carry a few hidden bits.
-- **Markdown block structure.** An autofix in Markdown prose can change how a line renders: a dash on its own line can turn the paragraph above into a heading, a dash row can complete a table, and `<U+2265>` at the start of a line becomes a block quote. Lines without letters or digits are only suggested, so fixes never create front matter, HTML, links, or definitions, but review `--fix` output in Markdown.
-- **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so `--fix` rewrites quotes and spaces in it like prose. Configure the option, as in the example above, if your Markdown files have front matter.
+- **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so its values are checked with the prose policy instead of the string policy. Configure the option, as in the example above, if your Markdown files have front matter.
 - **Vue and Svelte.** They are not supported languages. With their ESLint parsers, the markup around the script block is checked as text and only gets suggestions, but template expressions are not told apart from markup.
 - **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 

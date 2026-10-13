@@ -73,7 +73,6 @@ const collectLinkRanges = (
  */
 export const markdownAdapter: LanguageAdapter = {
   defaultContext: 'text',
-  fixesText: true,
   matches: (ast) => readType(ast) === 'root',
   collectContextRanges: (sourceCode) => {
     const ranges: ContextRange[] = [];

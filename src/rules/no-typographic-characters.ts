@@ -13,13 +13,11 @@ export const noTypographicCharacters = createFindingRule({
   messages: {
     typographic:
       'Typographic character {{character}} in {{context}}. Use "{{replacement}}" instead.',
-    [SUGGEST_REPLACEMENT_MESSAGE_ID]:
-      'Replace with "{{replacement}}" (not applied automatically: it could change a value, rendered text, or markup, or turn a comment into a directive).',
+    [SUGGEST_REPLACEMENT_MESSAGE_ID]: 'Replace with "{{replacement}}".',
   },
-  fixable: true,
   hasSuggestions: true,
   createSelector: selectCategories(['typographic']),
   messageId: () => 'typographic',
-  correction: (finding, environment) =>
-    correctWithReplacement(finding, environment, { fixesCode: false }),
+  correction: (finding, adapter) =>
+    correctWithReplacement(finding, adapter, { fixesCode: false }),
 });

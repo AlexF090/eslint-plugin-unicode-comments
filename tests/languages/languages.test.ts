@@ -64,24 +64,16 @@ describe('language support', () => {
     expect(ruleIdsOf('a.yaml', '# Gr\u00FC\u00DFe\nkey: 1\n')).toEqual([]);
   });
 
-  it('fixes typographic characters in Markdown prose', () => {
-    expect(
-      fixFile('a.md', '# Title\n\nIt\u2019s done \u2014 mostly\u2026\n'),
-    ).toBe("# Title\n\nIt's done -- mostly...\n");
-  });
-
-  it('does not fix code blocks and inline code in Markdown', () => {
+  it('only suggests replacements in Markdown prose and code', () => {
     const code = [
-      'Done\u2026',
+      'It\u2019s done \u2014 mostly\u2026',
       '',
       '```python',
       'print("\u201Chi\u201D")',
       '```',
       '',
-      'Run `echo \u201Chi\u201D` first.',
-      '',
     ].join('\n');
-    expect(fixFile('a.md', code)).toBe(code.replace('Done\u2026', 'Done...'));
+    expect(fixFile('a.md', code)).toBe(code);
   });
 
   it('only suggests replacements in plain text files', () => {
@@ -168,19 +160,6 @@ describe('Markdown autofix never changes link destinations', () => {
   ])('does not autofix the %s in Markdown', (_name, code) => {
     expect(fixFile('a.md', code)).toBe(code);
     expect(ruleIdsOf('a.md', code).length).toBeGreaterThan(0);
-  });
-
-  it('splits Markdown blocks at blank lines with CRLF line endings', () => {
-    const code = 'Plain a\u2013b\r\n\r\n[x](https://e.com)\r\n';
-    expect(fixFile('a.md', code)).toBe(code.replace('a\u2013b', 'a-b'));
-  });
-
-  it('only suggests in Markdown blocks that contain links or inline HTML', () => {
-    const code =
-      '[a\u2013b](https://e.com/c\u2013d) and [e\u2013f][r]\n\n[r]: https://e.com\n\nPlain a\u2013b\n';
-    expect(fixFile('a.md', code)).toBe(
-      code.replace('Plain a\u2013b', 'Plain a-b'),
-    );
   });
 
   it('does not fix inline code or nested images inside Markdown link text', () => {
