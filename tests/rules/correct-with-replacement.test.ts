@@ -33,7 +33,7 @@ const createFinding = (
 
 describe('correctWithReplacement', () => {
   it.each([
-    ['comment', false, false, 'fix'],
+    ['comment', true, true, 'suggestion'],
     ['text', true, false, 'fix'],
     ['text', false, false, 'suggestion'],
     ['string', true, false, 'suggestion'],
@@ -92,12 +92,12 @@ describe('correctWithReplacement', () => {
     ['a\u2013b', '-', 'fix'],
     [' \u2192 ', '->', 'fix'],
   ] as const)(
-    'in a comment %j with replacement %j returns %s',
+    'in Markdown prose %j with replacement %j returns %s',
     (sourceText, replacement, kind) => {
       expect(
         correctWithReplacement(
-          createFinding('comment', replacement),
-          createEnvironment(false, sourceText),
+          createFinding('text', replacement),
+          createEnvironment(true, sourceText),
           { fixesCode: false },
         )?.kind,
       ).toBe(kind);

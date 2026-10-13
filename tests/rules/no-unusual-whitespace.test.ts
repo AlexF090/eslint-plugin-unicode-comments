@@ -20,10 +20,15 @@ ruleTester.run('no-unusual-whitespace', noUnusualWhitespace, {
       ],
     },
     {
-      name: 'run of thin spaces in a comment is fixed as one finding',
+      name: 'run of thin spaces in a comment is suggested as one finding',
       code: '// a\u2009\u2009b',
-      output: '// a  b',
-      errors: [{ messageId: 'unusualWhitespace' }],
+      output: null,
+      errors: [
+        {
+          messageId: 'unusualWhitespace',
+          suggestions: [{ messageId: 'suggestReplacement', output: '// a  b' }],
+        },
+      ],
     },
     {
       name: 'no-break space in a string is only a suggestion',

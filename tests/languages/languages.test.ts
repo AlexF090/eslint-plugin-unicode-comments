@@ -147,10 +147,9 @@ describe('autofix never turns a comment into live content', () => {
     ]);
   });
 
-  it('still fixes a no-break space in a YAML comment', () => {
-    expect(fixFile('a.yaml', 'safe: true # a\u00A0note\n')).toBe(
-      'safe: true # a note\n',
-    );
+  it('only suggests replacing a no-break space in a YAML comment', () => {
+    const code = 'safe: true # a\u00A0note\n';
+    expect(fixFile('a.yaml', code)).toBe(code);
   });
 });
 

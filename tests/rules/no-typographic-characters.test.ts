@@ -9,9 +9,9 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
   ],
   invalid: [
     {
-      name: 'AI-style comment is fixed',
-      code: '// This function \u2014 as \u201Cexpected\u201D \u2192 returns\u2026',
-      output: '// This function -- as "expected" -> returns...',
+      name: 'typographic character in a comment is only a suggestion',
+      code: '// This function \u2014 returns',
+      output: null,
       errors: [
         {
           messageId: 'typographic',
@@ -20,11 +20,13 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
             context: 'a comment',
             replacement: '--',
           },
+          suggestions: [
+            {
+              messageId: 'suggestReplacement',
+              output: '// This function -- returns',
+            },
+          ],
         },
-        { messageId: 'typographic' },
-        { messageId: 'typographic' },
-        { messageId: 'typographic' },
-        { messageId: 'typographic' },
       ],
     },
     {

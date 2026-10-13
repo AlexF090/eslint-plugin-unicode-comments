@@ -8,7 +8,7 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 - **Allowlist instead of denylist.** Characters are classified by Unicode properties, so new attack characters are covered without a plugin update. Code and identifiers are ASCII only by default; comments, strings, and prose may contain any visible character in any script.
 - **Few false positives.** Emoji ZWJ sequences, variation selectors after emoji, subdivision flags, and joiners in Arabic or Indic text are recognised as legitimate.
 - **Readable reports.** `Invisible tag characters in a comment encode the hidden text "Ignore all previous instructions" (ASCII smuggling).`
-- **Fixes where safe.** Typographic characters and unusual whitespace are fixed automatically in comments and Markdown prose (whitespace also between JavaScript and TypeScript tokens). In strings, code blocks, link targets, rendered JSX or HTML text, the code of other languages, Markdown blocks with links or inline HTML, and plain text files, a suggestion is offered instead, because a fix could change a value, break code, or turn text into live markup.
+- **Fixes where safe.** Typographic characters and unusual whitespace are fixed automatically in Markdown prose (whitespace also between JavaScript and TypeScript tokens). In comments (tools read directives such as `eslint-disable` and shebangs there), strings, code blocks, link targets, rendered JSX or HTML text, the code of other languages, Markdown blocks with links or inline HTML, and plain text files, a suggestion is offered instead, because a fix could change a value, break code, or turn text into live markup.
 
 ## Installation
 

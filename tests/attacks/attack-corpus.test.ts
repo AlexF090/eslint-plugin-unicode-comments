@@ -308,6 +308,23 @@ describe('attack corpus: autofix as the attack vector', () => {
     expect(fixFile('README.md', code)).toBe(code);
   });
 
+  it.each([
+    ['/* eslint\u2010disable */\nconst x = 1;\n', 'a.js'],
+    ['const x = 1; // eslint\u2013disable\u2013line\n', 'a.js'],
+    ['// @ts\u2013ignore\nconst x = 1;\n', 'a.ts'],
+    [
+      '#!/usr/bin/env -S node \u2014experimental-vm-modules\nconst x = 1;\n',
+      'a.js',
+    ],
+    ['a:\n  # eslint\u2013disable-next-line\n  b: 1\n', 'a.yaml'],
+    ['<!-- prettier\u2010ignore -->\n<p>x</p>\n', 'a.html'],
+  ])(
+    'does not let --fix turn the comment %j into a directive',
+    (code, filename) => {
+      expect(fixFile(filename, code)).toBe(code);
+    },
+  );
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

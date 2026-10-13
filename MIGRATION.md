@@ -41,7 +41,8 @@ Replace disable comments accordingly, for example:
 - Escape sequences such as `"\u202E"` are no longer reported. Only characters that are actually present in the source text are.
 - Each problem points to the exact character and names it (`U+200B ZERO WIDTH SPACE`) instead of marking the whole comment or literal.
 - No-break, thin, and figure spaces moved from the style rules (`warn`) to `no-unusual-whitespace` (`error`), because they change string values invisibly.
-- Single angle quotation marks are fixed to `'` instead of `<` and `>`. Low-9 quotation marks are fixed to `'` and `"` instead of `,` and `,,`.
+- `eslint --fix` no longer rewrites comments: typographic characters and unusual whitespace in comments get a suggestion instead, because a fixed dash or space can turn a comment into a directive (`eslint-disable`, `@ts-ignore`) or change a shebang. Apply the suggestions in your editor.
+- Single angle quotation marks are replaced with `'` instead of `<` and `>`. Low-9 quotation marks are replaced with `'` and `"` instead of `,` and `,,`.
 - Words written entirely in Cyrillic or Greek are no longer reported in comments and strings under `recommended`; only words that mix scripts are. The old rules reported every Cyrillic and Greek letter. Use the `strict` preset or a narrower `allowed-characters` policy to keep that behavior.
 - Line separator, paragraph separator, and narrow no-break space (U+2028, U+2029, U+202F), which the old security rules reported, are now reported by `no-unusual-whitespace`.
 - Latin letters that imitate ASCII, such as the dotless i (U+0131), are reported by `no-confusable-characters`. Allow them with its `allow` option if you write Turkish or Azerbaijani.

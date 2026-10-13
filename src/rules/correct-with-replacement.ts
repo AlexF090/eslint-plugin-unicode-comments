@@ -160,17 +160,21 @@ const isInPossibleAutolink = (
 
 /**
  * Corrects a finding with its ASCII replacement where that is safe: fixed
- * in comments and prose, suggested in strings and rendered or unstructured
- * text (a fix there could change a value or break embedded code), fixed in
- * code only when `fixesCode` is set (and only suggested unless the language's
- * adapter fixes code too), and never touched in identifiers.
+ * in Markdown prose, fixed in code only when `fixesCode` is set and the
+ * language's adapter fixes code too (otherwise suggested), suggested in
+ * comments, strings, and rendered or unstructured text, and never touched in
+ * identifiers.
  *
- * A replacement that inserts a line break is only ever suggested: in YAML,
- * TOML, and JSON with comments a line break ends a comment, so fixing a line
- * separator would turn the rest of the comment into live configuration, and
- * in Markdown it could start a new block. A replacement that joins characters
- * of a comment terminator with its neighbors is only suggested
- * as well, so a fix cannot end a comment early.
+ * Comments are only suggested because tools read them: a fixed dash turns
+ * `eslint<U+2010>disable` or `@ts<U+2013>ignore` into a live directive, and a
+ * fixed shebang changes the command that runs the file. In Markdown prose, a
+ * block that contains `<`, `[`, or `]` and a word that could be an autolink
+ * are only suggested, so a fix cannot create markup or retarget a link.
+ *
+ * A replacement that inserts a line break is only ever suggested (in YAML,
+ * TOML, and JSON with comments a line break ends a comment, and in Markdown
+ * it could start a new block), and so is a replacement that joins characters
+ * of a comment terminator with its neighbors.
  */
 export const correctWithReplacement = (
   finding: Finding,
@@ -193,7 +197,7 @@ export const correctWithReplacement = (
       : { kind: 'fix', text: replacement };
   switch (finding.context) {
     case 'comment':
-      return fix;
+      return suggestion;
     case 'text':
       return adapter.fixesText === true &&
         !isInBlockWithMarkup(sourceText, finding.offset) &&
