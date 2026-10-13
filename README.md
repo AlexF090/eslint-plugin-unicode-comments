@@ -165,7 +165,9 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 - **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
 - **Emoji sequences.** VARIATION SELECTOR-15/16 after any pictographic character (including COPYRIGHT SIGN and TRADE MARK SIGN) and up to three ZERO WIDTH JOINERs between pictographic characters are accepted, not only the recommended emoji sequences, so the choice of selector or joiner there can carry a few hidden bits.
 - **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so its values are checked with the prose policy instead of the string policy. Configure the option, as in the example above, if your Markdown files have front matter.
-- **Vue and Svelte.** They are not supported languages. With their ESLint parsers, the markup around the script block is checked as text and only gets suggestions, but template expressions are not told apart from markup.
+- **Vue and Svelte.** They are not supported languages. With their ESLint parsers, the markup before the first and after the last script token is checked as text and only gets suggestions, but template expressions are not told apart from markup, and markup between two script blocks is treated as code.
+- **Combining marks on ASCII.** Under `recommended`, comments, strings, and prose allow marks (`\p{M}`), so a visible mark on an ASCII letter in a URL (`p<U+0323>aypal`) is not reported. The `strict` preset and `ai-instructions` report it.
+- **Byte order marks in JavaScript.** ESLint removes leading byte order marks from JavaScript and TypeScript files before rules run, so a second one at the start of the file is not reported.
 - **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 
 ## How it works
