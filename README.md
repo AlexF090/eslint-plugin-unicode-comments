@@ -115,7 +115,7 @@ Every character is reported by exactly one rule, so a finding never appears twic
 
 ## Configuring the allow lists
 
-All rules accept an `allow` option; `allowed-characters` takes one list per source context. Entries are literal characters, code points (`U+00E4`), ranges (`U+0400..U+04FF`), or Unicode property escapes (`\\p{Script=Latin}`).
+Every rule except `allowed-characters` accepts an `allow` option with one list of entries; `allowed-characters` instead takes one list per source context. Entries are literal characters, code points (`U+00E4`), ranges (`U+0400..U+04FF`), or Unicode property escapes (`\\p{Script=Latin}`). Negated escapes such as `\\P{L}` are rejected, because they would allow almost every character.
 
 Permit Latin letters in identifiers, for a codebase with German or French names:
 

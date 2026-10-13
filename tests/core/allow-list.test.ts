@@ -43,6 +43,7 @@ describe('compileAllowList', () => {
     ['U+110000', 'above U+10FFFF'],
     ['U+0500..U+0400', 'range start is above range end'],
     ['\\p{Script=Klingon}', 'unknown Unicode property'],
+    ['\\P{L}', 'negated property escapes are not supported'],
   ])('rejects %j with a descriptive error', (entry, reason) => {
     expect(() => compileAllowList([entry])).toThrow(InvalidAllowEntryError);
     expect(() => compileAllowList([entry])).toThrow(reason);

@@ -11,7 +11,8 @@
 const codePointEntryPattern = /^U\+([0-9A-F]{4,6})$/iu;
 const codePointRangeEntryPattern =
   /^U\+([0-9A-F]{4,6})\.\.U\+([0-9A-F]{4,6})$/iu;
-const propertyEscapeEntryPattern = /^\\[pP]\{[\w=]+\}$/u;
+const propertyEscapeEntryPattern = /^\\p\{[\w=]+\}$/u;
+const negatedPropertyEscapeEntryPattern = /^\\P\{[\w=]+\}$/u;
 
 const MAXIMUM_CODE_POINT = 0x10ffff;
 
@@ -49,6 +50,14 @@ const toCharacterClassMember = (entry: string): string => {
   const codePointMatch = codePointEntryPattern.exec(entry);
   if (codePointMatch?.[1] !== undefined) {
     return escapeCodePoint(parseHexCodePoint(entry, codePointMatch[1]));
+  }
+
+  if (negatedPropertyEscapeEntryPattern.test(entry)) {
+    // `\P{L}` would silently allow almost every character.
+    throw new InvalidAllowEntryError(
+      entry,
+      'negated property escapes are not supported',
+    );
   }
 
   if (propertyEscapeEntryPattern.test(entry)) {
