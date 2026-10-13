@@ -38,7 +38,7 @@ export interface Finding {
   context: SourceContext;
   /** ASCII text that can replace the whole finding without changing meaning. */
   replacement?: string;
-  /** For `lookalike`: the ASCII character it imitates. */
+  /** For `lookalike`: the ASCII text (one to three characters) it imitates. */
   imitates?: string;
   /** For `mixed-script`: the script of the character and of its word. */
   script?: string;
@@ -68,7 +68,9 @@ const blankCharacters: ReadonlySet<number> = new Set([
 ]);
 const privateUsePattern = /^\p{Co}$/u;
 const unassignedPattern = /^\p{Cn}$/u;
-const imitatedAsciiTextPattern = /^[\x21-\x7E]{1,3}$/u;
+const imitatedAsciiCharacterPattern = /^[\x21-\x7E]$/u;
+const imitatedAsciiLetterSequencePattern = /^[\x21-\x7E]{2,4}$/u;
+const latinScriptPattern = /^\p{Script=Latin}$/u;
 
 const LAST_LATIN_1_CODE_POINT = 0xff;
 const FIRST_TAG_CHARACTER = 0xe0020;
@@ -89,9 +91,9 @@ const isSurrogate = (codePoint: number): boolean =>
 
 /**
  * The ASCII text a non-ASCII character imitates: its NFKC normalization when
- * that is one to three printable ASCII characters (fullwidth forms, the
- * ligature U+FB01 for `fi`, the Roman numeral U+2161 for `II`), or its UTS #39
- * confusable for Latin characters NFKC keeps.
+ * that is one printable ASCII character (fullwidth forms), or two to four
+ * for a Latin character (the ligature U+FB01 for `fi`, the Roman numeral
+ * U+2161 for `II`), or its UTS #39 confusable for Latin characters NFKC keeps.
  */
 const findImitatedAscii = (
   character: string,
@@ -104,9 +106,19 @@ const findImitatedAscii = (
     return undefined;
   }
   const normalized = character.normalize('NFKC');
-  return imitatedAsciiTextPattern.test(normalized)
-    ? normalized
-    : latinConfusables.get(codePoint);
+  if (imitatedAsciiCharacterPattern.test(normalized)) {
+    return normalized;
+  }
+  // Latin ligatures, digraphs, and Roman numerals read as their letters; the
+  // squared units and abbreviations of other scripts (U+338F for `kg`,
+  // U+2116 for `No`) are ordinary symbols in their prose.
+  if (
+    imitatedAsciiLetterSequencePattern.test(normalized) &&
+    latinScriptPattern.test(character)
+  ) {
+    return normalized;
+  }
+  return latinConfusables.get(codePoint);
 };
 
 type ClassifiedCharacter = Pick<

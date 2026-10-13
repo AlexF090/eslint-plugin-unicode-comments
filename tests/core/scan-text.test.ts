@@ -102,6 +102,7 @@ describe('scanText', () => {
       ['fi ligature in a path', '/con\uFB01g', ['fi']],
       ['lj digraph in a domain', 'he\u01C9o.com', ['lj']],
       ['Roman numeral two', 'Version \u2161', ['II']],
+      ['Roman numeral eight in a domain', 'pay\u2167.com', ['VIII']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });
@@ -125,6 +126,10 @@ describe('scanText', () => {
       [
         'Japanese loanwords after a Latin word',
         'Kubernetes\u30CE\u30FC\u30C9 Web\u30CE\u30FC\u30C8',
+      ],
+      [
+        'squared units and abbreviations',
+        '5\u338F, 3\u339E, \u2116 1, \u2121 0',
       ],
       [
         'Chinese text next to Latin',

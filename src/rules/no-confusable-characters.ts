@@ -8,10 +8,10 @@ export const noConfusableCharacters = createFindingRule({
     'Disallow characters that imitate ASCII (fullwidth forms, mathematical alphanumerics) and words that mix scripts (homograph attacks)',
   messages: {
     lookalike:
-      '{{character}} in {{context}} imitates the ASCII character "{{imitates}}".',
+      '{{character}} in {{context}} imitates the ASCII text "{{imitates}}".',
     mixedScript:
       '{{script}} character {{character}} in a {{dominantScript}} word in {{context}}. Mixing scripts within one word is the shape of a homograph attack.',
-    suggestAscii: 'Replace with the ASCII character "{{imitates}}".',
+    suggestAscii: 'Replace with the ASCII text "{{imitates}}".',
   },
   hasSuggestions: true,
   createSelector: selectCategories(['lookalike', 'mixed-script']),
