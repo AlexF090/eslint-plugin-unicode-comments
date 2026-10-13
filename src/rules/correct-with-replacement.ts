@@ -1,5 +1,4 @@
 import type { Finding } from '../core/scan-text.ts';
-import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
 import type { Correction } from './create-finding-rule.ts';
 
@@ -12,24 +11,37 @@ interface CorrectionOptions {
 
 const lineBreakPattern = /[\n\r]/u;
 
-/**
- * ASCII characters that end or open syntax in each context: comment
- * terminators (an asterisk before a slash, `-->`), string delimiters, escapes, and template
- * interpolation, and the markup openers of HTML, JSX, and Markdown text.
- * Even a suggestion that inserts one of them could turn the rest of a
- * comment, string, or text into live code or markup once applied.
- */
-const syntaxCharacterPatterns: Partial<Record<SourceContext, RegExp>> = {
-  comment: /[*/>]/u,
-  string: /[$"'\\`{}]/u,
-  text: /[<>&{}[\]`]/u,
-};
+const lettersAndDigitsPattern = /^[\dA-Za-z]+$/u;
+const letterDigitOrSpacePattern = /^[\dA-Za-z\t ]$/u;
 
-/** Whether `text` may replace a character in `context` without inserting syntax. */
-export const isInertReplacement = (
-  context: SourceContext,
-  text: string,
-): boolean => syntaxCharacterPatterns[context]?.test(text) !== true;
+/**
+ * Whether a suggestion may insert `text`. Only ASCII letters and digits are
+ * inert in every supported language; any punctuation, space, or line break
+ * can end a comment or string, split an attribute, or open markup once the
+ * suggestion is applied (`-` before `>` ends an HTML comment, `,` splits a
+ * YAML flow list, `(` completes a Markdown link).
+ */
+export const isInertReplacement = (text: string): boolean =>
+  lettersAndDigitsPattern.test(text);
+
+/**
+ * Whether removing `[offset, offset + length)` from `sourceText` joins two
+ * characters that cannot form syntax together: letters, digits, spaces, tabs,
+ * or the start or end of the text. Removing an invisible character between
+ * `$` and `{` would otherwise open a template interpolation.
+ */
+export const isInertRemoval = (
+  sourceText: string,
+  offset: number,
+  length: number,
+): boolean => {
+  const before = sourceText.charAt(offset - 1);
+  const after = sourceText.charAt(offset + length);
+  return (
+    (before === '' || letterDigitOrSpacePattern.test(before)) &&
+    (after === '' || letterDigitOrSpacePattern.test(after))
+  );
+};
 
 /**
  * Corrects a finding with its ASCII replacement. A fix is applied
@@ -37,13 +49,10 @@ export const isInertReplacement = (
  * whitespace between the tokens of a language whose adapter fixes code
  * (JavaScript and TypeScript treat that whitespace as a separator already),
  * when the rule sets `fixesCode`. Everywhere else the replacement is only
- * suggested, because tools and renderers read comments, strings, and prose:
- * a fixed dash can turn a comment into an `eslint-disable` directive, and a
- * fixed quote or space in Markdown can complete inline HTML, a link, or front
- * matter. Identifiers are never touched.
- *
- * A replacement that inserts a line break is only ever suggested, because in
- * code it could end a comment or a string.
+ * suggested, and only when it consists of ASCII letters and digits (see
+ * `isInertReplacement`); dashes, quotes, spaces, and other punctuation get no
+ * suggestion, because applying one could turn a comment, string, or text into
+ * live code or markup. Identifiers are never touched.
  */
 export const correctWithReplacement = (
   finding: Finding,
@@ -63,9 +72,7 @@ export const correctWithReplacement = (
     case 'comment':
     case 'string':
     case 'text':
-      return isInertReplacement(finding.context, replacement)
-        ? suggestion
-        : undefined;
+      return isInertReplacement(replacement) ? suggestion : undefined;
     case 'code':
       if (!fixesCode) {
         return undefined;

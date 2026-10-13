@@ -20,7 +20,9 @@ export const noConfusableCharacters = createFindingRule({
     finding.category === 'lookalike' ? 'lookalike' : 'mixedScript',
   correction: (finding) =>
     finding.imitates === undefined ||
-    !isInertReplacement(finding.context, finding.imitates)
+    !isInertReplacement(finding.imitates) ||
+    finding.context === 'code' ||
+    finding.context === 'identifier'
       ? undefined
       : {
           kind: 'suggestion',

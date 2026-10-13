@@ -24,38 +24,46 @@ ruleTester.run('no-bidi-control', noBidiControl, {
           line: 1,
           column: 32,
           endColumn: 33,
+          suggestions: [],
+        },
+        {
+          messageId: 'bidiControl',
           suggestions: [
             {
               messageId: 'suggestRemoval',
               output:
-                'if (accessLevel != "user") { /* } \u2066if (isAdmin)\u2069 \u2066 begin admins only */ }',
+                'if (accessLevel != "user") { /*\u202E } if (isAdmin)\u2069 \u2066 begin admins only */ }',
             },
           ],
         },
+        { messageId: 'bidiControl', suggestions: [] },
+        { messageId: 'bidiControl', suggestions: 1 },
+      ],
+    },
+    {
+      name: 'stretched string in a string literal gets no suggestion next to a slash or quote',
+      code: 'const access = "user\u202E \u2066// Check if admin\u2069 \u2066";',
+      errors: [
+        { messageId: 'bidiControl', suggestions: 1 },
+        { messageId: 'bidiControl', suggestions: [] },
+        { messageId: 'bidiControl', suggestions: 1 },
+        { messageId: 'bidiControl', suggestions: [] },
+      ],
+    },
+    {
+      name: 'control between letters in a string can be removed',
+      code: 'const mark = "a\u200Fb";',
+      errors: [
         {
           messageId: 'bidiControl',
-          suggestions: 1,
-        },
-        {
-          messageId: 'bidiControl',
-          suggestions: 1,
-        },
-        {
-          messageId: 'bidiControl',
-          suggestions: 1,
+          suggestions: [
+            { messageId: 'suggestRemoval', output: 'const mark = "ab";' },
+          ],
         },
       ],
     },
     {
-      name: 'stretched string in a string literal',
-      code: 'const access = "user\u202E \u2066// Check if admin\u2069 \u2066";',
-      errors: Array.from({ length: 4 }, () => ({
-        messageId: 'bidiControl',
-        suggestions: 1,
-      })),
-    },
-    {
-      name: 'grouped run of adjacent controls',
+      name: 'grouped run of adjacent controls at the end of a comment next to a slash gets no suggestion',
       code: 'const a = 1; //\u202E\u2066',
       errors: [
         {
@@ -67,9 +75,7 @@ ruleTester.run('no-bidi-control', noBidiControl, {
           },
           column: 16,
           endColumn: 18,
-          suggestions: [
-            { messageId: 'suggestRemoval', output: 'const a = 1; //' },
-          ],
+          suggestions: [],
         },
       ],
     },

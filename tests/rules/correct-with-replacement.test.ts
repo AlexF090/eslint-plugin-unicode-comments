@@ -26,19 +26,22 @@ const createFinding = (
 
 describe('correctWithReplacement', () => {
   it.each([
-    ['comment', true, true, 'suggestion'],
-    ['string', true, true, 'suggestion'],
-    ['text', true, true, 'suggestion'],
-    ['code', true, true, 'fix'],
-    ['code', false, true, 'suggestion'],
-    ['code', true, false, undefined],
-    ['identifier', true, true, undefined],
+    ['comment', true, true, 'x', 'suggestion'],
+    ['string', true, true, 'x', 'suggestion'],
+    ['text', true, true, 'x', 'suggestion'],
+    ['comment', true, true, ' ', undefined],
+    ['string', true, true, '--', undefined],
+    ['text', true, true, ' ', undefined],
+    ['code', true, true, ' ', 'fix'],
+    ['code', false, true, ' ', 'suggestion'],
+    ['code', true, false, ' ', undefined],
+    ['identifier', true, true, 'x', undefined],
   ] as const)(
-    'in %s (adapter fixes code %s, rule fixes code %s) returns %s',
-    (context, adapterFixesCode, fixesCode, kind) => {
+    'in %s (adapter fixes code %s, rule fixes code %s) with replacement "%s" returns %s',
+    (context, adapterFixesCode, fixesCode, replacement, kind) => {
       expect(
         correctWithReplacement(
-          createFinding(context, ' '),
+          createFinding(context, replacement),
           createAdapter(adapterFixesCode),
           { fixesCode },
         )?.kind,

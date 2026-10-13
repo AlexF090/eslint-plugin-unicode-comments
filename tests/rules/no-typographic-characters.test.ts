@@ -9,7 +9,20 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
   ],
   invalid: [
     {
-      name: 'typographic character in a comment is only a suggestion',
+      name: 'multiplication sign gets a suggestion, because x is a letter',
+      code: '// a 3\u00D74 grid',
+      output: null,
+      errors: [
+        {
+          messageId: 'typographic',
+          suggestions: [
+            { messageId: 'suggestReplacement', output: '// a 3x4 grid' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'typographic character in a comment gets no suggestion',
       code: '// This function \u2014 returns',
       output: null,
       errors: [
@@ -20,28 +33,18 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
             context: 'a comment',
             replacement: '--',
           },
-          suggestions: [
-            {
-              messageId: 'suggestReplacement',
-              output: '// This function -- returns',
-            },
-          ],
+          suggestions: [],
         },
       ],
     },
     {
-      name: 'string literal gets a suggestion instead of a fix',
+      name: 'string literal gets neither a fix nor a suggestion',
       code: 'const message = "Wait\u2026";',
       output: null,
       errors: [
         {
           messageId: 'typographic',
-          suggestions: [
-            {
-              messageId: 'suggestReplacement',
-              output: 'const message = "Wait...";',
-            },
-          ],
+          suggestions: [],
         },
       ],
     },
@@ -55,18 +58,13 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
       ],
     },
     {
-      name: 'JSX text gets a suggestion because it is rendered',
+      name: 'JSX text gets no suggestion',
       code: 'const element = <p>Loading\u2026</p>;',
       output: null,
       errors: [
         {
           messageId: 'typographic',
-          suggestions: [
-            {
-              messageId: 'suggestReplacement',
-              output: 'const element = <p>Loading...</p>;',
-            },
-          ],
+          suggestions: [],
         },
       ],
     },

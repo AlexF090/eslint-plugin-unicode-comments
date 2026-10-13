@@ -375,6 +375,25 @@ describe('attack corpus: autofix as the attack vector', () => {
     },
   );
 
+  it.each([
+    ['<!-- note \u2014><img src=x onerror=alert(1)> -->\n', 'a.html'],
+    ['<img alt=x\u3000onerror=alert(1)>\n', 'a.html'],
+    ['See [click]\uFF08javascript:alert(1)) now\n', 'README.md'],
+    ['list: [a\uFF0Cevil]\n', 'a.yaml'],
+    ['a: 1 # note\u2028evil: true\n', 'a.yaml'],
+    ['<!-- a -\u200B-> <img src=x onerror=alert(1)> -->\n', 'a.html'],
+    ['const t = `$\u200B{alert(1)}`;\n', 'a.js'],
+    ['const s = "<\u200Bscript>";\n', 'a.js'],
+  ])(
+    'offers no suggestion that would create syntax in %j',
+    (code, filename) => {
+      expect(
+        suggestionCountsOf(filename, code).every((count) => count === 0),
+      ).toBe(true);
+      expect(suggestionCountsOf(filename, code).length).toBeGreaterThan(0);
+    },
+  );
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

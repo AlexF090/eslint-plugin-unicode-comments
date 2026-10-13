@@ -78,7 +78,11 @@ export interface FindingRuleSettings {
     compileAllowEntries: AllowEntryCompiler,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
-  correction?(finding: Finding, adapter: LanguageAdapter): Correction;
+  correction?(
+    finding: Finding,
+    adapter: LanguageAdapter,
+    sourceText: string,
+  ): Correction;
 }
 
 const contextPhrases: Record<SourceContext, string> = {
@@ -186,7 +190,11 @@ export const createFindingRule = (
         }
         const locate = createOffsetLocator(sourceCode);
         const report = (finding: Finding): void => {
-          const correction = settings.correction?.(finding, adapter);
+          const correction = settings.correction?.(
+            finding,
+            adapter,
+            sourceCode.text,
+          );
           const range = toRange(finding);
           context.report({
             loc: { start: locate(range[0]), end: locate(range[1]) },

@@ -67,7 +67,7 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
       ],
     },
     {
-      name: 'division slashes of no particular script in a URL',
+      name: 'division slashes in a URL get no suggestion, because a slash is punctuation',
       code: 'const url = "https:\u2215\u2215example.com";',
       errors: [
         {
@@ -78,14 +78,9 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
             imitates: '/',
           },
           column: 20,
-          suggestions: [
-            {
-              messageId: 'suggestAscii',
-              output: 'const url = "https:/\u2215example.com";',
-            },
-          ],
+          suggestions: [],
         },
-        { messageId: 'lookalike', column: 21, suggestions: 1 },
+        { messageId: 'lookalike', column: 21, suggestions: [] },
       ],
     },
     {

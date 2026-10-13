@@ -64,7 +64,7 @@ describe('language support', () => {
     expect(ruleIdsOf('a.yaml', '# Gr\u00FC\u00DFe\nkey: 1\n')).toEqual([]);
   });
 
-  it('only suggests replacements in Markdown prose and code', () => {
+  it('offers no suggestion for punctuation replacements in Markdown prose and code', () => {
     const code = [
       'It\u2019s done \u2014 mostly\u2026',
       '',
@@ -74,7 +74,7 @@ describe('language support', () => {
       '',
     ].join('\n');
     expect(fixFile('a.md', code)).toBe(code);
-    expect(suggestionCountsOf('a.md', code)).toEqual([1, 1, 1, 0, 0]);
+    expect(suggestionCountsOf('a.md', code)).toEqual([0, 0, 0, 0, 0]);
   });
 
   it('only suggests replacements in plain text files', () => {

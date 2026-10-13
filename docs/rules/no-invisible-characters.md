@@ -3,7 +3,7 @@
 Disallow invisible characters that can hide code or instructions from reviewers.
 
 - Recommended: `error`
-- Suggestions: remove the character
+- Suggestions: remove the character, when the characters on both sides are ASCII letters, digits, spaces, or tabs (removing it elsewhere could join two characters into syntax, such as `$` and `{` or `-` and `->`)
 
 ## Rule details
 

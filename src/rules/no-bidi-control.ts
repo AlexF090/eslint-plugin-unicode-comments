@@ -1,3 +1,4 @@
+import { isInertRemoval } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import { selectCategories } from './allow-option.ts';
 
@@ -14,9 +15,8 @@ export const noBidiControl = createFindingRule({
   hasSuggestions: true,
   createSelector: selectCategories(['bidi-control']),
   messageId: () => 'bidiControl',
-  correction: () => ({
-    kind: 'suggestion',
-    text: '',
-    messageId: 'suggestRemoval',
-  }),
+  correction: (finding, _adapter, sourceText) =>
+    isInertRemoval(sourceText, finding.offset, finding.length)
+      ? { kind: 'suggestion', text: '', messageId: 'suggestRemoval' }
+      : undefined,
 });

@@ -3,7 +3,7 @@
 Disallow whitespace other than space, tab, and line breaks.
 
 - Recommended: `error`
-- Fixable: replaces the character with a space between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Everywhere else, including comments, strings, Markdown, and the code of other languages such as HTML and CSS (where the character can be part of a tag, attribute, or selector name), the replacement is only suggested, because a fix there could change a value, rendered text, or structure, or turn a comment into a directive. LINE SEPARATOR and PARAGRAPH SEPARATOR are always only suggested (as a line feed), because a line break can end a comment or a string.
+- Fixable: replaces the character with a space between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Everywhere else, including comments, strings, Markdown, and the code of other languages such as HTML and CSS (where the character can be part of a tag, attribute, or selector name), the replacement is only named in the message and not suggested, because a space or line break there could split an attribute, end a comment or string, or start a new key.
 
 ## Rule details
 

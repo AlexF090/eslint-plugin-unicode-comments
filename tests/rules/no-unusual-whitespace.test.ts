@@ -20,58 +20,46 @@ ruleTester.run('no-unusual-whitespace', noUnusualWhitespace, {
       ],
     },
     {
-      name: 'run of thin spaces in a comment is suggested as one finding',
+      name: 'run of thin spaces in a comment is reported as one finding without a suggestion',
       code: '// a\u2009\u2009b',
       output: null,
       errors: [
         {
           messageId: 'unusualWhitespace',
-          suggestions: [{ messageId: 'suggestReplacement', output: '// a  b' }],
+          suggestions: [],
         },
       ],
     },
     {
-      name: 'no-break space in a string is only a suggestion',
+      name: 'no-break space in a string gets no suggestion',
       code: 'const unit = "10\u00A0km";',
       output: null,
       errors: [
         {
           messageId: 'unusualWhitespace',
-          suggestions: [
-            {
-              messageId: 'suggestReplacement',
-              output: 'const unit = "10 km";',
-            },
-          ],
+          suggestions: [],
         },
       ],
     },
     {
-      name: 'no-break space in JSX text is only a suggestion',
+      name: 'no-break space in JSX text gets no suggestion',
       code: 'const element = <p>10\u00A0km</p>;',
       output: null,
       errors: [
         {
           messageId: 'unusualWhitespace',
-          suggestions: [
-            {
-              messageId: 'suggestReplacement',
-              output: 'const element = <p>10 km</p>;',
-            },
-          ],
+          suggestions: [],
         },
       ],
     },
     {
-      name: 'line separator in a comment is only a suggestion',
+      name: 'line separator in a comment gets no suggestion',
       code: '/* a\u2028b */',
       output: null,
       errors: [
         {
           messageId: 'unusualWhitespace',
-          suggestions: [
-            { messageId: 'suggestReplacement', output: '/* a\nb */' },
-          ],
+          suggestions: [],
         },
       ],
     },

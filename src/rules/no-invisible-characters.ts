@@ -1,3 +1,4 @@
+import { isInertRemoval } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import { selectCategories } from './allow-option.ts';
 
@@ -22,9 +23,8 @@ export const noInvisibleCharacters = createFindingRule({
     }
     return finding.hiddenText === undefined ? 'invisible' : 'hiddenText';
   },
-  correction: () => ({
-    kind: 'suggestion',
-    text: '',
-    messageId: 'suggestRemoval',
-  }),
+  correction: (finding, _adapter, sourceText) =>
+    isInertRemoval(sourceText, finding.offset, finding.length)
+      ? { kind: 'suggestion', text: '', messageId: 'suggestRemoval' }
+      : undefined,
 });
