@@ -34,3 +34,6 @@ const plugin = {
 attachPlugin(configs, plugin);
 
 export default plugin;
+
+// Lets CommonJS configuration files use `require('eslint-plugin-unicode-guard')` without `.default`.
+export { plugin as 'module.exports' };
