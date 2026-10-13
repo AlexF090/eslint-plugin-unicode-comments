@@ -7,6 +7,7 @@ import type {
   SourceLocation,
 } from '@eslint/core';
 import { TextSourceCodeBase, VisitNodeStep } from '@eslint/plugin-kit';
+import { qualifyName } from '../plugin-namespace.ts';
 
 /**
  * A minimal ESLint language that treats a file as plain text, so files
@@ -72,6 +73,16 @@ export class PlainTextSourceCode extends TextSourceCodeBase<PlainTextSourceCodeT
 const readBody = (file: File): string | undefined =>
   typeof file.body === 'string' ? file.body : undefined;
 
+const requireTextBody = (file: File): string => {
+  const text = readBody(file);
+  if (text === undefined) {
+    throw new TypeError(
+      `${qualifyName('text')}: the body of ${file.path} is not text, so no source code can be created for it.`,
+    );
+  }
+  return text;
+};
+
 export const textLanguage: Language<{
   LangOptions: LanguageOptions;
   Code: PlainTextSourceCode;
@@ -97,5 +108,5 @@ export const textLanguage: Language<{
     return { ok: true, ast: createTextDocument(text) };
   },
   createSourceCode: (file, input: OkParseResult<TextDocumentNode>) =>
-    new PlainTextSourceCode(readBody(file) ?? '', input.ast),
+    new PlainTextSourceCode(requireTextBody(file), input.ast),
 };

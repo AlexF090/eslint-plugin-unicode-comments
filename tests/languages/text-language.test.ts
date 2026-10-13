@@ -37,6 +37,22 @@ describe('textLanguage', () => {
       errors: [{ message: 'Expected the file body to be text.' }],
     });
   });
+
+  it('refuses to create source code for a binary file body', () => {
+    const parsed = textLanguage.parse(fileWith(''), { languageOptions: {} });
+    if (!parsed.ok) {
+      throw new Error('Expected empty text to parse.');
+    }
+    expect(() =>
+      textLanguage.createSourceCode(fileWith(new Uint8Array([1, 2])), parsed, {
+        languageOptions: {},
+      }),
+    ).toThrow(
+      new TypeError(
+        'unicode-guard/text: the body of a.txt is not text, so no source code can be created for it.',
+      ),
+    );
+  });
 });
 
 describe('PlainTextSourceCode', () => {
