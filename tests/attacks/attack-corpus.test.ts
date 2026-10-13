@@ -270,6 +270,14 @@ describe('attack corpus: autofix as the attack vector', () => {
     expect(fixFile('index.html', code)).not.toMatch(/--!?>\s*<script/u);
   });
 
+  it.each([
+    ['<a href="x"\u00A0onclick="alert(1)">x</a>\n', 'index.html'],
+    ['<div\u00A0onclick=alert(1)>x</div>\n', 'index.html'],
+    ['.a\u00A0.b { color: red; }\n', 'style.css'],
+  ])('does not let --fix change the structure of %j', (code, filename) => {
+    expect(fixFile(filename, code)).toBe(code);
+  });
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

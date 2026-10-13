@@ -19,6 +19,7 @@ const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
 /** JavaScript, TypeScript, and JSX via espree or typescript-eslint, plus other parsers producing ESTree tokens. */
 export const javascriptAdapter: LanguageAdapter = {
   defaultContext: 'code',
+  fixesCode: true,
   matches: (ast) =>
     readType(ast) === 'Program' &&
     isRecord(ast) &&

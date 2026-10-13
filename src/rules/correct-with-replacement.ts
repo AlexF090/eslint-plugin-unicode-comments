@@ -62,7 +62,8 @@ const joinsCommentTerminator = (
  * Corrects a finding with its ASCII replacement where that is safe: fixed
  * in comments and prose, suggested in strings and rendered or unstructured
  * text (a fix there could change a value or break embedded code), fixed in
- * code only when `fixesCode` is set, and never touched in identifiers.
+ * code only when `fixesCode` is set (and only suggested unless the language's
+ * adapter fixes code too), and never touched in identifiers.
  *
  * A replacement that inserts a line break is only ever suggested: in YAML,
  * TOML, and JSON with comments a line break ends a comment, so fixing a line
@@ -98,7 +99,10 @@ export const correctWithReplacement = (
     case 'string':
       return suggestion;
     case 'code':
-      return fixesCode ? fix : undefined;
+      if (!fixesCode) {
+        return undefined;
+      }
+      return adapter.fixesCode === true ? fix : suggestion;
     case 'identifier':
       return undefined;
   }

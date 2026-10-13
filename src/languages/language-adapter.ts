@@ -17,4 +17,12 @@ export interface LanguageAdapter {
    * of unknown structure only get suggestions.
    */
   fixesText?: boolean;
+  /**
+   * Whether autofixes may replace unusual whitespace in `code` context. Only
+   * true where the language already treats that whitespace as a separator
+   * (JavaScript); in HTML and CSS it is part of a name, so replacing it would
+   * change the structure, for example turn an inert attribute into a live
+   * event handler.
+   */
+  fixesCode?: boolean;
 }

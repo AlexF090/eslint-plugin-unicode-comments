@@ -11,6 +11,7 @@ const createEnvironment = (
   adapter: {
     defaultContext: 'text',
     fixesText,
+    fixesCode: true,
     matches: () => true,
     collectContextRanges: () => [],
   },
@@ -102,4 +103,15 @@ describe('correctWithReplacement', () => {
       ).toBe(kind);
     },
   );
+
+  it('only suggests in code when the language does not fix code', () => {
+    const { adapter, sourceText } = createEnvironment(false);
+    expect(
+      correctWithReplacement(
+        createFinding('code', ' '),
+        { adapter: { ...adapter, fixesCode: false }, sourceText },
+        { fixesCode: true },
+      )?.kind,
+    ).toBe('suggestion');
+  });
 });
