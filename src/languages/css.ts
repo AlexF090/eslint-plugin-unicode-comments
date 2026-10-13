@@ -9,7 +9,6 @@ import {
 
 /** `@eslint/css`. Strings and `url()` values are strings, everything else outside comments is code. */
 export const cssAdapter: LanguageAdapter = {
-  name: 'CSS',
   defaultContext: 'code',
   matches: (ast) => readType(ast) === 'StyleSheet',
   collectContextRanges: (sourceCode) => {

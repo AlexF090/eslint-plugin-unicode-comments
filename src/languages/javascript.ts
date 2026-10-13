@@ -1,12 +1,7 @@
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from './language-adapter.ts';
 import { isRecord } from '../core/is-record.ts';
-import {
-  collectCommentRanges,
-  mapElementsToRanges,
-  readArray,
-  readType,
-} from './syntax-element.ts';
+import { collectTokenAndCommentRanges, readType } from './syntax-element.ts';
 
 const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
   ['String', 'string'],
@@ -23,16 +18,11 @@ const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
 
 /** JavaScript, TypeScript, and JSX via espree or typescript-eslint, plus other parsers producing ESTree tokens. */
 export const javascriptAdapter: LanguageAdapter = {
-  name: 'JavaScript',
   defaultContext: 'code',
   matches: (ast) =>
     readType(ast) === 'Program' &&
     isRecord(ast) &&
     Array.isArray(ast['tokens']),
-  collectContextRanges: (sourceCode) => [
-    ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), (type) =>
-      tokenContexts.get(type),
-    ),
-    ...collectCommentRanges(sourceCode),
-  ],
+  collectContextRanges: (sourceCode) =>
+    collectTokenAndCommentRanges(sourceCode, (type) => tokenContexts.get(type)),
 };

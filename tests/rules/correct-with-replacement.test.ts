@@ -9,7 +9,6 @@ const createEnvironment = (
   sourceText = ' \u2014 ',
 ): CorrectionEnvironment => ({
   adapter: {
-    name: 'test',
     defaultContext: 'text',
     fixesText,
     matches: () => true,

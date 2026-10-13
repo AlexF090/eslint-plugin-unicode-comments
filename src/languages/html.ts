@@ -1,10 +1,8 @@
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
-  collectCommentRanges,
-  mapElementsToRanges,
-  readArray,
-  readType,
+  collectTokenAndCommentRanges,
+  isProgramStartingWith,
 } from './syntax-element.ts';
 
 const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
@@ -18,15 +16,8 @@ const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
 
 /** `@html-eslint/eslint-plugin`. Tag and attribute names are code. */
 export const htmlAdapter: LanguageAdapter = {
-  name: 'HTML',
   defaultContext: 'code',
-  matches: (ast) =>
-    readType(ast) === 'Program' &&
-    readType(readArray(ast, 'body')[0]) === 'Document',
-  collectContextRanges: (sourceCode) => [
-    ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), (type) =>
-      tokenContexts.get(type),
-    ),
-    ...collectCommentRanges(sourceCode),
-  ],
+  matches: (ast) => isProgramStartingWith(ast, (type) => type === 'Document'),
+  collectContextRanges: (sourceCode) =>
+    collectTokenAndCommentRanges(sourceCode, (type) => tokenContexts.get(type)),
 };

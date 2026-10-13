@@ -7,8 +7,6 @@ export interface ScannableSourceCode {
 }
 
 export interface LanguageAdapter {
-  /** Language name used in documentation and error messages. */
-  name: string;
   matches(ast: unknown): boolean;
   collectContextRanges(sourceCode: ScannableSourceCode): ContextRange[];
   /** Context of text that no collected range covers. */

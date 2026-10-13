@@ -72,7 +72,6 @@ const collectLinkRanges = (
  * HTML, front matter, and link destinations, titles, and labels are strings.
  */
 export const markdownAdapter: LanguageAdapter = {
-  name: 'Markdown',
   defaultContext: 'text',
   fixesText: true,
   matches: (ast) => readType(ast) === 'root',
@@ -97,7 +96,6 @@ export const markdownAdapter: LanguageAdapter = {
 
 /** The plugin's own `text` language and any language this plugin does not recognise. */
 export const plainTextAdapter: LanguageAdapter = {
-  name: 'plain text',
   defaultContext: 'text',
   matches: () => true,
   collectContextRanges: () => [],

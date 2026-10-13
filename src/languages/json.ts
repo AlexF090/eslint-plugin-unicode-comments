@@ -3,7 +3,6 @@ import { mapElementsToRanges, readArray, readType } from './syntax-element.ts';
 
 /** `@eslint/json` (JSON, JSONC, JSON5). Keys and values are both string tokens. */
 export const jsonAdapter: LanguageAdapter = {
-  name: 'JSON',
   defaultContext: 'code',
   matches: (ast) =>
     readType(ast) === 'Document' && readArray(ast, 'tokens').length > 0,

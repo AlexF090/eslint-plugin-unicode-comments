@@ -139,6 +139,21 @@ export const readComments = (sourceCode: object, ast: unknown): unknown[] => {
   ];
 };
 
+/**
+ * Whether `ast` is a `Program` whose first statement has a type accepted by
+ * `matchesType`. YAML, TOML, and HTML roots are recognised this way.
+ */
+export const isProgramStartingWith = (
+  ast: unknown,
+  matchesType: (type: string) => boolean,
+): boolean => {
+  if (readType(ast) !== 'Program') {
+    return false;
+  }
+  const firstType = readType(readArray(ast, 'body')[0]);
+  return firstType !== undefined && matchesType(firstType);
+};
+
 /** A `comment` context range for every comment the language exposes. */
 export const collectCommentRanges = (sourceCode: {
   ast: unknown;
@@ -147,3 +162,12 @@ export const collectCommentRanges = (sourceCode: {
     readComments(sourceCode, sourceCode.ast),
     () => 'comment',
   );
+
+/** Context ranges for the tokens in `ast.tokens` whose type maps to a context, plus every comment. */
+export const collectTokenAndCommentRanges = (
+  sourceCode: { ast: unknown },
+  contextForType: (type: string) => SourceContext | undefined,
+): ContextRange[] => [
+  ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), contextForType),
+  ...collectCommentRanges(sourceCode),
+];

@@ -1,9 +1,7 @@
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
-  collectCommentRanges,
-  mapElementsToRanges,
-  readArray,
-  readType,
+  collectTokenAndCommentRanges,
+  isProgramStartingWith,
 } from './syntax-element.ts';
 
 const scalarTokenTypes = new Set([
@@ -15,15 +13,11 @@ const scalarTokenTypes = new Set([
 
 /** `eslint-plugin-yml`. Plain, quoted, and block scalars (keys included) are strings. */
 export const yamlAdapter: LanguageAdapter = {
-  name: 'YAML',
   defaultContext: 'code',
   matches: (ast) =>
-    readType(ast) === 'Program' &&
-    readType(readArray(ast, 'body')[0])?.startsWith('YAML') === true,
-  collectContextRanges: (sourceCode) => [
-    ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), (type) =>
+    isProgramStartingWith(ast, (type) => type.startsWith('YAML')),
+  collectContextRanges: (sourceCode) =>
+    collectTokenAndCommentRanges(sourceCode, (type) =>
       scalarTokenTypes.has(type) ? 'string' : undefined,
     ),
-    ...collectCommentRanges(sourceCode),
-  ],
 };
