@@ -41,7 +41,7 @@ To add a dangerous character: decide its category in `classifyCharacter` (or ext
 
 ## CI/CD and release
 
-- `.github/workflows/ci.yml`: audit, then build, type-check, lint, format, package lint, and tests on a matrix of ESLint 9 and 10 and Node.js 22 and 24 (lint runs on Node.js 24 only). Actions are pinned by commit SHA.
+- `.github/workflows/ci.yml`: audit, then build, type-check, lint, format, package lint, and tests on a matrix of ESLint 9 and 10 and Node.js 22 and 24, plus the lower bounds ESLint 9.38.0 on Node.js 22.13.0 (with engine-strict off, because lint-staged needs a newer Node.js 22); lint runs on Node.js 24 only. Actions are pinned by commit SHA.
 - `.github/workflows/codeql.yml` and `scorecard.yml`: code scanning and OpenSSF Scorecard.
 - `.github/workflows/release.yml`: on a pushed `v*.*.*` tag, publishes to npm with Trusted Publishing (OIDC, no token) and provenance. The npm package's Trusted Publisher must reference this repository and `release.yml`.
 - Releases are tagged manually: `npm version <patch|minor|major>` then `git push --follow-tags`.
