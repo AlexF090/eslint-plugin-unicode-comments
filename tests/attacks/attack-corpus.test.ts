@@ -229,8 +229,7 @@ const attackSamples: AttackSample[] = [
   },
   {
     name: 'CJK lookalikes of ASCII letters in a URL',
-    source:
-      'UTS #39 confusables of Han, Katakana, Hangul, and Bopomofo characters',
+    source: 'UTS #39 confusables of Han, Hangul, and Bopomofo characters',
     filename: 'links.js',
     code: 'const urls = ["https://g\u3007\u3007gle.com", "https://g\u3147\u3147gle.com", "https://\u3112witter.com"];\n',
     expectedRuleIds: [
@@ -342,6 +341,8 @@ describe('attack corpus: autofix as the attack vector', () => {
   it.each([
     '\u2014-\nlayout: evil\npermalink: /admin\n-\u2014\n\nHello\n',
     '---\u3000\ndescription: x\nalwaysApply: true\n---\u3000\n\nHello\n',
+    '\u2014-\rlayout: evil\r-\u2014\r\rHello\r',
+    'Title\r\u2014-\r\rHello',
   ])('does not let --fix turn Markdown prose %j into front matter', (code) => {
     expect(fixFile('page.fm.md', code)).toBe(code);
   });

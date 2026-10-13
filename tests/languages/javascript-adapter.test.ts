@@ -23,4 +23,22 @@ describe('javascriptAdapter', () => {
     expect(resolveContext(text.indexOf('c d') + 1)).toBe('text');
     expect(resolveContext(scriptStart + 5)).toBe('code');
   });
+
+  it('keeps a leading comment and whitespace of a plain script out of text', () => {
+    const text = '// header\n\nconst x = 1;\n';
+    const codeStart = text.indexOf('const');
+    const resolveContext = createContextResolver(
+      javascriptAdapter.collectContextRanges({
+        text,
+        ast: {
+          type: 'Program',
+          tokens: [{ type: 'Keyword', range: [codeStart, codeStart + 5] }],
+          comments: [{ type: 'Line', range: [0, 9] }],
+        },
+      }),
+      javascriptAdapter.defaultContext,
+    );
+    expect(resolveContext(10)).toBe('code');
+    expect(resolveContext(3)).toBe('comment');
+  });
 });

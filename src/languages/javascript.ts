@@ -23,8 +23,7 @@ const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
 
 const nonWhitespacePattern = /\S/u;
 
-/** Whether `[start, end)` holds anything but whitespace and comments. */
-const holdsMarkup = (
+const holdsMoreThanWhitespaceAndComments = (
   text: string,
   comments: readonly ContextRange[],
   start: number,
@@ -61,7 +60,12 @@ const collectMarkupAroundTokens = (
     { start: lastTokenEnd, end: text.length, context: 'text' },
   ];
   return regions.filter((region) =>
-    holdsMarkup(text, comments, region.start, region.end),
+    holdsMoreThanWhitespaceAndComments(
+      text,
+      comments,
+      region.start,
+      region.end,
+    ),
   );
 };
 

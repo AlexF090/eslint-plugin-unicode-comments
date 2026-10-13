@@ -52,7 +52,7 @@ const scriptsMixedWithLatinPattern =
 // (KATAKANA LETTER NO starts the loanwords for "node" and "note"), so they
 // are left out; Han radicals, IDEOGRAPHIC NUMBER ZERO, and compatibility
 // jamo rarely stand in a Latin word.
-const wordLettersNextToLatinPattern =
+const kanaAndConjoiningJamoPattern =
   /^[\p{Script=Hiragana}\p{Script=Katakana}\u1100-\u11FF]$/u;
 const scriptsWithoutLetters = new Set(['Common', 'Inherited', 'Unknown']);
 
@@ -124,7 +124,7 @@ const isAsciiNeighborConfusable = ({
   return (
     (isNeutral ||
       (scriptsMixedWithLatinPattern.test(character) &&
-        !wordLettersNextToLatinPattern.test(character))) &&
+        !kanaAndConjoiningJamoPattern.test(character))) &&
     !lookalikeExclusionPattern.test(character) &&
     asciiWordOrUrlCharacterPattern.test(imitated)
   );

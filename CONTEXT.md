@@ -7,7 +7,7 @@ Terms used consistently across code, tests, and documentation.
   - `identifier`: names the language treats as identifiers or keywords.
   - `comment`: comments of any syntax.
   - `string`: string, template, and regular expression literals; JSON strings; YAML and TOML scalar values; Markdown code blocks, inline code, embedded HTML, and front matter; HTML script and style content.
-  - `text`: prose (Markdown prose, HTML text, JSX text, plain text files).
+  - `text`: prose (Markdown prose, HTML text, JSX text, plain text files) and markup around the script tokens that Vue and Svelte parsers return.
 - **Context range**: a `[start, end)` offset range of the source text with one source context. Produced by a language adapter.
 - **Language adapter**: maps an ESLint `SourceCode` of one language to context ranges and a default context for uncovered text.
 - **Category**: the single classification a scanned character receives: `bidi-control`, `invisible`, `control`, `private-use`, `unassigned`, `surrogate`, `unusual-whitespace`, `typographic`, `lookalike`, `mixed-script`, or `other`.
