@@ -191,4 +191,9 @@ describe('attack corpus: autofix as the attack vector', () => {
     const code = 'safe = true # reviewed\u2029admin = true\n';
     expect(fixFile('config.toml', code)).toBe(code);
   });
+
+  it('does not let --fix retarget a Markdown link to a different domain', () => {
+    const code = '[docs](https://pay\u2013example.com/login)\n';
+    expect(fixFile('README.md', code)).toBe(code);
+  });
 });

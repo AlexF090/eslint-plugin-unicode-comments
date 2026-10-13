@@ -153,3 +153,38 @@ describe('autofix never turns a comment into live content', () => {
     );
   });
 });
+
+describe('Markdown autofix never changes link destinations', () => {
+  it.each([
+    ['inline link', '[docs](https://e.com/a\u2013b)'],
+    ['inline link title', '[docs](https://e.com "a\u2013b")'],
+    ['image', '![logo](https://e.com/a\u2013b.png)'],
+    ['image alt text', '![a\u2013b](https://e.com/logo.png)'],
+    ['autolink', '<https://e.com/a\u2013b>'],
+    ['literal autolink', 'See https://e.com/a\u2013b now.'],
+    ['definition', '[docs]: https://e.com/a\u2013b'],
+    ['collapsed reference', '[a\u2013b][]\n\n[a\u2013b]: https://e.com'],
+    ['shortcut reference', '[a\u2013b]\n\n[a\u2013b]: https://e.com'],
+    ['full reference label', '[docs][a\u2013b]\n\n[a\u2013b]: https://e.com'],
+  ])('does not autofix the %s in Markdown', (_name, code) => {
+    expect(fixFile('a.md', code)).toBe(code);
+    expect(ruleIdsOf('a.md', code).length).toBeGreaterThan(0);
+  });
+
+  it('still fixes the text of Markdown links', () => {
+    expect(
+      fixFile(
+        'a.md',
+        '[a\u2013b](https://e.com/c\u2013d) and [e\u2013f][r]\n\n[r]: https://e.com\n',
+      ),
+    ).toBe(
+      '[a-b](https://e.com/c\u2013d) and [e-f][r]\n\n[r]: https://e.com\n',
+    );
+  });
+
+  it('does not fix inline code or nested images inside Markdown link text', () => {
+    const code =
+      '[`a\u2013b` ![c](https://e.com/d\u2013e.png)](https://e.com)\n';
+    expect(fixFile('a.md', code)).toBe(code);
+  });
+});
