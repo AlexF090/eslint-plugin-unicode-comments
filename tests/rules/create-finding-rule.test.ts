@@ -1,13 +1,14 @@
 import { Linter } from 'eslint';
 import { describe, expect, it } from 'vitest';
 import unicodeGuard from '../../src/index.ts';
+import { qualifyName } from '../../src/plugin-namespace.ts';
 
 const lintWithOptions = (ruleName: string, options: unknown) =>
   new Linter().verify(
     'const a = 1;',
     {
       plugins: { 'unicode-guard': unicodeGuard },
-      rules: { [`unicode-guard/${ruleName}`]: ['error', options] },
+      rules: { [qualifyName(ruleName)]: ['error', options] },
     },
     { filename: 'a.js' },
   );

@@ -13,6 +13,7 @@ export const noConfusableCharacters = createFindingRule({
       '{{script}} character {{character}} in a {{dominantScript}} word in {{context}}. Mixing scripts within one word is the shape of a homograph attack.',
     suggestAscii: 'Replace with the ASCII character "{{imitates}}".',
   },
+  hasSuggestions: true,
   createSelector: selectCategories(['lookalike', 'mixed-script']),
   messageId: (finding) =>
     finding.category === 'lookalike' ? 'lookalike' : 'mixedScript',

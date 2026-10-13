@@ -1,7 +1,6 @@
 import type {
   LanguageOptions,
   MessagePlaceholderData,
-  RuleContext,
   RuleDefinition,
   RuleFixer,
   RulesMeta,
@@ -12,7 +11,6 @@ import type {
 import {
   compileAllowList,
   InvalidAllowEntryError,
-  type CharacterPredicate,
 } from '../core/allow-list.ts';
 import { describeCodePoint } from '../core/character-names.ts';
 import {
@@ -23,14 +21,14 @@ import {
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
 import { readPackageMetadata } from '../package-metadata.ts';
-import { PLUGIN_NAMESPACE } from '../plugin-namespace.ts';
-import { allowOptionSchema, defaultAllowOptions } from './allow-option.ts';
-import { createOffsetLocator } from './create-offset-locator.ts';
+import { qualifyName } from '../plugin-namespace.ts';
 import {
-  isLocatableSourceCode,
-  scanSourceCode,
-  type Position,
-} from './scan-source-code.ts';
+  allowOptionSchema,
+  defaultAllowOptions,
+  type AllowEntryCompiler,
+} from './allow-option.ts';
+import { createOffsetLocator } from './create-offset-locator.ts';
+import { isLocatableSourceCode, scanSourceCode } from './scan-source-code.ts';
 
 const { repositoryUrl } = readPackageMetadata();
 
@@ -50,10 +48,6 @@ export interface FindingRuleTypeOptions {
  * with a JSON schema and reads them through a type guard.
  */
 export type FindingRule = RuleDefinition<FindingRuleTypeOptions>;
-
-export type FindingRuleContext = RuleContext<
-  Omit<FindingRuleTypeOptions, 'Visitor' | 'ExtRuleDocs'>
->;
 
 /** How a finding may be corrected: applied automatically, offered as a suggestion, or not at all. */
 export type Correction =
@@ -78,15 +72,17 @@ export interface FindingRuleSettings {
   defaultOptions?: unknown[];
   /** Set when `correction` can return `{ kind: 'fix' }`. */
   fixable?: boolean;
+  /** Set when `correction` can return `{ kind: 'suggestion' }`. */
+  hasSuggestions?: boolean;
   /**
    * Called once per file with the rule options; returns the predicate that
-   * decides which findings this rule reports. `compileAllowList` turns allow
-   * entries into a character predicate and reports malformed entries with
-   * the rule name.
+   * decides which findings this rule reports. `compileAllowEntries` turns
+   * allow entries into a character predicate and reports malformed entries
+   * with the rule name.
    */
   createSelector(
     options: readonly unknown[],
-    compileAllowList: (entries: readonly string[]) => CharacterPredicate,
+    compileAllowEntries: AllowEntryCompiler,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
   correction?(finding: Finding, environment: CorrectionEnvironment): Correction;
@@ -130,13 +126,13 @@ export const createMessageData = (
 });
 
 const compileAllowListForRule =
-  (ruleName: string) =>
-  (entries: readonly string[]): CharacterPredicate => {
+  (ruleName: string): AllowEntryCompiler =>
+  (entries) => {
     try {
       return compileAllowList(entries);
     } catch (error) {
       if (error instanceof InvalidAllowEntryError) {
-        throw new Error(`${PLUGIN_NAMESPACE}/${ruleName}: ${error.message}`, {
+        throw new Error(`${qualifyName(ruleName)}: ${error.message}`, {
           cause: error,
         });
       }
@@ -149,40 +145,10 @@ const toRange = (finding: Finding): [number, number] => [
   finding.offset + finding.length,
 ];
 
-const reportFinding = (
-  context: FindingRuleContext,
-  locate: (offset: number) => Position,
-  settings: FindingRuleSettings,
-  environment: CorrectionEnvironment,
-  finding: Finding,
-): void => {
-  const correction = settings.correction?.(finding, environment);
-  const range = toRange(finding);
-  const applyCorrection =
-    (text: string): RuleFixer =>
-    (fixer) =>
-      fixer.replaceTextRange(range, text);
-
-  context.report({
-    loc: {
-      start: locate(range[0]),
-      end: locate(range[1]),
-    },
-    messageId: settings.messageId(finding),
-    data: createMessageData(finding),
-    fix: correction?.kind === 'fix' ? applyCorrection(correction.text) : null,
-    suggest:
-      correction?.kind === 'suggestion'
-        ? [
-            {
-              messageId: correction.messageId,
-              data: createMessageData(finding),
-              fix: applyCorrection(correction.text),
-            },
-          ]
-        : null,
-  });
-};
+const replaceRange =
+  (range: [number, number], text: string): RuleFixer =>
+  (fixer) =>
+    fixer.replaceTextRange(range, text);
 
 /**
  * Builds a rule that scans the raw text of any ESLint language once per file
@@ -193,9 +159,6 @@ const reportFinding = (
 export const createFindingRule = (
   settings: FindingRuleSettings,
 ): FindingRule => {
-  const hasSuggestions = Object.keys(settings.messages).some((messageId) =>
-    messageId.startsWith('suggest'),
-  );
   return {
     meta: {
       type: settings.type,
@@ -205,7 +168,7 @@ export const createFindingRule = (
         url: `${repositoryUrl}/blob/main/docs/rules/${settings.name}.md`,
       },
       ...(settings.fixable === true ? { fixable: 'code' as const } : {}),
-      hasSuggestions,
+      hasSuggestions: settings.hasSuggestions === true,
       schema: settings.schema ?? allowOptionSchema,
       defaultOptions: settings.defaultOptions ?? defaultAllowOptions,
       messages: settings.messages,
@@ -220,7 +183,7 @@ export const createFindingRule = (
       const checkFile = () => {
         if (!isLocatableSourceCode(sourceCode)) {
           throw new Error(
-            `${PLUGIN_NAMESPACE}/${settings.name}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
+            `${qualifyName(settings.name)}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
           );
         }
         const { findings, adapter } = scanSourceCode(sourceCode);
@@ -233,8 +196,31 @@ export const createFindingRule = (
           adapter,
           sourceText: sourceCode.text,
         };
+        const report = (finding: Finding): void => {
+          const correction = settings.correction?.(finding, environment);
+          const range = toRange(finding);
+          context.report({
+            loc: { start: locate(range[0]), end: locate(range[1]) },
+            messageId: settings.messageId(finding),
+            data: createMessageData(finding),
+            fix:
+              correction?.kind === 'fix'
+                ? replaceRange(range, correction.text)
+                : null,
+            suggest:
+              correction?.kind === 'suggestion'
+                ? [
+                    {
+                      messageId: correction.messageId,
+                      data: createMessageData(finding),
+                      fix: replaceRange(range, correction.text),
+                    },
+                  ]
+                : null,
+          });
+        };
         for (const finding of groupFindings(sourceCode.text, selected)) {
-          reportFinding(context, locate, settings, environment, finding);
+          report(finding);
         }
       };
 

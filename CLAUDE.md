@@ -29,7 +29,7 @@ Run one test file: `npx vitest run tests/rules/no-bidi-control.test.ts`
 - `src/languages/`: one adapter per ESLint language mapping tokens/nodes to source contexts (`resolve-language-adapter.ts` picks one by AST shape; order matters because YAML, TOML, and HTML roots are also `Program`). `text-language.ts` is the plugin's own `unicode-guard/text` language.
 - `src/rules/`: `create-finding-rule.ts` builds every rule: scan once from the root node visitor, filter by the rule's categories and `allow` option, group, report with exact `loc`. Each category belongs to exactly one rule, so nothing is reported twice. Rule options are typed `unknown[]` and read through type guards so the rules stay assignable to ESLint 9 and 10 rule types.
 - `src/presets.ts`: presets `recommended`, `strict`, `relaxed`, `ai-instructions` (exported under ESLint's `configs` key). `attachPlugin` sets `plugins` on each preset to the exported plugin object itself.
-- `src/index.ts`: plugin object with `meta` read from `package.json` by `package-metadata.ts` (also the repository URL for rule documentation links); `plugin-namespace.ts` holds the `unicode-guard` prefix.
+- `src/index.ts`: plugin object with `meta` read from `package.json` by `package-metadata.ts` (also the repository URL for rule documentation links); `plugin-namespace.ts` holds the `unicode-guard` prefix and `qualifyName`, which prefixes rule, language, and preset names with it.
 
 To add a dangerous character: decide its category in `classifyCharacter` (or extend a Unicode property there), add a name to `character-names.ts` if it is common, and add a case to `tests/core/scan-text.test.ts` and, for real-world attacks, `tests/attacks/attack-corpus.test.ts`.
 

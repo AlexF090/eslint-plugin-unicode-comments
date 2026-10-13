@@ -11,6 +11,7 @@ export const noBidiControl = createFindingRule({
       'Bidirectional control character {{character}} in {{context}}. It can reorder how the surrounding code is displayed (Trojan Source).',
     suggestRemoval: 'Remove {{character}}.',
   },
+  hasSuggestions: true,
   createSelector: selectCategories(['bidi-control']),
   messageId: () => 'bidiControl',
   correction: () => ({

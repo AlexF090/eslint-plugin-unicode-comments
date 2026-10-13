@@ -17,6 +17,7 @@ export const noUnusualWhitespace = createFindingRule({
       'Replace with a regular space or line break (not applied automatically: it could change a value or rendered text, or end a comment early).',
   },
   fixable: true,
+  hasSuggestions: true,
   createSelector: selectCategories(['unusual-whitespace']),
   messageId: () => 'unusualWhitespace',
   correction: (finding, environment) =>

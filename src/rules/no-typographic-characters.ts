@@ -17,6 +17,7 @@ export const noTypographicCharacters = createFindingRule({
       'Replace with "{{replacement}}" (not applied automatically: it could change a value or rendered text, or end a comment early).',
   },
   fixable: true,
+  hasSuggestions: true,
   createSelector: selectCategories(['typographic']),
   messageId: () => 'typographic',
   correction: (finding, environment) =>

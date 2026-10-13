@@ -14,6 +14,7 @@ export const noInvisibleCharacters = createFindingRule({
     control: 'Control character {{character}} in {{context}}.',
     suggestRemoval: 'Remove {{character}}.',
   },
+  hasSuggestions: true,
   createSelector: selectCategories(['invisible', 'control']),
   messageId: (finding) => {
     if (finding.category === 'control') {

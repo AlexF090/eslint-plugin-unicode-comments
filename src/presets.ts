@@ -1,5 +1,5 @@
 import type { ConfigObject, Plugin, RulesConfig } from '@eslint/core';
-import { PLUGIN_NAMESPACE } from './plugin-namespace.ts';
+import { PLUGIN_NAMESPACE, qualifyName } from './plugin-namespace.ts';
 import { strictContextPolicy } from './rules/allowed-characters.ts';
 
 /**
@@ -53,32 +53,30 @@ export const matchAnyCase = (pattern: string): string =>
 
 export const aiInstructionFiles = aiInstructionFilePatterns.map(matchAnyCase);
 
-const rule = (name: string): string => `${PLUGIN_NAMESPACE}/${name}`;
-
 const securityRules: RulesConfig = {
-  [rule('no-bidi-control')]: 'error',
-  [rule('no-invisible-characters')]: 'error',
-  [rule('no-private-use-or-unassigned-characters')]: 'error',
-  [rule('no-confusable-characters')]: 'error',
+  [qualifyName('no-bidi-control')]: 'error',
+  [qualifyName('no-invisible-characters')]: 'error',
+  [qualifyName('no-private-use-or-unassigned-characters')]: 'error',
+  [qualifyName('no-confusable-characters')]: 'error',
 };
 
 export const recommendedRules: RulesConfig = {
   ...securityRules,
-  [rule('no-unusual-whitespace')]: 'error',
-  [rule('no-typographic-characters')]: 'warn',
-  [rule('allowed-characters')]: 'error',
+  [qualifyName('no-unusual-whitespace')]: 'error',
+  [qualifyName('no-typographic-characters')]: 'warn',
+  [qualifyName('allowed-characters')]: 'error',
 };
 
 export const strictRules: RulesConfig = {
   ...securityRules,
-  [rule('no-unusual-whitespace')]: 'error',
-  [rule('no-typographic-characters')]: 'error',
-  [rule('allowed-characters')]: ['error', strictContextPolicy],
+  [qualifyName('no-unusual-whitespace')]: 'error',
+  [qualifyName('no-typographic-characters')]: 'error',
+  [qualifyName('allowed-characters')]: ['error', strictContextPolicy],
 };
 
 export const relaxedRules: RulesConfig = {
   ...securityRules,
-  [rule('no-unusual-whitespace')]: 'warn',
+  [qualifyName('no-unusual-whitespace')]: 'warn',
 };
 
 export interface PresetConfiguration extends ConfigObject {
@@ -103,21 +101,21 @@ export type PluginPresets = {
 export const createPresets = (): PluginPresets => {
   return {
     recommended: {
-      name: `${PLUGIN_NAMESPACE}/recommended`,
+      name: qualifyName('recommended'),
       rules: recommendedRules,
     },
     strict: {
-      name: `${PLUGIN_NAMESPACE}/strict`,
+      name: qualifyName('strict'),
       rules: strictRules,
     },
     relaxed: {
-      name: `${PLUGIN_NAMESPACE}/relaxed`,
+      name: qualifyName('relaxed'),
       rules: relaxedRules,
     },
     'ai-instructions': {
-      name: `${PLUGIN_NAMESPACE}/ai-instructions`,
+      name: qualifyName('ai-instructions'),
       files: aiInstructionFiles,
-      language: `${PLUGIN_NAMESPACE}/text`,
+      language: qualifyName('text'),
       // A disable comment such as `<!-- eslint-disable -->` is invisible in
       // rendered Markdown, so it must not switch off checks in these files.
       linterOptions: { noInlineConfig: true },

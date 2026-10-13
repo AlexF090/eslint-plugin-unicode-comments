@@ -1,9 +1,8 @@
 import { sourceContexts, type SourceContext } from '../core/source-context.ts';
-import { isRecord } from '../core/is-record.ts';
 import {
   allowEntrySchema,
   characterOf,
-  isStringArray,
+  readAllowEntries,
 } from './allow-option.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 
@@ -53,15 +52,11 @@ export const allowedCharacters = createFindingRule({
     },
   ],
   defaultOptions: [recommendedContextPolicy],
-  createSelector: ([policy], compileAllowList) => {
-    const readEntries = (context: SourceContext): string[] => {
-      const entries = isRecord(policy) ? policy[context] : undefined;
-      return isStringArray(entries) ? entries : [];
-    };
+  createSelector: ([policy], compileAllowEntries) => {
     const isAllowedIn = Object.fromEntries(
       sourceContexts.map((context) => [
         context,
-        compileAllowList(readEntries(context)),
+        compileAllowEntries(readAllowEntries(policy, context)),
       ]),
     );
     return (finding) =>

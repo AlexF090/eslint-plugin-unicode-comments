@@ -4,15 +4,19 @@ import type { Finding, FindingCategory } from '../core/scan-text.ts';
 
 import { isRecord } from '../core/is-record.ts';
 
-export const isStringArray = (value: unknown): value is string[] =>
+const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((entry) => typeof entry === 'string');
 
-/** The `allow` entries of the first rule option; the JSON schema has already validated its shape. */
-export const readAllowEntries = (options: readonly unknown[]): string[] => {
-  const [firstOption] = options;
-  const allow = isRecord(firstOption) ? firstOption['allow'] : undefined;
-  return isStringArray(allow) ? allow : [];
+/** The allow entries under `key` of a rule option; the JSON schema has already validated its shape. */
+export const readAllowEntries = (option: unknown, key: string): string[] => {
+  const entries = isRecord(option) ? option[key] : undefined;
+  return isStringArray(entries) ? entries : [];
 };
+
+/** Turns allow entries into a character predicate, reporting malformed entries with the rule name. */
+export type AllowEntryCompiler = (
+  entries: readonly string[],
+) => CharacterPredicate;
 
 export const allowEntrySchema = {
   type: 'array',
@@ -37,11 +41,13 @@ export const characterOf = (finding: Finding): string =>
 export const selectCategories =
   (categories: readonly FindingCategory[]) =>
   (
-    options: readonly unknown[],
-    compileAllowList: (entries: readonly string[]) => CharacterPredicate,
+    [firstOption]: readonly unknown[],
+    compileAllowEntries: AllowEntryCompiler,
   ): ((finding: Finding) => boolean) => {
     const categorySet = new Set(categories);
-    const isAllowed = compileAllowList(readAllowEntries(options));
+    const isAllowed = compileAllowEntries(
+      readAllowEntries(firstOption, 'allow'),
+    );
     return (finding) =>
       categorySet.has(finding.category) && !isAllowed(characterOf(finding));
   };
