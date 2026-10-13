@@ -266,6 +266,16 @@ describe('scanText', () => {
     });
   });
 
+  it('does not exhaust the stack on one huge word', () => {
+    const hugeWord = '\u0430'.repeat(5_000_000);
+    expect(() => scanText(hugeWord, () => 'comment')).not.toThrow();
+  }, 60_000);
+
+  it('still finds mixed scripts in words longer than one chunk', () => {
+    const longWord = `${'a'.repeat(3000)}\u0430${'a'.repeat(3000)}`;
+    expect(categoriesOf(scanAs(longWord))).toEqual(['mixed-script']);
+  });
+
   it('never throws and keeps findings inside the text, ordered and non-overlapping', () => {
     fc.assert(
       fc.property(fc.string({ unit: 'binary' }), (text) => {

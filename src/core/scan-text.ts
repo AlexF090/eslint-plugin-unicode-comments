@@ -44,7 +44,9 @@ export interface Finding {
 
 const outsidePrintableAsciiPattern = /[^\t\n\r\x20-\x7E]/u;
 const scannedCharacterPattern = /[^\t\n\r\x20-\x7E]/gu;
-const wordPattern = /[\p{L}\p{M}\p{Nd}\p{Pc}]+/gu;
+// Bounded so a single huge word cannot exhaust the regular expression stack;
+// longer words are checked in chunks of this length.
+const wordPattern = /[\p{L}\p{M}\p{Nd}\p{Pc}]{1,1024}/gu;
 const nonAsciiPattern = /[\u0080-\u{10FFFF}]/u;
 
 const bidiControlPattern = /^\p{Bidi_Control}$/u;
