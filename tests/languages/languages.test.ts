@@ -197,4 +197,14 @@ describe('Markdown corrections never touch link destinations', () => {
       expect(confusableMessagesOf(code)).toHaveLength(1);
     });
   });
+
+  it('puts replacement and imitated text in backticks', () => {
+    const messages = lintFile('a.md', 'Wait\u2026 and \uFF41dmin').map(
+      (message) => message.message,
+    );
+    expect(messages).toEqual([
+      expect.stringContaining('Use `...` instead.'),
+      expect.stringContaining('imitates the ASCII text `a`'),
+    ]);
+  });
 });

@@ -8,7 +8,7 @@ export const noTypographicCharacters = createFindingRule({
     'Disallow typographic characters (dashes, curly quotes, ellipsis, bullets, arrows) that word processors and language models insert where a developer types ASCII',
   messages: {
     typographic:
-      'Typographic character {{character}} in {{context}}. Use "{{replacement}}" instead.',
+      'Typographic character {{character}} in {{context}}. Use `{{replacement}}` instead.',
   },
   createSelector: selectCategories(['typographic']),
   messageId: () => 'typographic',

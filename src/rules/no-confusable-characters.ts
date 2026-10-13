@@ -8,7 +8,7 @@ export const noConfusableCharacters = createFindingRule({
     'Disallow characters that imitate ASCII (fullwidth forms, mathematical alphanumerics) and words that mix scripts (homograph attacks)',
   messages: {
     lookalike:
-      '{{character}} in {{context}} imitates the ASCII text "{{imitates}}".',
+      '{{character}} in {{context}} imitates the ASCII text `{{imitates}}`.',
     mixedScript:
       '{{script}} character {{character}} in a {{dominantScript}} word in {{context}}. Mixing scripts within one word is the shape of a homograph attack.',
   },
