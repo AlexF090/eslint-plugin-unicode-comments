@@ -36,6 +36,45 @@ const parseHexCodePoint = (entry: string, hex: string): number => {
 const escapeCodePoint = (codePoint: number): string =>
   `\\u{${codePoint.toString(16)}}`;
 
+const compilePropertyEscape = (entry: string): RegExp => {
+  try {
+    return new RegExp(`^${entry}$`, 'u');
+  } catch {
+    throw new InvalidAllowEntryError(
+      entry,
+      'unknown Unicode property or value',
+    );
+  }
+};
+
+/** Permanently unassigned (General_Category Cn in every Unicode version). */
+const NONCHARACTER = '\uFFFF';
+const LETTER = 'a';
+const PRIVATE_USE_CHARACTER = '\uE000';
+
+/**
+ * Rejects property escapes that would allow (almost) every character, such
+ * as `\p{Any}`, `\p{Cn}`, `\p{C}`, `\p{Script=Unknown}`, and `\p{Assigned}`,
+ * by probing them with characters whose properties never change: a
+ * property that matches a noncharacter covers the unassigned code points,
+ * and the only properties that match both a letter and a private-use
+ * character are `Any` and `Assigned`.
+ */
+const rejectMatchAllPropertyEscape = (entry: string, pattern: RegExp): void => {
+  if (pattern.test(NONCHARACTER)) {
+    throw new InvalidAllowEntryError(
+      entry,
+      'the property matches unassigned code points, so it would allow almost every character',
+    );
+  }
+  if (pattern.test(LETTER) && pattern.test(PRIVATE_USE_CHARACTER)) {
+    throw new InvalidAllowEntryError(
+      entry,
+      'the property matches every assigned character, so it would allow every dangerous character',
+    );
+  }
+};
+
 const toCharacterClassMember = (entry: string): string => {
   const rangeMatch = codePointRangeEntryPattern.exec(entry);
   if (rangeMatch?.[1] !== undefined && rangeMatch[2] !== undefined) {
@@ -61,14 +100,7 @@ const toCharacterClassMember = (entry: string): string => {
   }
 
   if (propertyEscapeEntryPattern.test(entry)) {
-    try {
-      new RegExp(entry, 'u');
-    } catch {
-      throw new InvalidAllowEntryError(
-        entry,
-        'unknown Unicode property or value',
-      );
-    }
+    rejectMatchAllPropertyEscape(entry, compilePropertyEscape(entry));
     return entry;
   }
 

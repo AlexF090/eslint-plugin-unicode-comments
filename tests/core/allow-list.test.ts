@@ -44,8 +44,28 @@ describe('compileAllowList', () => {
     ['U+0500..U+0400', 'range start is above range end'],
     ['\\p{Script=Klingon}', 'unknown Unicode property'],
     ['\\P{L}', 'negated property escapes are not supported'],
+    ['\\p{Any}', 'matches unassigned code points'],
+    ['\\p{Cn}', 'matches unassigned code points'],
+    ['\\p{General_Category=Unassigned}', 'matches unassigned code points'],
+    ['\\p{C}', 'matches unassigned code points'],
+    ['\\p{Script=Unknown}', 'matches unassigned code points'],
+    ['\\p{scx=Zzzz}', 'matches unassigned code points'],
+    ['\\p{Assigned}', 'matches every assigned character'],
   ])('rejects %j with a descriptive error', (entry, reason) => {
     expect(() => compileAllowList([entry])).toThrow(InvalidAllowEntryError);
     expect(() => compileAllowList([entry])).toThrow(reason);
+  });
+
+  it.each([
+    '\\p{L}',
+    '\\p{M}',
+    '\\p{N}',
+    '\\p{P}',
+    '\\p{S}',
+    '\\p{Co}',
+    '\\p{Script=Common}',
+    '\\p{ASCII}',
+  ])('accepts the broad but bounded property escape %j', (entry) => {
+    expect(() => compileAllowList([entry])).not.toThrow();
   });
 });
