@@ -16,6 +16,7 @@
     "dist",
     "!dist/**/*.map",
     "docs/rules",
+    "docs/known-limitations.md",
     "README.md",
     "CHANGELOG.md",
     "MIGRATION.md",

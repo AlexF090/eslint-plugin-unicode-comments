@@ -1,5 +1,9 @@
 # eslint-plugin-unicode-guard
 
+[![npm version](https://img.shields.io/npm/v/eslint-plugin-unicode-guard)](https://www.npmjs.com/package/eslint-plugin-unicode-guard)
+[![CI](https://github.com/AlexF090/eslint-plugin-unicode-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexF090/eslint-plugin-unicode-guard/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ESLint plugin that keeps hidden and deceptive Unicode out of your repository, so AI-generated code and AI instruction files are safe to review and merge.
 
 Code review is visual. A reviewer cannot see a zero width space, a bidirectional override, a Cyrillic `a` in a Latin identifier, or an instruction encoded in invisible tag characters. Language models produce these characters by accident, and attackers plant them on purpose: Trojan Source, invisible backdoors, GlassWorm payloads, and the "Rules File Backdoor" all rely on characters a developer would never type. This plugin reports every one of them, with the exact position, the code point, and its name.
@@ -9,6 +13,23 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 - **Few false positives.** Emoji ZWJ sequences, variation selectors after emoji, subdivision flags, and joiners in Arabic or Indic text are recognised as legitimate.
 - **Readable reports.** `Invisible tag characters in a comment encode the hidden text "Ignore all previous instructions" (ASCII smuggling).`
 - **Fixes only where provably safe.** `--fix` replaces unusual whitespace between JavaScript and TypeScript tokens, where the language already treats it as whitespace. Nothing else is fixed or suggested: messages name the ASCII replacement, and you apply it by hand. Any automatic or suggested change can turn a comment, string, or text into live code or markup: a dash before `>` ends an HTML comment, a comma splits a YAML list, and even letters form directives (`eslint-disable`), tags (`<script>`), and keywords.
+
+## Example output
+
+Given a JavaScript file with a Cyrillic `a` in a URL and a zero width space in a comment, and a `CLAUDE.md` with an instruction hidden in tag characters, ESLint reports:
+
+```text
+CLAUDE.md
+  3:20  error  Invisible tag characters in text encode the hidden text "Ignore all previous instructions" (ASCII smuggling)  unicode-guard/no-invisible-characters
+
+login.js
+  1:23  error  Cyrillic character U+0430 ("<U+0430>") in a Latin word in a string. Mixing scripts within one word is the shape of a homograph attack  unicode-guard/no-confusable-characters
+  2:18  error  Invisible character U+200B ZERO WIDTH SPACE in a comment. Invisible characters can hide code or instructions from reviewers     unicode-guard/no-invisible-characters
+
+<U+2716> 3 problems (3 errors, 0 warnings)
+```
+
+(The glyphs in this output are written as `<U+XXXX>` placeholders.)
 
 ## Installation
 
@@ -114,6 +135,8 @@ HTML works the same way with `@html-eslint/eslint-plugin` and `language: 'html/h
 | [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        |        |
 | [allowed-characters](docs/rules/allowed-characters.md)                                           | any other non-ASCII character not allowed in its context                                                        | error       |        |
 
+The **Recommended** column is the severity the rule has in the `recommended` preset (`strict` raises `no-typographic-characters` to `error`, and `relaxed` lowers `no-unusual-whitespace` to `warn`). The **Fix** column says whether `--fix` changes anything: `JS fix` means unusual whitespace between JavaScript and TypeScript tokens is replaced with an ASCII space, an empty cell means the rule never fixes or suggests anything.
+
 Every character is reported by exactly one rule, so a finding never appears twice.
 
 ## Configuring the allow lists
@@ -154,34 +177,58 @@ A context you leave out keeps the rule's default, which is the `recommended` pol
 
 Checks are based on Unicode scripts, not natural languages: German, French, and Spanish are all `Script=Latin`.
 
+## Recommended setup for security-critical code
+
+Use `strict` everywhere, then allow Latin letters in comments, strings, and text, so umlauts and accents work while all-Cyrillic fake words and lookalikes are still errors. Put `ai-instructions` last so its plain text language and `noInlineConfig` apply:
+
+```js
+import { defineConfig } from 'eslint/config';
+import unicodeGuard from 'eslint-plugin-unicode-guard';
+
+export default defineConfig([
+  unicodeGuard.configs.strict,
+  {
+    rules: {
+      'unicode-guard/allowed-characters': [
+        'error',
+        {
+          comment: ['\\p{Script=Latin}'],
+          string: ['\\p{Script=Latin}'],
+          text: ['\\p{Script=Latin}'],
+        },
+      ],
+    },
+  },
+  unicodeGuard.configs['ai-instructions'],
+]);
+```
+
+Contexts left out (`code`, `identifier`) keep the default of ASCII only. Run the check in CI with zero tolerance for warnings:
+
+```sh
+npx eslint . --max-warnings 0
+```
+
+Make this check a required status check for merging, otherwise a pull request can bypass it. For Markdown files outside the `ai-instructions` preset, also set `linterOptions: { noInlineConfig: true }`, because an `<!-- eslint-disable -->` comment is invisible when rendered.
+
 ## Known limitations
 
-- **Whole-script confusables.** A word written entirely in Cyrillic or Greek that reads like a Latin word (for example a Cyrillic `paypal` in a URL) is not reported in comments, strings, and prose under `recommended`, because only words that mix scripts are suspicious without the full UTS #39 confusables data. In code and identifiers the ASCII-only policy rejects it, but scripts, styles, and attribute values embedded in HTML count as strings, so a whole Cyrillic identifier there is not reported either. Use `strict` or narrow `allowed-characters` for strings if this matters to you.
-- **Joiners in joining scripts.** ZERO WIDTH JOINER and NON-JOINER after a letter of a joining script such as Arabic or Devanagari (optionally followed by marks) and before another character of a joining script are accepted, so the presence or absence of a joiner there can carry a few hidden bits.
-- **Lookalikes next to ASCII.** Characters of no particular script, such as the division slash (U+2215), the fraction slash (U+2044), the modifier letter colon (U+A789), and mathematical Greek letters, and CJK characters that may mix with Latin, such as IDEOGRAPHIC NUMBER ZERO (U+3007), are reported only next to an ASCII letter, digit, or URL character, and so are letterlike symbols (U+2100 - U+214F) and mathematical alphanumeric symbols (U+1D400 - U+1D7FF) that NFKC maps to ASCII (`x <U+2208> <U+211D>` is accepted, `<U+211D>x.com` is reported). Math symbols that imitate several ASCII characters (INFINITY for `oo`, PARALLEL TO for `ll`), squared units, modifier letters, superscripts and subscripts, and SCRIPT SMALL L (U+2113) are never reported. Kana and conjoining Hangul jamo are never reported as lookalikes, because they spell ordinary words next to Latin: KATAKANA LETTER NO (U+30CE) looks like a slash but starts the loanwords for "node" and "note". So math written without spaces (`1<U+2044>2`) are reported, while lookalikes of quotes, brackets, and operators and punctuation of other scripts (CJK wave dash, Devanagari danda) are not.
-- **Standardized variation sequences.** Variation selectors 1 to 14 and the Mongolian free variation selectors (U+180B - U+180D, U+180F) are accepted after the base characters that StandardizedVariants.txt lists for them (for example CJK compatibility ideographs, never after ASCII), so the choice between those few listed selectors can carry a few hidden bits.
-- **Regular expression literals** are treated as strings, so a regular expression may contain any visible non-ASCII character, such as a character class of Cyrillic letters. Lookalikes and mixed-script words are still reported.
-- **Ideographic variation selectors** (VS17 to VS256) are always reported, also in legitimate ideographic variation sequences. Allow `U+E0100..U+E01EF` in `no-invisible-characters` if you need them.
-- **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
-- **Emoji sequences.** VARIATION SELECTOR-15/16 after any pictographic character (including COPYRIGHT SIGN and TRADE MARK SIGN) and up to three ZERO WIDTH JOINERs between pictographic characters are accepted, not only the recommended emoji sequences, so the choice of selector or joiner there can carry a few hidden bits.
-- **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so its values are checked with the prose policy instead of the string policy. Configure the option, as in the example above, if your Markdown files have front matter.
-- **Vue and Svelte.** They are not supported languages. With their ESLint parsers, the markup before the first and after the last script token is checked as text and never fixed, but template expressions are not told apart from markup, and markup between two script blocks is treated as JavaScript code, so `--fix` may replace unusual whitespace there.
-- **Combining marks on ASCII.** Under `recommended`, comments, strings, and prose allow marks (`\p{M}`), so a visible mark on an ASCII letter in a URL (`p<U+0323>aypal`) is not reported. The `strict` preset and `ai-instructions` report it.
-- **Byte order marks in JavaScript.** ESLint removes leading byte order marks from JavaScript and TypeScript files before rules run, so a second one at the start of the file is not reported.
-- **Roman numerals and Latin digraphs.** Roman numerals that stand for several letters (such as U+2161 for `II`, always reported) and the digraphs of Dutch and Croatian (U+0132, U+0133, U+01C7..U+01CC, U+01F1..U+01F3) read as ASCII letter sequences and are reported, also where they are ordinary text. Allow them in `no-confusable-characters` if you write them.
-- **Squared units and abbreviations.** Symbols such as U+338F (`kg`), U+33A7 (`m/s`), U+2116 (`No`), and U+2122 (`TM`) are not reported as lookalikes, because they are ordinary in Chinese, Japanese, Korean, and Russian text. International domain names map them to ASCII, so `ex<U+338F>mple.com` resolves to `exkgmple.com`; use `strict` for URLs in strings if this matters to you.
-- **Fullwidth punctuation in Chinese and Japanese text.** Fullwidth forms such as U+FF0C (fullwidth comma) and U+FF01 (fullwidth exclamation mark) imitate ASCII and are reported everywhere, also as ordinary punctuation in Chinese and Japanese prose. Allow `U+FF01..U+FF0F`, `U+FF1A..U+FF20`, and the other punctuation you use in `no-confusable-characters` for such files.
-- **Lookalikes that are emoji or numbers.** Characters that NFKC maps to ASCII but that are emoji (U+2139 INFORMATION SOURCE for `i`, circled letters) or other numbers (superscript digits, tally marks) are not reported as lookalikes under `recommended`, so ordinary emoji and footnote digits stay allowed. `strict` and `ai-instructions` report them.
+The most important points; the complete list is in [docs/known-limitations.md](docs/known-limitations.md).
+
+- **Whole-script confusables.** Under `recommended`, a word written entirely in Cyrillic or Greek that reads like a Latin word (a Cyrillic `paypal` in a URL) is not reported in comments, strings, and prose, because only words that mix scripts are suspicious without the full UTS #39 confusables data. Use `strict`, or narrow `allowed-characters` for strings, if this matters to you.
 - **Character references.** Only characters that are literally in the file are checked. HTML and Markdown character references such as `&#x202E;` or `&#8203;` produce hidden characters in rendered output but are not reported.
-- **Punctuation of other scripts in URLs.** IDEOGRAPHIC FULL STOP (U+3002) and HALFWIDTH IDEOGRAPHIC FULL STOP (U+FF61) between ASCII labels (`example<U+3002>com`) are not reported under `recommended`, although browsers treat them as dots in domain names. Digits of other scripts next to ASCII digits only (`10.0.0.<U+0660>5`) are not reported either. `strict` reports both.
-- **Greek letters in units.** A Greek letter inside a Latin word is reported as a mixed script, also in units and formulas such as `10 k<U+03A9>`, `5 <U+03BC>s`, and `<U+0394>t`. Allow the letters you use (`U+0391..U+03C9`) in `no-confusable-characters` for datasheets and physics text.
-- **Rare lookalikes and legacy spellings.** A few characters that look like ASCII but belong to a script that does not mix with Latin, such as VEDIC SIGN JIHVAMULIYA (U+1CF5) and the CJK strokes U+31D2 and U+31D3, are not reported next to ASCII. Old-style Malayalam chillu spellings (consonant, virama, ZERO WIDTH JOINER at the end of a word) are reported as invisible characters; the atomic chillu letters of Unicode 5.1 are not.
+- **Squared units, emoji, and number lookalikes.** Squared units (U+338F for `kg`), emoji that NFKC maps to ASCII (U+2139 for `i`), and other numbers (superscript digits) are not reported as lookalikes under `recommended`. `strict` and `ai-instructions` report the emoji and number lookalikes; use `strict` for URLs in strings if squared units matter to you.
+- **Legitimate letters are reported.** The Turkish dotless i (U+0131), letters of African orthographies, Greek letters in units, and fullwidth CJK punctuation look like ASCII and are reported as lookalikes or mixed scripts. Allow what you use:
+
+  ```js
+  {
+    rules: {
+      'unicode-guard/no-confusable-characters': ['error', { allow: ['U+0131', 'U+0391..U+03C9', 'U+FF01..U+FF0F'] }],
+    },
+  }
+  ```
+
 - **Parse errors.** A file that fails to parse reports only the parse error; the plugin's rules do not run on it.
-- **Latin letters of African and other orthographies.** Letters such as U+028B and U+0192 (Ewe), U+0263 (Akan, Kabyle), the Turkish dotless i (U+0131), and IPA letters are reported as lookalikes. Allow them in `no-confusable-characters`.
-- **No-break spaces in typography.** NO-BREAK SPACE and NARROW NO-BREAK SPACE (U+00A0, U+202F) in French typography and Mongolian are reported as unusual whitespace.
-- **MONGOLIAN VOWEL SEPARATOR** (U+180E) is always reported as an invisible character.
-- **Inline configuration in Markdown.** Under `recommended`, an `<!-- eslint-disable -->` comment in an ordinary Markdown file disables the checks for the rest of it. Set `linterOptions: { noInlineConfig: true }` for Markdown files.
-- **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 
 ## How it works
 
@@ -190,6 +237,10 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 3. Each rule reports its own categories, grouped into runs, with exact line and column.
 
 The scanner has no ESLint dependency. Design decisions are recorded in [docs/adr](docs/adr).
+
+## Contributing
+
+Issues and pull requests are welcome. Set up with `npm ci`, then run `npm test` and `npm run lint` before you push. [CLAUDE.md](CLAUDE.md) describes the architecture and commands, [CONTEXT.md](CONTEXT.md) defines the terms, and [docs/adr](docs/adr) records the design decisions. Report security issues as described in [SECURITY.md](SECURITY.md), not in a public issue.
 
 ## Migrating from eslint-plugin-unicode-comments
 
