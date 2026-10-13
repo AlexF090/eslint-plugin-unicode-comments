@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-unicode-guard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ESLint plugin that makes AI-generated code safe to merge: flags invisible, bidirectional, confusable, private-use and other non-standard Unicode characters in code, comments, strings, JSON, Markdown, CSS, YAML, TOML, HTML and plain text files",
   "type": "module",
   "exports": {

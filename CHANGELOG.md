@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.0.1]
+
+### Changed
+
+- First release published through GitHub Actions with Trusted Publishing and provenance. No functional changes compared to 1.0.0.
+
 ## [1.0.0]
 
 First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unicode-comments` 2.1.3. See [MIGRATION.md](MIGRATION.md).
@@ -32,5 +38,6 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 - ESLint 8 and `.eslintrc` support.
 - All rule names of `eslint-plugin-unicode-comments`.
 
-[Unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-guard/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-guard/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/AlexF090/eslint-plugin-unicode-guard/releases/tag/v1.0.1
 [1.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-guard/releases/tag/v1.0.0
