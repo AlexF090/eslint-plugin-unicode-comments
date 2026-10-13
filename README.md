@@ -125,17 +125,22 @@ HTML works the same way with `@html-eslint/eslint-plugin` and `language: 'html/h
 
 ## Rules
 
-| Rule                                                                                             | Reports                                                                                                         | Recommended | Fix    |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ----------- | ------ |
-| [no-bidi-control](docs/rules/no-bidi-control.md)                                                 | bidirectional controls (Trojan Source)                                                                          | error       |        |
-| [no-invisible-characters](docs/rules/no-invisible-characters.md)                                 | zero-width and format characters, Hangul fillers, tag characters, stray variation selectors, control characters | error       |        |
-| [no-private-use-or-unassigned-characters](docs/rules/no-private-use-or-unassigned-characters.md) | private-use characters, unassigned code points, noncharacters, unpaired surrogates                              | error       |        |
-| [no-confusable-characters](docs/rules/no-confusable-characters.md)                               | ASCII lookalikes and mixed-script words (homographs)                                                            | error       |        |
-| [no-unusual-whitespace](docs/rules/no-unusual-whitespace.md)                                     | no-break, thin, ideographic, and other non-ASCII whitespace                                                     | error       | JS fix |
-| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 | warn        |        |
-| [allowed-characters](docs/rules/allowed-characters.md)                                           | any other non-ASCII character not allowed in its context                                                        | error       |        |
+💼 Configurations enabled in.\
+⚠️ Configurations set to warn in.\
+✅ Set in the `recommended` configuration.\
+🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/latest/use/command-line-interface#--fix).
 
-The **Recommended** column is the severity the rule has in the `recommended` preset (`strict` raises `no-typographic-characters` to `error`, and `relaxed` lowers `no-unusual-whitespace` to `warn`). The **Fix** column says whether `--fix` changes anything: `JS fix` means unusual whitespace between JavaScript and TypeScript tokens is replaced with an ASCII space, an empty cell means the rule never fixes or suggests anything.
+| Name                                                                                             | Description                                                                                                     | 💼  | ⚠️  | 🔧  |
+| :----------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :-- | :-- | :-- |
+| [no-bidi-control](docs/rules/no-bidi-control.md)                                                 | bidirectional controls (Trojan Source)                                                                          | ✅  |     |     |
+| [no-invisible-characters](docs/rules/no-invisible-characters.md)                                 | zero-width and format characters, Hangul fillers, tag characters, stray variation selectors, control characters | ✅  |     |     |
+| [no-private-use-or-unassigned-characters](docs/rules/no-private-use-or-unassigned-characters.md) | private-use characters, unassigned code points, noncharacters, unpaired surrogates                              | ✅  |     |     |
+| [no-confusable-characters](docs/rules/no-confusable-characters.md)                               | ASCII lookalikes and mixed-script words (homographs)                                                            | ✅  |     |     |
+| [no-unusual-whitespace](docs/rules/no-unusual-whitespace.md)                                     | no-break, thin, ideographic, and other non-ASCII whitespace                                                     | ✅  |     | 🔧  |
+| [no-typographic-characters](docs/rules/no-typographic-characters.md)                             | dashes, curly quotes, ellipsis, bullets, arrows                                                                 |     | ✅  |     |
+| [allowed-characters](docs/rules/allowed-characters.md)                                           | any other non-ASCII character not allowed in its context                                                        | ✅  |     |     |
+
+`strict` sets every rule to error, and `relaxed` sets `no-unusual-whitespace` to warn. The only fix replaces unusual whitespace between JavaScript and TypeScript tokens with a space; no rule offers editor suggestions.
 
 Every character is reported by exactly one rule, so a finding never appears twice.
 
