@@ -22,6 +22,10 @@
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { format, resolveConfig } from 'prettier';
+import {
+  asciiWordOrUrlCharacterPattern,
+  lookalikeExclusionPattern,
+} from '../src/core/lookalike-patterns.ts';
 
 const UNICODE_VERSION = '18.0.0';
 const BASE_URL = `https://www.unicode.org/Public/${UNICODE_VERSION}`;
@@ -38,12 +42,6 @@ const commonScriptPattern = /^[\p{Script=Common}\p{Script=Inherited}]$/u;
 // of those scripts' prose and stay out.
 const usedInLatinTextPattern =
   /^[\p{Script_Extensions=Common}\p{Script_Extensions=Inherited}\p{Script_Extensions=Latin}]$/u;
-// Letters, digits, and the punctuation of URLs, paths, and command-line
-// options. Lookalikes of quotes, brackets, and operators are left out: they
-// are common in prose (modifier letter apostrophes, CJK brackets) and cannot
-// redirect a URL or change a command.
-const imitatedCommonScriptPattern = /^[\w!#$%&*+\-./:=?@\\~]$/u;
-const lookalikeExclusionPattern = /^[\p{No}\p{Extended_Pictographic}]$/u;
 const scriptsWithoutLetters = new Set(['Common', 'Inherited', 'Unknown']);
 
 interface Confusable {
@@ -112,7 +110,7 @@ const isCommonScriptConfusable = ({
     commonScriptPattern.test(character) &&
     usedInLatinTextPattern.test(character) &&
     !lookalikeExclusionPattern.test(character) &&
-    imitatedCommonScriptPattern.test(imitated)
+    asciiWordOrUrlCharacterPattern.test(imitated)
   );
 };
 

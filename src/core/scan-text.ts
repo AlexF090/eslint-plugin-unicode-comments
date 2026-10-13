@@ -1,5 +1,9 @@
 import { commonScriptConfusables } from './common-script-confusables.ts';
 import { latinConfusables } from './latin-confusables.ts';
+import {
+  asciiWordOrUrlCharacterPattern,
+  lookalikeExclusionPattern,
+} from './lookalike-patterns.ts';
 import { findMixedScriptCharacters } from './mixed-script.ts';
 import type { SourceContext } from './source-context.ts';
 import { typographicCharacters } from './typographic-replacements.ts';
@@ -51,9 +55,6 @@ const scannedCharacterPattern = /[^\t\n\r\x20-\x7E]|\r(?!\n)/gu;
 // adjacent chunks are joined back into one word.
 const wordChunkPattern = /[\p{L}\p{M}\p{Nd}\p{Pc}]{1,1024}/gu;
 const nonAsciiPattern = /[\u0080-\u{10FFFF}]/u;
-// ASCII that a lookalike of no particular script must touch to be reported:
-// letters, digits, and the punctuation of URLs, paths, and options.
-const asciiWordOrUrlCharacterPattern = /^[\w!#$%&*+\-./:=?@\\~]$/u;
 
 const bidiControlPattern = /^\p{Bidi_Control}$/u;
 const controlPattern = /^\p{Cc}$/u;
@@ -67,7 +68,6 @@ const blankCharacters: ReadonlySet<number> = new Set([
 ]);
 const privateUsePattern = /^\p{Co}$/u;
 const unassignedPattern = /^\p{Cn}$/u;
-const lookalikeExclusionPattern = /^[\p{No}\p{Extended_Pictographic}]$/u;
 const printableAsciiCharacterPattern = /^[\x21-\x7E]$/u;
 
 const LAST_LATIN_1_CODE_POINT = 0xff;
