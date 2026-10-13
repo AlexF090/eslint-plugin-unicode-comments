@@ -4,8 +4,8 @@ import type { Correction } from './create-finding-rule.ts';
 
 export const SUGGEST_REPLACEMENT_MESSAGE_ID = 'suggestReplacement';
 
-export interface CorrectionOptions {
-  /** Whether replacements in code are applied automatically. */
+interface CorrectionOptions {
+  /** Whether the rule corrects findings in code at all (fixed or suggested). */
   fixesCode: boolean;
 }
 

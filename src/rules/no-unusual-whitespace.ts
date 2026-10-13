@@ -14,7 +14,7 @@ export const noUnusualWhitespace = createFindingRule({
     unusualWhitespace:
       'Unusual whitespace {{character}} in {{context}}. Use a regular space or line break.',
     [SUGGEST_REPLACEMENT_MESSAGE_ID]:
-      'Replace with a regular space or line break (not applied automatically outside JavaScript and TypeScript code: it could change a value, rendered text, or markup, or turn a comment into a directive).',
+      'Replace with a regular space or line break (not applied automatically: outside the code of JavaScript and TypeScript it could change a value, rendered text, or markup, or turn a comment into a directive, and a line break could end a comment or a string).',
   },
   fixable: true,
   hasSuggestions: true,
