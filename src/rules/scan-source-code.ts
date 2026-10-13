@@ -1,4 +1,4 @@
-import type { SourceCode, TextSourceCode } from '@eslint/core';
+import type { TextSourceCode } from '@eslint/core';
 import { scanText, type Finding } from '../core/scan-text.ts';
 import { createContextResolver } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
@@ -16,7 +16,7 @@ export interface LocatableSourceCode extends TextSourceCode {
 
 /** Narrows to text-based source code (ESLint also supports binary languages) that can map offsets to positions. */
 export const isLocatableSourceCode = (
-  sourceCode: SourceCode,
+  sourceCode: object,
 ): sourceCode is LocatableSourceCode =>
   typeof Reflect.get(sourceCode, 'text') === 'string' &&
   typeof Reflect.get(sourceCode, 'getLocFromIndex') === 'function';

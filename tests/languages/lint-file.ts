@@ -60,3 +60,10 @@ export const lintFile = (
 
 export const fixFile = (filename: string, code: string): string =>
   new Linter().verifyAndFix(code, configs, { filename }).output;
+
+/** The source code object the language of `filename` creates for `code`. */
+export const sourceCodeOf = (filename: string, code: string): unknown => {
+  const linter = new Linter();
+  linter.verify(code, configs, { filename });
+  return linter.getSourceCode();
+};

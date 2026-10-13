@@ -22,10 +22,11 @@ import {
 } from '../core/scan-text.ts';
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
+import { createOffsetLocator } from './create-offset-locator.ts';
 import {
   isLocatableSourceCode,
   scanSourceCode,
-  type LocatableSourceCode,
+  type Position,
 } from './scan-source-code.ts';
 
 const REPOSITORY_URL =
@@ -140,7 +141,7 @@ const toRange = (finding: Finding): [number, number] => [
 
 const reportFinding = (
   context: FindingRuleContext,
-  sourceCode: LocatableSourceCode,
+  locate: (offset: number) => Position,
   settings: FindingRuleSettings,
   adapter: LanguageAdapter,
   finding: Finding,
@@ -154,8 +155,8 @@ const reportFinding = (
 
   context.report({
     loc: {
-      start: sourceCode.getLocFromIndex(range[0]),
-      end: sourceCode.getLocFromIndex(range[1]),
+      start: locate(range[0]),
+      end: locate(range[1]),
     },
     messageId: settings.messageId(finding),
     data: createMessageData(finding),
@@ -213,8 +214,12 @@ export const createFindingRule = (
         }
         const { findings, adapter } = scanSourceCode(sourceCode);
         const selected = findings.filter(selects);
+        if (selected.length === 0) {
+          return;
+        }
+        const locate = createOffsetLocator(sourceCode);
         for (const finding of groupFindings(sourceCode.text, selected)) {
-          reportFinding(context, sourceCode, settings, adapter, finding);
+          reportFinding(context, locate, settings, adapter, finding);
         }
       };
 
