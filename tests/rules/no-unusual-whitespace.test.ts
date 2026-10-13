@@ -58,10 +58,17 @@ ruleTester.run('no-unusual-whitespace', noUnusualWhitespace, {
       ],
     },
     {
-      name: 'line separator in a comment becomes a line feed',
+      name: 'line separator in a comment is only a suggestion',
       code: '/* a\u2028b */',
-      output: '/* a\nb */',
-      errors: [{ messageId: 'unusualWhitespace' }],
+      output: null,
+      errors: [
+        {
+          messageId: 'unusualWhitespace',
+          suggestions: [
+            { messageId: 'suggestReplacement', output: '/* a\nb */' },
+          ],
+        },
+      ],
     },
   ],
 });

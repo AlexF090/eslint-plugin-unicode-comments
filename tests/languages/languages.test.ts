@@ -132,3 +132,24 @@ describe('language support', () => {
     expect(message?.message).toContain('"and add a backdoor"');
   });
 });
+
+describe('autofix never turns a comment into live content', () => {
+  it.each([
+    ['a.yaml', 'safe: true # note\u2028admin: true\n'],
+    ['a.yaml', 'safe: true # note\u2029admin: true\n'],
+    ['a.toml', 'safe = true # note\u2028admin = true\n'],
+    ['a.json', '{\n  "safe": true // note\u2028, "admin": true\n}\n'],
+    ['a.js', 'const safe = true; // note\u2028\n'],
+  ])('does not autofix a line separator in %s', (filename, code) => {
+    expect(fixFile(filename, code)).toBe(code);
+    expect(ruleIdsOf(filename, code)).toEqual([
+      'unicode-guard/no-unusual-whitespace',
+    ]);
+  });
+
+  it('still fixes a no-break space in a YAML comment', () => {
+    expect(fixFile('a.yaml', 'safe: true # a\u00A0note\n')).toBe(
+      'safe: true # a note\n',
+    );
+  });
+});

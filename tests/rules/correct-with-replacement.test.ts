@@ -47,6 +47,25 @@ describe('correctWithReplacement', () => {
     },
   );
 
+  it.each([
+    ['comment', false, false, 'suggestion'],
+    ['text', true, false, 'suggestion'],
+    ['code', false, true, 'suggestion'],
+    ['code', false, false, undefined],
+    ['identifier', true, true, undefined],
+  ] as const)(
+    'with a line break replacement in %s (fixesText %s, fixesCode %s) returns %s',
+    (context, fixesText, fixesCode, kind) => {
+      expect(
+        correctWithReplacement(
+          createFinding(context, '\n'),
+          createAdapter(fixesText),
+          { fixesCode },
+        )?.kind,
+      ).toBe(kind);
+    },
+  );
+
   it('returns nothing without a replacement', () => {
     expect(
       correctWithReplacement(createFinding('comment'), createAdapter(true), {
