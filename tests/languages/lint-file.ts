@@ -62,6 +62,12 @@ export const lintFile = (
       message,
     }));
 
+/** The number of suggestions of every problem reported for `code`. */
+export const suggestionCountsOf = (filename: string, code: string): number[] =>
+  new Linter()
+    .verify(code, configurations, { filename })
+    .map((message) => message.suggestions?.length ?? 0);
+
 export const fixFile = (filename: string, code: string): string =>
   new Linter().verifyAndFix(code, configurations, { filename }).output;
 

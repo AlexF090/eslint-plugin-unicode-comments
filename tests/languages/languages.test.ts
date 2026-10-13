@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fixFile, lintFile } from './lint-file.ts';
+import { fixFile, lintFile, suggestionCountsOf } from './lint-file.ts';
 
 const ruleIdsOf = (filename: string, code: string) =>
   lintFile(filename, code).map((message) => message.ruleId);
@@ -74,6 +74,7 @@ describe('language support', () => {
       '',
     ].join('\n');
     expect(fixFile('a.md', code)).toBe(code);
+    expect(suggestionCountsOf('a.md', code)).toEqual([1, 1, 1, 1, 1]);
   });
 
   it('only suggests replacements in plain text files', () => {
@@ -145,7 +146,7 @@ describe('autofix never turns a comment into live content', () => {
   });
 });
 
-describe('Markdown autofix never changes link destinations', () => {
+describe('Markdown corrections never touch link destinations', () => {
   it.each([
     ['inline link', '[docs](https://e.com/a\u2013b)'],
     ['inline link title', '[docs](https://e.com "a\u2013b")'],
