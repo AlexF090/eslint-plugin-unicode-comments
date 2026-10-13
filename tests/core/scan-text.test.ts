@@ -32,7 +32,15 @@ describe('scanText', () => {
     ['\u3164', 'invisible'],
     ['\u2800', 'invisible'],
     ['\u{E0041}', 'invisible'],
+    ['\uFFA0', 'invisible'],
+    ['\u115F', 'invisible'],
+    ['\u1160', 'invisible'],
+    ['\u{16FE4}', 'invisible'],
+    ['\u{1D159}', 'invisible'],
+    ['\u{1D173}', 'invisible'],
+    ['\u{1D17A}', 'invisible'],
     ['\u0000', 'control'],
+    ['\r', 'control'],
     ['\u001B', 'control'],
     ['\u0085', 'control'],
     ['\uE000', 'private-use'],
@@ -56,6 +64,65 @@ describe('scanText', () => {
     ['\u4E2D', 'other'],
   ] as const)('classifies %j as %s', (character, category) => {
     expect(categoriesOf(scanAs(`a ${character} b`))).toEqual([category]);
+  });
+
+  it('accepts a carriage return that starts a CRLF line break', () => {
+    expect(scanAs('a\r\nb\r\n')).toEqual([]);
+  });
+
+  it('reports a carriage return that is not followed by a line feed', () => {
+    expect(scanAs('// comment\rcall();')).toEqual([
+      expect.objectContaining({
+        offset: 10,
+        codePoint: 0x0d,
+        category: 'control',
+      }),
+    ]);
+    expect(categoriesOf(scanAs('a\r\r\nb\r'))).toEqual(['control', 'control']);
+  });
+
+  describe('Common-script lookalikes next to ASCII', () => {
+    const lookalikesOf = (text: string, context: SourceContext = 'string') =>
+      scanAs(text, context)
+        .filter((finding) => finding.category === 'lookalike')
+        .map((finding) => finding.imitates);
+
+    it.each([
+      [
+        'modifier letter colon and division slashes in a URL',
+        'https\uA789\u2215\u2215trusted.example.com',
+        [':', '/', '/'],
+      ],
+      ['fraction slash in a path', 'example.com\u2044login', ['/']],
+      ['APL alpha in a domain', 'p\u237Aypal.com', ['a']],
+      ['estimated symbol in a domain', 'githu\u212E.com', ['e']],
+      ['modifier letter minus in an option', 'rm \u02D7rf /', ['-']],
+      ['mathematical bold small alpha in a word', 'p\u{1D6C2}ypal', ['a']],
+    ])('reports a %s', (_name, text, imitated) => {
+      expect(lookalikesOf(text)).toEqual(imitated);
+    });
+
+    it.each([
+      ['a division slash between spaces', 'a \u2215 b'],
+      ['a ratio between spaces', '16 \u2236 9'],
+      ['Greek words', '\u0391\u03B8\u03AE\u03BD\u03B1 and \u03B1\u03B2\u03B3.'],
+      [
+        'Cyrillic words next to punctuation',
+        '\u041F\u0440\u0438\u0432\u0435\u0442, \u043C\u0438\u0440.',
+      ],
+      ['a Japanese wave dash between digits', '1\u301C3'],
+      ['a Devanagari danda', '\u0939\u0948\u0964 next'],
+      ['a Hawaiian okina', 'Hawai\u02BBi'],
+    ])('does not report %s', (_name, text) => {
+      expect(lookalikesOf(text, 'text')).toEqual([]);
+    });
+
+    it('leaves typographic characters to the typographic category', () => {
+      expect(categoriesOf(scanAs('a\u2013b\u2212c'))).toEqual([
+        'typographic',
+        'typographic',
+      ]);
+    });
   });
 
   it('reports a Latin lookalike that NFKC does not map to ASCII', () => {
@@ -187,7 +254,15 @@ describe('scanText', () => {
         '\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}',
       ],
       ['Persian ZWNJ', '\u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u0645'],
-      ['standardized variation sequence', '\u845B\uFE00'],
+      ['standardized variation sequence of an ideograph', '\u6F22\uFE00'],
+      ['second standardized variant of an ideograph', '\u6F22\uFE01'],
+      ['standardized variation sequence of a math symbol', '\u2269\uFE00'],
+      ['Indic joiner after a virama', '\u0915\u094D\u200D\u0937'],
+      ['Indic joiner after a vowel sign', '\u0915\u093F\u200C\u0937'],
+      [
+        'Persian ZWNJ after a vowel mark',
+        '\u0645\u06CC\u064E\u200C\u062E\u0648\u0627\u0647\u0645',
+      ],
       ['text presentation selector', '\u2764\uFE0E'],
       [
         'kiss ZWJ sequence with three joiners',
@@ -204,6 +279,27 @@ describe('scanText', () => {
       ['an asterisk', '*\uFE0E\u20E3'],
     ])('rejects a variation selector after %s', (_name, text) => {
       expect(categoriesOf(scanAs(text, 'string'))).toContain('invisible');
+    });
+
+    it.each([
+      ['an ideograph without that standardized variant', '\u6F22\uFE02'],
+      ['an ideograph without standardized variants', '\u3007\uFE05'],
+      ['a common ideograph', '\u4E2D\uFE00'],
+      ['a Latin letter', 'a\uFE00'],
+    ])('rejects a variation selector 1 to 14 after %s', (_name, text) => {
+      expect(categoriesOf(scanAs(text, 'text'))).toContain('invisible');
+    });
+
+    it.each([
+      ['Devanagari stress signs', 'th\u0951\u200C\u0951is'],
+      ['Arabic vowel marks', 'th\u064B\u200D\u064Bis'],
+      ['Devanagari viramas', 'th\u094D\u200C\u094Dis'],
+    ])('rejects a joiner between %s in a Latin word', (_name, text) => {
+      expect(
+        scanAs(text, 'text').filter(
+          (finding) => finding.category === 'invisible',
+        ),
+      ).toEqual([expect.objectContaining({ offset: 3 })]);
     });
 
     it('rejects variation selectors hidden between digits', () => {
@@ -275,6 +371,21 @@ describe('scanText', () => {
     const longWord = `${'a'.repeat(3000)}\u0430${'a'.repeat(3000)}`;
     expect(categoriesOf(scanAs(longWord))).toEqual(['mixed-script']);
   });
+
+  it.each([1023, 1024, 1025, 2048])(
+    'finds a homoglyph right after %i Latin letters',
+    (length) => {
+      const findings = scanAs(`${'a'.repeat(length)}\u0430`);
+      expect(findings).toEqual([
+        expect.objectContaining({ offset: length, category: 'mixed-script' }),
+      ]);
+    },
+  );
+
+  it('finds a homoglyph in a huge word without exhausting the stack', () => {
+    const hugeWord = `${'a'.repeat(5_000_000)}\u0430`;
+    expect(categoriesOf(scanAs(hugeWord))).toEqual(['mixed-script']);
+  }, 60_000);
 
   it('never throws and keeps findings inside the text, ordered and non-overlapping', () => {
     fc.assert(

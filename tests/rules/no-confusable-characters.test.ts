@@ -7,6 +7,8 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
     '// \u041F\u0440\u0438\u0432\u0435\u0442 \u043C\u0438\u0440',
     'const label = "React\u3067\u4F5C\u308B";',
     'const area = "10 m\u00B2";',
+    'const ratio = "a \u2215 b";',
+    '// Hawai\u02BBi',
     {
       code: 'const width = "\uFF11\uFF10\uFF10";',
       options: [{ allow: ['U+FF10..U+FF19'] }],
@@ -62,6 +64,28 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
             },
           ],
         },
+      ],
+    },
+    {
+      name: 'division slashes of no particular script in a URL',
+      code: 'const url = "https:\u2215\u2215example.com";',
+      errors: [
+        {
+          messageId: 'lookalike',
+          data: {
+            character: 'U+2215 ("\u2215")',
+            context: 'a string',
+            imitates: '/',
+          },
+          column: 20,
+          suggestions: [
+            {
+              messageId: 'suggestAscii',
+              output: 'const url = "https:/\u2215example.com";',
+            },
+          ],
+        },
+        { messageId: 'lookalike', column: 21, suggestions: 1 },
       ],
     },
     {

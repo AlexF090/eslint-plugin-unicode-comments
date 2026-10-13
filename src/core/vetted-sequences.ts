@@ -1,5 +1,6 @@
 import type { SourceContext } from './source-context.ts';
 import { isProseContext } from './source-context.ts';
+import { standardizedVariationSequences } from './standardized-variation-sequences.ts';
 
 /**
  * Finds offsets of format characters and selectors that are part of a
@@ -9,12 +10,15 @@ import { isProseContext } from './source-context.ts';
  *   sequence (the longest RGI sequences have three)
  * - VARIATION SELECTOR-15/16 after a pictographic emoji, and VARIATION
  *   SELECTOR-16 in a keycap sequence (digit, `#`, or `*`, then U+20E3)
- * - VARIATION SELECTOR-1 to -14 after a CJK ideograph (standardized
- *   variation sequences)
+ * - VARIATION SELECTOR-1 to -14 where StandardizedVariants.txt defines
+ *   the sequence for the base character (CJK compatibility variants, math
+ *   symbols, Myanmar, ...)
  * - tag characters of the three RGI subdivision flags (England, Scotland,
  *   Wales)
- * - ZERO WIDTH JOINER/NON-JOINER between letters of scripts that use them
- *   for correct shaping (Arabic, Indic, ...)
+ * - ZERO WIDTH JOINER/NON-JOINER after a letter of a script that uses them
+ *   for correct shaping (Arabic, Indic, ...), possibly followed by its
+ *   marks, and before a letter or mark of such a script. Script, not
+ *   Script_Extensions, decides: marks shared with Latin do not count.
  *
  * Sequences are only vetted in comments, strings, and prose. A variation
  * selector directly after another variation selector is never vetted: one
@@ -31,6 +35,8 @@ const TEXT_PRESENTATION_SELECTOR = 0xfe0e;
 const EMOJI_PRESENTATION_SELECTOR = 0xfe0f;
 const COMBINING_ENCLOSING_KEYCAP = 0x20e3;
 const MAXIMUM_EMOJI_JOINERS = 3;
+// Unicode Stream-Safe Text Format: at most 30 combining marks in a row.
+const MAXIMUM_COMBINING_MARKS = 30;
 
 const joiningScripts = [
   'Arabic',
@@ -55,12 +61,13 @@ const joiningScripts = [
 const keycapBasePattern = /^[\d#*]$/u;
 const pictographicPattern = /^\p{Extended_Pictographic}$/u;
 const emojiModifierPattern = /^\p{Emoji_Modifier}$/u;
-const ideographicPattern = /^\p{Ideographic}$/u;
-const letterPattern = /^[\p{L}\p{M}]$/u;
+const letterPattern = /^\p{L}$/u;
+const markPattern = /^\p{M}$/u;
+const letterOrMarkPattern = /^[\p{L}\p{M}]$/u;
 const joiningScriptPattern = new RegExp(
   '^[' +
     joiningScripts
-      .map((script) => String.raw`\p{Script_Extensions=` + script + '}')
+      .map((script) => String.raw`\p{Script=` + script + '}')
       .join('') +
     ']$',
   'u',
@@ -106,8 +113,30 @@ const characterAt = (text: string, offset: number): string | undefined => {
 const matches = (pattern: RegExp, character: string | undefined): boolean =>
   character !== undefined && pattern.test(character);
 
-const isJoiningScriptLetter = (character: string | undefined): boolean =>
-  matches(letterPattern, character) && matches(joiningScriptPattern, character);
+const isJoiningScriptCharacter = (character: string | undefined): boolean =>
+  matches(letterOrMarkPattern, character) &&
+  matches(joiningScriptPattern, character);
+
+/**
+ * The base letter the marks before `offset` attach to. Marks are skipped
+ * because many of them (U+0951 DEVANAGARI STRESS SIGN UDATTA, Arabic vowel
+ * marks) can follow a Latin letter as well; only the base tells the script.
+ * Gives up after the stream-safe limit of combining marks.
+ */
+const baseCharacterBefore = (
+  text: string,
+  offset: number,
+): string | undefined => {
+  let cursor = offset;
+  for (let marks = 0; marks <= MAXIMUM_COMBINING_MARKS; marks += 1) {
+    const previous = characterBefore(text, cursor);
+    if (!matches(markPattern, previous)) {
+      return previous;
+    }
+    cursor -= previous?.length ?? 0;
+  }
+  return undefined;
+};
 
 const emojiSequencePartPattern =
   /^[\p{Extended_Pictographic}\p{Emoji_Modifier}\uFE0F]$/u;
@@ -150,10 +179,14 @@ const isVettedJoiner = (
   if (joinsEmoji) {
     return countPrecedingEmojiJoiners(text, offset) < MAXIMUM_EMOJI_JOINERS;
   }
+  if (codePoint !== ZERO_WIDTH_JOINER && codePoint !== ZERO_WIDTH_NON_JOINER) {
+    return false;
+  }
+  const base = baseCharacterBefore(text, offset);
   return (
-    (codePoint === ZERO_WIDTH_JOINER || codePoint === ZERO_WIDTH_NON_JOINER) &&
-    isJoiningScriptLetter(previous) &&
-    isJoiningScriptLetter(next)
+    matches(letterPattern, base) &&
+    isJoiningScriptCharacter(base) &&
+    isJoiningScriptCharacter(next)
   );
 };
 
@@ -171,7 +204,11 @@ const isVettedVariationSelector = (
     return false;
   }
   if (isStandardizedVariationSelector(codePoint)) {
-    return ideographicPattern.test(previous);
+    return (
+      standardizedVariationSequences
+        .get(previousCodePoint)
+        ?.includes(codePoint) === true
+    );
   }
   if (
     codePoint === TEXT_PRESENTATION_SELECTOR ||

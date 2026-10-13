@@ -14,6 +14,8 @@ ruleTester.run('no-invisible-characters', noInvisibleCharacters, {
     'const family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}";',
     'const heart = "\u2764\uFE0F";',
     '// \u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u0645',
+    'const a = 1;\r\nconst b = 2;\r\n',
+    '// \u6F22\uFE00',
     {
       code: 'const persian = "a\u200Cb";',
       options: [{ allow: ['U+200C'] }],
@@ -73,6 +75,49 @@ ruleTester.run('no-invisible-characters', noInvisibleCharacters, {
           suggestions: 1,
         },
       ],
+    },
+    {
+      name: 'carriage return without a line feed',
+      code: '// Log the request\rgrantAdmin();',
+      errors: [
+        {
+          messageId: 'control',
+          data: { character: 'U+000D CARRIAGE RETURN', context: 'code' },
+          suggestions: 1,
+        },
+      ],
+    },
+    {
+      name: 'joiner between marks shared with Latin',
+      code: '// th\u0951\u200C\u0951is',
+      errors: [{ messageId: 'invisible', suggestions: 1 }],
+    },
+    {
+      name: 'blank filler characters',
+      code: 'const note = "ok\u{16FE4} done\u{1D159}";',
+      errors: [
+        {
+          messageId: 'invisible',
+          data: {
+            character: 'U+16FE4 KHITAN SMALL SCRIPT FILLER',
+            context: 'a string',
+          },
+          suggestions: 1,
+        },
+        {
+          messageId: 'invisible',
+          data: {
+            character: 'U+1D159 MUSICAL SYMBOL NULL NOTEHEAD',
+            context: 'a string',
+          },
+          suggestions: 1,
+        },
+      ],
+    },
+    {
+      name: 'variation selector without a standardized variation sequence',
+      code: '// \u3007\uFE05',
+      errors: [{ messageId: 'invisible', suggestions: 1 }],
     },
     {
       name: 'escape control character in a template literal',

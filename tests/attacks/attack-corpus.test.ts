@@ -155,6 +155,72 @@ const attackSamples: AttackSample[] = [
     ],
   },
   {
+    name: 'Bits hidden in standardized variation selectors after ideographs',
+    source: 'Variation selector smuggling outside StandardizedVariants.txt',
+    filename: 'notes.md',
+    code: 'Read \u3007\uFE05 and \u6F22\uFE02 carefully.\n',
+    expectedRuleIds: [
+      'unicode-guard/no-invisible-characters',
+      'unicode-guard/no-invisible-characters',
+    ],
+  },
+  {
+    name: 'Common-script lookalikes of URL punctuation',
+    source: 'UTS #39 confusables outside the Latin script',
+    filename: 'README.md',
+    code: 'Install from https\uA789\u2215\u2215trusted.example.com\u2044setup.sh today.\n',
+    expectedRuleIds: Array.from(
+      { length: 4 },
+      () => 'unicode-guard/no-confusable-characters',
+    ),
+  },
+  {
+    name: 'Common-script lookalikes of letters in domains and options',
+    source: 'UTS #39 confusables outside the Latin script',
+    filename: 'install.js',
+    code: [
+      'fetch("https://p\u237Aypal.com/login");',
+      'fetch("https://githu\u212E.com/org/repo");',
+      'fetch("https://p\u{1D6C2}ypal.com/login");',
+      'run("rm \u02D7rf /tmp/cache");',
+    ].join('\n'),
+    expectedRuleIds: Array.from(
+      { length: 4 },
+      () => 'unicode-guard/no-confusable-characters',
+    ),
+  },
+  {
+    name: 'Bare carriage return hiding a statement behind a comment',
+    source: 'Line terminators that some viewers do not render as line breaks',
+    filename: 'carriage-return.js',
+    code: '// Log the request\rgrantAdmin();\n',
+    expectedRuleIds: ['unicode-guard/no-invisible-characters'],
+  },
+  {
+    name: 'Blank filler characters that render as nothing',
+    source: 'Invisible characters outside Default_Ignorable_Code_Point',
+    filename: 'AGENTS.md',
+    code: 'Approved\u{16FE4} by the security team.\u{1D159}\n',
+    expectedRuleIds: [
+      'unicode-guard/no-invisible-characters',
+      'unicode-guard/no-invisible-characters',
+    ],
+  },
+  {
+    name: 'Joiner hidden between Inherited marks in a Latin word',
+    source: 'Script_Extensions of U+0951 include Latin',
+    filename: 'README.md',
+    code: 'Run th\u0951\u200C\u0951is command.\n',
+    expectedRuleIds: ['unicode-guard/no-invisible-characters'],
+  },
+  {
+    name: 'Homoglyph after a word longer than the scan chunk',
+    source: 'Mixed-script detection on very long words',
+    filename: 'long-word.js',
+    code: `const value = "${'a'.repeat(1024)}\u0430";\n`,
+    expectedRuleIds: ['unicode-guard/no-confusable-characters'],
+  },
+  {
     name: 'Homoglyph dependency name in package.json',
     source: 'Typosquatting with Cyrillic letters',
     filename: 'package.json',

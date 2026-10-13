@@ -1,3 +1,4 @@
+import { commonScriptConfusables } from './common-script-confusables.ts';
 import { latinConfusables } from './latin-confusables.ts';
 import { findMixedScriptCharacters } from './mixed-script.ts';
 import type { SourceContext } from './source-context.ts';
@@ -42,17 +43,28 @@ export interface Finding {
   hiddenText?: string;
 }
 
-const outsidePrintableAsciiPattern = /[^\t\n\r\x20-\x7E]/u;
-const scannedCharacterPattern = /[^\t\n\r\x20-\x7E]/gu;
+// A carriage return is only accepted as the first half of CRLF: alone, some
+// viewers do not break the line while the language does.
+const outsidePrintableAsciiPattern = /[^\t\n\r\x20-\x7E]|\r(?!\n)/u;
+const scannedCharacterPattern = /[^\t\n\r\x20-\x7E]|\r(?!\n)/gu;
 // Bounded so a single huge word cannot exhaust the regular expression stack;
-// longer words are checked in chunks of this length.
-const wordPattern = /[\p{L}\p{M}\p{Nd}\p{Pc}]{1,1024}/gu;
+// adjacent chunks are joined back into one word.
+const wordChunkPattern = /[\p{L}\p{M}\p{Nd}\p{Pc}]{1,1024}/gu;
 const nonAsciiPattern = /[\u0080-\u{10FFFF}]/u;
+// ASCII that a lookalike of no particular script must touch to be reported:
+// letters, digits, and the punctuation of URLs, paths, and options.
+const asciiWordOrUrlCharacterPattern = /^[\w!#$%&*+\-./:=?@\\~]$/u;
 
 const bidiControlPattern = /^\p{Bidi_Control}$/u;
 const controlPattern = /^\p{Cc}$/u;
 const unusualWhitespacePattern = /^[\p{Zs}\u2028\u2029]$/u;
-const invisiblePattern = /^[\p{Default_Ignorable_Code_Point}\p{Cf}\u2800]$/u;
+const invisiblePattern = /^[\p{Default_Ignorable_Code_Point}\p{Cf}]$/u;
+// Characters outside the pattern above that render as nothing.
+const blankCharacters: ReadonlySet<number> = new Set([
+  0x2800, // BRAILLE PATTERN BLANK
+  0x16fe4, // KHITAN SMALL SCRIPT FILLER
+  0x1d159, // MUSICAL SYMBOL NULL NOTEHEAD
+]);
 const privateUsePattern = /^\p{Co}$/u;
 const unassignedPattern = /^\p{Cn}$/u;
 const lookalikeExclusionPattern = /^[\p{No}\p{Extended_Pictographic}]$/u;
@@ -119,7 +131,7 @@ export const classifyCharacter = (
       replacement: whitespaceReplacement(codePoint),
     };
   }
-  if (invisiblePattern.test(character)) {
+  if (invisiblePattern.test(character) || blankCharacters.has(codePoint)) {
     return { category: 'invisible' };
   }
   if (privateUsePattern.test(character)) {
@@ -199,13 +211,95 @@ export const groupFindings = (
   return grouped;
 };
 
+const isCommonScriptLookalikeCandidate = (finding: Finding): boolean =>
+  finding.category === 'other' &&
+  commonScriptConfusables.has(finding.codePoint);
+
+const touchesAsciiWordOrUrl = (
+  text: string,
+  run: readonly Finding[],
+): boolean => {
+  const first = run[0];
+  const last = run.at(-1);
+  if (first === undefined || last === undefined) {
+    return false;
+  }
+  return (
+    asciiWordOrUrlCharacterPattern.test(text.charAt(first.offset - 1)) ||
+    asciiWordOrUrlCharacterPattern.test(text.charAt(last.offset + last.length))
+  );
+};
+
+/**
+ * Reports lookalikes of no particular script (DIVISION SLASH, MODIFIER
+ * LETTER COLON, mathematical Greek letters, ...) only where they stand in
+ * for ASCII: in a run of such characters that touches an ASCII letter,
+ * digit, or URL character. Between spaces, as in `a <U+2215> b`, they are
+ * ordinary symbols.
+ */
+const applyCommonScriptLookalikes = (
+  text: string,
+  findings: Iterable<Finding>,
+): void => {
+  const markRun = (run: readonly Finding[]): void => {
+    if (!touchesAsciiWordOrUrl(text, run)) {
+      return;
+    }
+    for (const finding of run) {
+      const imitates = commonScriptConfusables.get(finding.codePoint);
+      if (imitates === undefined) {
+        continue;
+      }
+      finding.category = 'lookalike';
+      finding.imitates = imitates;
+    }
+  };
+
+  let run: Finding[] = [];
+  for (const finding of findings) {
+    if (!isCommonScriptLookalikeCandidate(finding)) {
+      continue;
+    }
+    const previous = run.at(-1);
+    if (
+      previous !== undefined &&
+      previous.offset + previous.length !== finding.offset
+    ) {
+      markRun(run);
+      run = [];
+    }
+    run.push(finding);
+  }
+  markRun(run);
+};
+
+interface WordRange {
+  start: number;
+  end: number;
+}
+
+/** Word ranges, with the bounded chunks of `wordChunkPattern` that touch joined into one word. */
+const findWordRanges = (text: string): WordRange[] => {
+  const ranges: WordRange[] = [];
+  for (const chunk of text.matchAll(wordChunkPattern)) {
+    const end = chunk.index + chunk[0].length;
+    const previous = ranges.at(-1);
+    if (previous !== undefined && previous.end === chunk.index) {
+      previous.end = end;
+      continue;
+    }
+    ranges.push({ start: chunk.index, end });
+  }
+  return ranges;
+};
+
 const applyMixedScriptFindings = (
   text: string,
   findingsByOffset: Map<number, Finding>,
   resolveContext: (offset: number) => SourceContext,
 ): void => {
-  for (const wordMatch of text.matchAll(wordPattern)) {
-    const word = wordMatch[0];
+  for (const { start, end } of findWordRanges(text)) {
+    const word = text.slice(start, end);
     if (!nonAsciiPattern.test(word)) {
       continue;
     }
@@ -214,7 +308,7 @@ const applyMixedScriptFindings = (
       continue;
     }
     for (const foreign of result.foreignCharacters) {
-      const offset = wordMatch.index + foreign.offset;
+      const offset = start + foreign.offset;
       const existing = findingsByOffset.get(offset);
       if (existing !== undefined && existing.category !== 'other') {
         continue;
@@ -235,7 +329,7 @@ const applyMixedScriptFindings = (
 
 /**
  * Scans `text` and returns one finding per character outside printable
- * ASCII (tab, line feed, and carriage return excepted), plus ASCII letters
+ * ASCII (tab, line feed, and the carriage return of CRLF excepted), plus ASCII letters
  * that appear inside a mixed-script word, ordered by offset. Characters that
  * are part of a vetted sequence (see `findVettedOffsets`) produce no
  * finding. Use `groupFindings` to merge runs after filtering.
@@ -269,6 +363,7 @@ export const scanText = (
     });
   }
 
+  applyCommonScriptLookalikes(text, findingsByOffset.values());
   applyMixedScriptFindings(text, findingsByOffset, resolveContext);
 
   return [...findingsByOffset.values()].sort(
