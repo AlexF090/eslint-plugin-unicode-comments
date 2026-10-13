@@ -100,6 +100,7 @@
     "@vitest/ui": "4.1.11",
     "eslint": "10.8.1",
     "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-eslint-plugin": "7.6.2",
     "eslint-plugin-regexp": "3.1.1",
     "eslint-plugin-toml": "1.5.0",
     "eslint-plugin-yml": "3.9.0",

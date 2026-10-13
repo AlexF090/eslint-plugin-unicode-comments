@@ -1,6 +1,7 @@
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPlugin from 'eslint-plugin-eslint-plugin';
 import { defineConfig } from 'eslint/config';
 import regexpPlugin from 'eslint-plugin-regexp';
 import yml from 'eslint-plugin-yml';
@@ -19,6 +20,14 @@ export default defineConfig(
       unicodeGuard.configs.recommended,
       eslintConfigPrettier,
     ],
+  },
+  {
+    files: ['src/rules/**/*.ts'],
+    extends: [eslintPlugin.configs['rules-recommended']],
+  },
+  {
+    files: ['tests/rules/**/*.test.ts'],
+    extends: [eslintPlugin.configs['tests-recommended']],
   },
   {
     files: ['**/*.json'],

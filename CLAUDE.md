@@ -36,6 +36,7 @@ To add a dangerous character: decide its category in `classifyCharacter` (or ext
 ## Conventions
 
 - Source files use `.ts` import extensions (`allowImportingTsExtensions` + `rewriteRelativeImportExtensions`) and only erasable TypeScript syntax, so `eslint.config.js` can import `src/index.ts` natively.
+- `npm run lint` also applies `eslint-plugin-eslint-plugin` (recommended rule and test checks) to `src/rules` and `tests/rules`.
 - No literal non-ASCII characters in source, tests, or docs: write `\uXXXX` escapes, or `<U+XXXX>` placeholders in Markdown examples. `npm run lint` enforces this with the plugin itself.
 - Tests: `tests/core` (scanner units, fast-check properties), `tests/rules` (ESLint `RuleTester` from `tests/rule-tester.ts`), `tests/languages` (all languages through `Linter`, see `lint-file.ts`, plus adapter units with hand-built ASTs for parsers the repository does not install), `tests/attacks` (regression corpus). Type-checking tests requires the pinned ESLint 10 types; CI checks `src` types against every ESLint version in the matrix.
 
