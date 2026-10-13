@@ -74,6 +74,13 @@ describe('ai-instructions preset', () => {
     '.junie/Guidelines.md',
     'packages/app/.junie/guidelines.md',
     'review.PROMPT.md',
+    'QWEN.md',
+    'CRUSH.md',
+    'WARP.md',
+    '.goosehints',
+    '.openhands/microagents/repo.md',
+    '.openhands/microagents/sub/x.md',
+    '.claude/skills/review/helper.txt',
   ])('lints %s with the strict policy', (filename) => {
     expect(
       ruleIdsFor(filename, attack, [unicodeGuard.configs['ai-instructions']]),
