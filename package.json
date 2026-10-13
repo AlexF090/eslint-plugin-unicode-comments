@@ -54,7 +54,7 @@
     "provenance": true
   },
   "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24"
+    "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
     "eslint": "^9.38.0 || ^10.0.0"

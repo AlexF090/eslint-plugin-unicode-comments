@@ -16,7 +16,7 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 npm install --save-dev eslint eslint-plugin-unicode-guard
 ```
 
-Requires ESLint `^9.38.0 || ^10.0.0` with flat configuration, and Node.js `^20.19.0 || ^22.13.0 || >=24`.
+Requires ESLint `^9.38.0 || ^10.0.0` with flat configuration, and Node.js `^22.13.0 || >=24`.
 
 ## Usage
 

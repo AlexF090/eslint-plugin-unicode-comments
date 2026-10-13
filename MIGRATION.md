@@ -5,7 +5,7 @@
 ## Requirements
 
 - ESLint `^9.38.0 || ^10.0.0`. ESLint 8 and `.eslintrc` are no longer supported; stay on `eslint-plugin-unicode-comments` if you cannot upgrade.
-- Node.js `^20.19.0 || ^22.13.0 || >=24`.
+- Node.js `^22.13.0 || >=24`.
 - The package is ESM only. CommonJS configuration files can still `require()` it on the supported Node.js versions.
 
 ## Configuration

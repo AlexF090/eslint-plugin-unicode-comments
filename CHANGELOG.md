@@ -22,7 +22,7 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 
 ### Changed
 
-- Requires ESLint `^9.38.0 || ^10.0.0` and Node.js `^20.19.0 || ^22.13.0 || >=24`; ESM only; flat configuration only.
+- Requires ESLint `^9.38.0 || ^10.0.0` and Node.js `^22.13.0 || >=24`; ESM only; flat configuration only.
 - Problems point to the exact character and name its code point.
 - Escape sequences in literals are no longer reported.
 
