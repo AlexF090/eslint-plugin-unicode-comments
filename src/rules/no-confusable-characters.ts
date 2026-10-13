@@ -1,0 +1,34 @@
+import { createFindingRule } from './create-finding-rule.ts';
+import {
+  allowOptionSchema,
+  defaultAllowOptions,
+  selectCategories,
+  type AllowRuleOptions,
+} from './allow-option.ts';
+
+export const noConfusableCharacters = createFindingRule<AllowRuleOptions>({
+  name: 'no-confusable-characters',
+  type: 'problem',
+  description:
+    'Disallow characters that imitate ASCII (fullwidth forms, mathematical alphanumerics) and words that mix scripts (homograph attacks)',
+  messages: {
+    lookalike:
+      '{{character}} in {{context}} imitates the ASCII character "{{imitates}}".',
+    mixedScript:
+      '{{script}} character {{character}} in a {{dominantScript}} word in {{context}}. Mixing scripts within one word is the shape of a homograph attack.',
+    suggestAscii: 'Replace with the ASCII character "{{imitates}}".',
+  },
+  schema: allowOptionSchema,
+  defaultOptions: defaultAllowOptions,
+  createSelector: selectCategories(['lookalike', 'mixed-script']),
+  messageId: (finding) =>
+    finding.category === 'lookalike' ? 'lookalike' : 'mixedScript',
+  correction: (finding) =>
+    finding.imitates === undefined
+      ? undefined
+      : {
+          kind: 'suggestion',
+          text: finding.imitates,
+          messageId: 'suggestAscii',
+        },
+});
