@@ -29,6 +29,7 @@ import { standardizedVariationSequences } from './standardized-variation-sequenc
  * tell legitimate sequences apart is not bundled.
  */
 
+const LAST_ASCII_CODE_POINT = 0x7f;
 const ZERO_WIDTH_JOINER = 0x200d;
 const ZERO_WIDTH_NON_JOINER = 0x200c;
 const TEXT_PRESENTATION_SELECTOR = 0xfe0e;
@@ -204,7 +205,11 @@ const isVettedVariationSelector = (
     return false;
   }
   if (isStandardizedVariationSelector(codePoint)) {
+    // StandardizedVariants.txt lists DIGIT ZERO with VS1, but a selector
+    // after ASCII would let text that looks like plain ASCII carry hidden
+    // bits.
     return (
+      previousCodePoint > LAST_ASCII_CODE_POINT &&
       standardizedVariationSequences
         .get(previousCodePoint)
         ?.includes(codePoint) === true

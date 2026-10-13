@@ -221,6 +221,13 @@ const attackSamples: AttackSample[] = [
     expectedRuleIds: ['unicode-guard/no-confusable-characters'],
   },
   {
+    name: 'Standardized variation selector after an ASCII digit',
+    source: 'StandardizedVariants.txt lists DIGIT ZERO with VS1',
+    filename: 'CLAUDE.md',
+    code: 'Use port 8080\uFE00 for the admin panel.\n',
+    expectedRuleIds: ['unicode-guard/no-invisible-characters'],
+  },
+  {
     name: 'Homoglyph dependency name in package.json',
     source: 'Typosquatting with Cyrillic letters',
     filename: 'package.json',
