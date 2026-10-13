@@ -171,6 +171,11 @@ describe('Markdown autofix never changes link destinations', () => {
     expect(ruleIdsOf('a.md', code).length).toBeGreaterThan(0);
   });
 
+  it('splits Markdown blocks at blank lines with CRLF line endings', () => {
+    const code = 'Plain a\u2013b\r\n\r\n[x](https://e.com)\r\n';
+    expect(fixFile('a.md', code)).toBe(code.replace('a\u2013b', 'a-b'));
+  });
+
   it('only suggests in Markdown blocks that contain links or inline HTML', () => {
     const code =
       '[a\u2013b](https://e.com/c\u2013d) and [e\u2013f][r]\n\n[r]: https://e.com\n\nPlain a\u2013b\n';

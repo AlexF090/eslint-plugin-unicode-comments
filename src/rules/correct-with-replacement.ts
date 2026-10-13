@@ -24,7 +24,7 @@ const LAST_ASCII_CODE_POINT = 0x7f;
 
 /** Characters that start Markdown inline HTML, links, images, and definitions. */
 const markdownMarkupPattern = /[<[\]]/u;
-const blankLinePattern = /\n[\t ]*\n/gu;
+const blankLinePattern = /\r?\n[\t ]*\r?\n/gu;
 
 interface MarkdownBlock {
   start: number;
