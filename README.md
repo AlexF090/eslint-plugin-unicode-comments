@@ -8,7 +8,7 @@ Code review is visual. A reviewer cannot see a zero width space, a bidirectional
 - **Allowlist instead of denylist.** Characters are classified by Unicode properties, so new attack characters are covered without a plugin update. Code and identifiers are ASCII only by default; comments, strings, and prose may contain any visible character in any script.
 - **Few false positives.** Emoji ZWJ sequences, variation selectors after emoji, subdivision flags, and joiners in Arabic or Indic text are recognised as legitimate.
 - **Readable reports.** `Invisible tag characters in a comment encode the hidden text "Ignore all previous instructions" (ASCII smuggling).`
-- **Fixes where safe.** Typographic characters and unusual whitespace are fixed automatically in comments and Markdown prose (whitespace also between tokens). In strings, code blocks, rendered JSX or HTML text, and plain text files, a suggestion is offered instead, because a fix could change a value or break code.
+- **Fixes where safe.** Typographic characters and unusual whitespace are fixed automatically in comments and Markdown prose (whitespace also between JavaScript and TypeScript tokens). In strings, code blocks, link targets, rendered JSX or HTML text, the code of other languages, Markdown blocks with links or inline HTML, and plain text files, a suggestion is offered instead, because a fix could change a value, break code, or turn text into live markup.
 
 ## Installation
 
@@ -162,6 +162,8 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 - **Regular expression literals** are treated as strings, so a regular expression may contain any visible non-ASCII character, such as a character class of Cyrillic letters. Lookalikes and mixed-script words are still reported.
 - **Ideographic variation selectors** (VS17 to VS256) are always reported, also in legitimate ideographic variation sequences. Allow `U+E0100..U+E01EF` in `no-invisible-characters` if you need them.
 - **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
+- **Emoji sequences.** VARIATION SELECTOR-15/16 after any pictographic character (including COPYRIGHT SIGN and TRADE MARK SIGN) and up to three ZERO WIDTH JOINERs between pictographic characters are accepted, not only the recommended emoji sequences, so the choice of selector or joiner there can carry a few hidden bits.
+- **Markdown block structure.** An autofix in Markdown prose can change how a line renders: a dash on its own line can turn the paragraph above into a heading, a dash row can complete a table, and `<U+2265>` at the start of a line becomes a block quote. Fixes never create HTML, links, or definitions, but review `--fix` output in Markdown.
 - **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 
 ## How it works
