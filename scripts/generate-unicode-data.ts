@@ -73,10 +73,14 @@ const download = async (path: string): Promise<string> => {
 const toHex = (codePoint: number): string =>
   `0x${codePoint.toString(16).toUpperCase().padStart(4, '0')}`;
 
-const escapeAscii = (character: string): string =>
-  character === "'" || character === '\\' ? `\\${character}` : character;
+const escapeAscii = (text: string): string =>
+  text.replace(/['\\]/gu, (character) => `\\${character}`);
 
-/** Confusables with one printable ASCII target that NFKC keeps as they are. */
+// The French ligatures are letters of the language, not lookalikes of `oe`.
+const orthographicLigatures = new Set([0x0152, 0x0153]);
+const MAXIMUM_IMITATED_LENGTH = 4;
+
+/** Confusables with a target of one to four printable ASCII characters that NFKC keeps as they are. */
 const collectAsciiConfusables = (data: string): Confusable[] => {
   const confusables: Confusable[] = [];
   for (const line of data.split('\n')) {
@@ -93,16 +97,24 @@ const collectAsciiConfusables = (data: string): Confusable[] => {
     }
     const codePoint = Number.parseInt(sourceField, 16);
     const targets = targetField.split(' ');
-    if (codePoint <= LAST_LATIN_1_CODE_POINT || targets.length !== 1) {
+    if (
+      codePoint <= LAST_LATIN_1_CODE_POINT ||
+      targets.length > MAXIMUM_IMITATED_LENGTH ||
+      orthographicLigatures.has(codePoint)
+    ) {
       continue;
     }
     const character = String.fromCodePoint(codePoint);
-    const imitated = String.fromCodePoint(
-      Number.parseInt(targets[0] ?? '', 16),
-    );
+    const imitated = targets
+      .map((target) => String.fromCodePoint(Number.parseInt(target, 16)))
+      .join('');
+    const isPrintableAscii = (text: string): boolean =>
+      [...text].every((imitatedCharacter) =>
+        printableAsciiPattern.test(imitatedCharacter),
+      );
     if (
-      printableAsciiPattern.test(imitated) &&
-      !printableAsciiPattern.test(character.normalize('NFKC'))
+      isPrintableAscii(imitated) &&
+      !isPrintableAscii(character.normalize('NFKC'))
     ) {
       confusables.push({ codePoint, imitated });
     }
@@ -126,7 +138,9 @@ const isAsciiNeighborConfusable = ({
       (scriptsMixedWithLatinPattern.test(character) &&
         !kanaAndConjoiningJamoPattern.test(character))) &&
     !lookalikeExclusionPattern.test(character) &&
-    asciiWordOrUrlCharacterPattern.test(imitated)
+    [...imitated].every((imitatedCharacter) =>
+      asciiWordOrUrlCharacterPattern.test(imitatedCharacter),
+    )
   );
 };
 

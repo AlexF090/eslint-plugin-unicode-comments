@@ -255,6 +255,16 @@ const attackSamples: AttackSample[] = [
     ],
   },
   {
+    name: 'Letters that imitate two ASCII letters in a URL',
+    source: 'UTS #39 confusables with a two-character target',
+    filename: 'links.js',
+    code: 'fetch("https://g\uA74Fgle.com"); fetch("https://we\u01C1sfargo.com");\n',
+    expectedRuleIds: [
+      'unicode-guard/no-confusable-characters',
+      'unicode-guard/no-confusable-characters',
+    ],
+  },
+  {
     name: 'Homoglyph dependency name in package.json',
     source: 'Typosquatting with Cyrillic letters',
     filename: 'package.json',

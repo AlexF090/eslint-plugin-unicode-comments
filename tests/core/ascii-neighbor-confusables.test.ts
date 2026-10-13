@@ -10,7 +10,7 @@ describe('asciiNeighborConfusables', () => {
         /^[\p{Script=Common}\p{Script=Inherited}\p{Script=Han}\p{Script=Hangul}\p{Script=Bopomofo}]$/u,
       );
       expect(character.normalize('NFKC')).not.toMatch(/^[\x21-\x7E]$/u);
-      expect(imitated).toMatch(/^[\w!#$%&*+\-./:=?@\\~]$/u);
+      expect(imitated).toMatch(/^[\w!#$%&*+\-./:=?@\\~]{1,4}$/u);
     }
   });
 
