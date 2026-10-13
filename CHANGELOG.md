@@ -17,7 +17,7 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 - Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, NFKC lookalikes (including ligatures and Roman numerals that read as ASCII letter pairs), and Latin lookalikes from UTS #39 such as the dotless i, lookalikes of no particular script or of CJK scripts next to ASCII (division and fraction slashes, modifier letter colon, mathematical Greek, IDEOGRAPHIC NUMBER ZERO), blank fillers, and carriage returns that are not followed by a line feed.
 - Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences listed in StandardizedVariants.txt, and joiners between letters of a joining script. Ideographic variation selectors (VS17 to VS256) are always reported.
 - `allow` options with code points, ranges, and Unicode property escapes (escapes that would allow almost everything are rejected); per-context policy for `allowed-characters`.
-- Autofix for unusual whitespace between JavaScript and TypeScript tokens. Editor suggestions only when they insert ASCII letters or digits or remove an invisible character between letters; other replacements are named in the message, because applying them could create syntax.
+- Autofix for unusual whitespace between JavaScript and TypeScript tokens. No other fixes and no editor suggestions: messages name the ASCII replacement, because any automatic or suggested change could create syntax.
 - Regression corpus of published attacks.
 
 ### Changed
