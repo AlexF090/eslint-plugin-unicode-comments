@@ -23,6 +23,21 @@ describe('asciiNeighborConfusables', () => {
     }
   });
 
+  it('leaves out squared units, which are ordinary symbols in CJK text', () => {
+    for (const codePoint of [0x33a7, 0x33c6, 0x33de, 0x33df]) {
+      expect(asciiNeighborConfusables.has(codePoint)).toBe(false);
+    }
+  });
+
+  it('only lists a multi-character imitation for a letter', () => {
+    for (const [codePoint, imitated] of asciiNeighborConfusables) {
+      if (imitated.length > 1) {
+        expect(String.fromCodePoint(codePoint)).toMatch(/^\p{L}$/u);
+      }
+    }
+    expect(asciiNeighborConfusables.has(0x221e)).toBe(false);
+  });
+
   it('leaves out kana and conjoining Hangul jamo, which spell ordinary words', () => {
     for (const codePoint of [0x30ce, 0xff89, 0x110b, 0x11bc]) {
       expect(asciiNeighborConfusables.has(codePoint)).toBe(false);

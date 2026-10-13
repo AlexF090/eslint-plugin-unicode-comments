@@ -168,4 +168,33 @@ describe('Markdown corrections never touch link destinations', () => {
       '[`a\u2013b` ![c](https://e.com/d\u2013e.png)](https://e.com)\n';
     expect(fixFile('a.md', code)).toBe(code);
   });
+
+  describe('lookalikes in Markdown prose', () => {
+    const confusableRuleId = 'unicode-guard/no-confusable-characters';
+    const confusableMessagesOf = (code: string) =>
+      lintFile('a.md', code).filter(
+        (message) => message.ruleId === confusableRuleId,
+      );
+
+    it.each([
+      ['squared units', 'Speed 5\u33A7 and 10\u33C6.'],
+      ['a hooked capital of Hausa', '\u0181arawo and \u018Aan\u0198wallo'],
+      ['infinity in an interval', '(-\u221E, 0] and n=\u221E'],
+      ['parallel signs', '\u2016x\u2016 and a\u2225b'],
+      ['superscripts and subscripts', 'Na\u207A, 2\u207F, x\u1D62'],
+      ['script small l', '5 \u2113'],
+      ['a set symbol', 'x \u2208 \u211D'],
+    ])('does not report %s', (_name, code) => {
+      expect(confusableMessagesOf(code)).toEqual([]);
+    });
+
+    it.each([
+      ['a multi-character imitation by a letter', 'g\uA74Fgle.com'],
+      ['a mathematical Greek letter in a word', 'p\u{1D6C2}ypal'],
+      ['a double-struck letter next to a domain', '\u211Dx.com'],
+      ['a mathematical bold letter in a word', 'pay\u{1D400}l.com'],
+    ])('reports %s', (_name, code) => {
+      expect(confusableMessagesOf(code)).toHaveLength(1);
+    });
+  });
 });

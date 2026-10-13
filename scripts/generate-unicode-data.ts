@@ -76,8 +76,11 @@ const toHex = (codePoint: number): string =>
 const escapeAscii = (text: string): string =>
   text.replace(/['\\]/gu, (character) => `\\${character}`);
 
-// The French ligatures are letters of the language, not lookalikes of `oe`.
-const orthographicLigatures = new Set([0x0152, 0x0153]);
+// Letters of living orthographies, not lookalikes: the French ligatures
+// (`oe`) and the hooked capitals of Hausa, Fula, and Ewe.
+const orthographicLetters = new Set([
+  0x0152, 0x0153, 0x0181, 0x018a, 0x0187, 0x0193, 0x0198, 0x01b3,
+]);
 const MAXIMUM_IMITATED_LENGTH = 4;
 
 /** Confusables with a target of one to four printable ASCII characters that NFKC keeps as they are. */
@@ -100,7 +103,7 @@ const collectAsciiConfusables = (data: string): Confusable[] => {
     if (
       codePoint <= LAST_LATIN_1_CODE_POINT ||
       targets.length > MAXIMUM_IMITATED_LENGTH ||
-      orthographicLigatures.has(codePoint)
+      orthographicLetters.has(codePoint)
     ) {
       continue;
     }
@@ -125,6 +128,11 @@ const collectAsciiConfusables = (data: string): Confusable[] => {
 const isLatinConfusable = ({ codePoint }: Confusable): boolean =>
   latinPattern.test(String.fromCodePoint(codePoint));
 
+// Squared units and abbreviations (U+3300 to U+33FF) are ordinary symbols
+// in CJK text.
+const squaredUnitsPattern = /^[\u3300-\u33FF]$/u;
+const letterPattern = /^\p{L}$/u;
+
 const isAsciiNeighborConfusable = ({
   codePoint,
   imitated,
@@ -138,6 +146,10 @@ const isAsciiNeighborConfusable = ({
       (scriptsMixedWithLatinPattern.test(character) &&
         !kanaAndConjoiningJamoPattern.test(character))) &&
     !lookalikeExclusionPattern.test(character) &&
+    !squaredUnitsPattern.test(character) &&
+    // Math symbols such as INFINITY (`oo`) and PARALLEL TO (`ll`) read as
+    // symbols; only a letter plausibly spells several ASCII letters.
+    (imitated.length === 1 || letterPattern.test(character)) &&
     [...imitated].every((imitatedCharacter) =>
       asciiWordOrUrlCharacterPattern.test(imitatedCharacter),
     )

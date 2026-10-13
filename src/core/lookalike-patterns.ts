@@ -12,5 +12,11 @@
  */
 export const asciiWordOrUrlCharacterPattern = /^[\w!#$%&*+\-./:=?@\\~]$/u;
 
-/** Characters never reported as lookalikes: other numbers and emoji. */
-export const lookalikeExclusionPattern = /^[\p{No}\p{Extended_Pictographic}]$/u;
+/**
+ * Characters never reported as lookalikes: other numbers, emoji, modifier
+ * letters, superscripts and subscripts (`Na<U+207A>`, `2<U+207F>`), and
+ * SCRIPT SMALL L (U+2113, the litre and the symbol for a length).
+ */
+export const lookalikeExclusionPattern =
+  // eslint-disable-next-line regexp/no-dupe-characters-character-class -- the whole block of superscripts and subscripts is listed on purpose
+  /^[\p{No}\p{Extended_Pictographic}\p{Lm}\u2070-\u209F\u2113]$/u;

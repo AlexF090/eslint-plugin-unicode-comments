@@ -54,7 +54,6 @@ describe('scanText', () => {
     ['\u201C', 'typographic'],
     ['\u2192', 'typographic'],
     ['\uFF41', 'lookalike'],
-    ['\u{1D400}', 'lookalike'],
     ['\u2160', 'lookalike'],
     ['\u0131', 'lookalike'],
     ['\u0251', 'lookalike'],
@@ -105,6 +104,8 @@ describe('scanText', () => {
       ['Roman numeral eight in a domain', 'pay\u2167.com', ['VIII']],
       ['two dot leader in a path', '/\u2025/etc/passwd', ['..']],
       ['double question mark', 'a\u2047', ['??']],
+      ['mathematical bold capital in a word', 'pay\u{1D400}l', ['A']],
+      ['double-struck letter next to a domain', '\u211Dx.com', ['R']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });
@@ -112,6 +113,10 @@ describe('scanText', () => {
     it.each([
       ['a division slash between spaces', 'a \u2215 b'],
       ['a ratio between spaces', '16 \u2236 9'],
+      ['a mathematical bold capital between spaces', 'a \u{1D400} b'],
+      ['a double-struck letter between spaces', 'x \u2208 \u211D'],
+      ['superscripts and subscripts', 'Na\u207A 2\u207F x\u1D62'],
+      ['script small l between spaces', '5 \u2113'],
       ['Greek words', '\u0391\u03B8\u03AE\u03BD\u03B1 and \u03B1\u03B2\u03B3.'],
       [
         'Cyrillic words next to punctuation',

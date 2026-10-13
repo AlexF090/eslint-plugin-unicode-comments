@@ -87,6 +87,10 @@ const groupedCategories: ReadonlySet<FindingCategory> = new Set([
   'unusual-whitespace',
 ]);
 
+const isLetterlikeOrMathematicalAlphanumeric = (codePoint: number): boolean =>
+  (codePoint >= 0x2100 && codePoint <= 0x214f) ||
+  (codePoint >= 0x1d400 && codePoint <= 0x1d7ff);
+
 const isSurrogate = (codePoint: number): boolean =>
   codePoint >= 0xd800 && codePoint <= 0xdfff;
 
@@ -108,7 +112,12 @@ const findImitatedAscii = (
   }
   const normalized = character.normalize('NFKC');
   if (imitatedAsciiCharacterPattern.test(normalized)) {
-    return normalized;
+    // Letterlike symbols and mathematical alphanumerics are ordinary in
+    // formulas; they are reported next to ASCII only (see
+    // `findAsciiNeighborImitation`).
+    return isLetterlikeOrMathematicalAlphanumeric(codePoint)
+      ? undefined
+      : normalized;
   }
   // Latin ligatures, digraphs, and Roman numerals read as their letters,
   // and sequences with punctuation (U+2025 for `..`) read as syntax; the
@@ -231,9 +240,32 @@ export const groupFindings = (
   return grouped;
 };
 
+/**
+ * The ASCII text a character imitates when it counts as a lookalike only
+ * next to ASCII: the generated table, or a letterlike symbol or
+ * mathematical alphanumeric that NFKC maps to one printable ASCII character.
+ */
+const findAsciiNeighborImitation = (codePoint: number): string | undefined => {
+  const listed = asciiNeighborConfusables.get(codePoint);
+  if (listed !== undefined) {
+    return listed;
+  }
+  if (!isLetterlikeOrMathematicalAlphanumeric(codePoint)) {
+    return undefined;
+  }
+  const character = String.fromCodePoint(codePoint);
+  if (lookalikeExclusionPattern.test(character)) {
+    return undefined;
+  }
+  const normalized = character.normalize('NFKC');
+  return imitatedAsciiCharacterPattern.test(normalized)
+    ? normalized
+    : undefined;
+};
+
 const isAsciiNeighborLookalikeCandidate = (finding: Finding): boolean =>
   finding.category === 'other' &&
-  asciiNeighborConfusables.has(finding.codePoint);
+  findAsciiNeighborImitation(finding.codePoint) !== undefined;
 
 const touchesAsciiWordOrUrl = (
   text: string,
@@ -266,7 +298,7 @@ const applyAsciiNeighborLookalikes = (
       return;
     }
     for (const finding of run) {
-      const imitates = asciiNeighborConfusables.get(finding.codePoint);
+      const imitates = findAsciiNeighborImitation(finding.codePoint);
       if (imitates === undefined) {
         continue;
       }
