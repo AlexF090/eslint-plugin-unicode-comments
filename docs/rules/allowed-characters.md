@@ -45,7 +45,9 @@ const greeting = 'Gr<U+00FC><U+00DF>e'; // letters are allowed in strings
 
 Each key replaces the default list for that context; keys you leave out keep their default. Entries use the format described in [no-bidi-control](./no-bidi-control.md#options).
 
-Allow German letters in comments under the strict policy:
+The default is always the `recommended` policy above, also when you start from the `strict` preset. Setting options replaces the strict policy as a whole, so under `strict` list every context you want to keep ASCII-only with an empty array, as the example below does for `string` and `text`. Otherwise those contexts fall back to the recommended lists and allow any visible character.
+
+Allow Latin letters in comments under the strict policy and keep strings and text ASCII-only:
 
 ```js
 import unicodeGuard from 'eslint-plugin-unicode-guard';

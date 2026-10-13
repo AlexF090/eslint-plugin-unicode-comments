@@ -13,11 +13,11 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 - Seven rules split by kind of character: `no-bidi-control`, `no-invisible-characters`, `no-private-use-or-unassigned-characters`, `no-confusable-characters`, `no-unusual-whitespace`, `no-typographic-characters`, `allowed-characters`.
 - Scanning of the raw source text of every ESLint language: JavaScript, TypeScript, JSX, JSON, Markdown, CSS, YAML, TOML, HTML.
 - Plain text language `unicode-guard/text` for files without an ESLint parser.
-- Presets `recommended`, `strict`, `relaxed`, and `ai-instructions` (assistant instruction files such as `AGENTS.md`, `CLAUDE.md`, `.cursorrules`).
-- Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, NFKC lookalikes, and Latin lookalikes from UTS #39 such as the dotless i.
-- Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences, and joiners in joining scripts. Ideographic variation selectors (VS17 to VS256) are always reported.
-- `allow` options with code points, ranges, and Unicode property escapes; per-context policy for `allowed-characters`.
-- Autofixes for typographic characters and unusual whitespace in comments and Markdown prose; suggestions in strings, Markdown code, rendered JSX and HTML text, and plain text files.
+- Presets `recommended`, `strict`, `relaxed`, and `ai-instructions` (assistant instruction files such as `AGENTS.md`, `CLAUDE.md`, `SKILL.md`, `.cursorrules`, matched in any letter case, with inline configuration comments disabled).
+- Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, NFKC lookalikes, and Latin lookalikes from UTS #39 such as the dotless i, lookalikes of no particular script next to ASCII (division and fraction slashes, modifier letter colon, mathematical Greek), blank fillers, and carriage returns that are not followed by a line feed.
+- Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences listed in StandardizedVariants.txt, and joiners between letters of a joining script. Ideographic variation selectors (VS17 to VS256) are always reported.
+- `allow` options with code points, ranges, and Unicode property escapes (escapes that would allow almost everything are rejected); per-context policy for `allowed-characters`.
+- Autofixes for typographic characters and unusual whitespace in comments and Markdown prose; suggestions in strings, Markdown code and link targets, rendered JSX and HTML text, and plain text files, and wherever a fix would insert a line break or could end a comment early.
 - Regression corpus of published attacks.
 
 ### Changed

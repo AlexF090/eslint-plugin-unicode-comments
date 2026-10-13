@@ -117,7 +117,7 @@ Every character is reported by exactly one rule, so a finding never appears twic
 
 ## Configuring the allow lists
 
-Every rule except `allowed-characters` accepts an `allow` option with one list of entries; `allowed-characters` instead takes one list per source context. Entries are literal characters, code points (`U+00E4`), ranges (`U+0400..U+04FF`), or Unicode property escapes (`\\p{Script=Latin}`). Negated escapes such as `\\P{L}` are rejected, because they would allow almost every character.
+Every rule except `allowed-characters` accepts an `allow` option with one list of entries; `allowed-characters` instead takes one list per source context. Entries are literal characters, code points (`U+00E4`), ranges (`U+0400..U+04FF`), or Unicode property escapes (`\\p{Script=Latin}`). Negated escapes such as `\\P{L}` and escapes that match unassigned code points or every assigned character (`\\p{Any}`, `\\p{Assigned}`, `\\p{Cn}`) are rejected, because they would allow almost every character.
 
 Permit Latin letters in identifiers, for a codebase with German or French names:
 
@@ -156,7 +156,9 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 ## Known limitations
 
 - **Whole-script confusables.** A word written entirely in Cyrillic or Greek that reads like a Latin word (for example a Cyrillic `paypal` in a URL) is not reported in comments, strings, and prose under `recommended`, because only words that mix scripts are suspicious without the full UTS #39 confusables data. In code and identifiers the ASCII-only policy rejects it; use `strict` or narrow `allowed-characters` for strings if this matters to you.
-- **Joiners in joining scripts.** ZERO WIDTH JOINER and NON-JOINER between Arabic or Indic letters are accepted, so the presence or absence of a joiner there can carry a few hidden bits.
+- **Joiners in joining scripts.** ZERO WIDTH JOINER and NON-JOINER between two letters of a joining script such as Arabic or Devanagari are accepted, so the presence or absence of a joiner there can carry a few hidden bits.
+- **Lookalikes of no particular script.** Characters such as the division slash (U+2215), the fraction slash (U+2044), the modifier letter colon (U+A789), and mathematical Greek letters are reported only next to an ASCII letter, digit, or URL character. So math written without spaces (`1<U+2044>2`) and IPA length marks (U+02D0) next to letters are reported, while lookalikes of quotes, brackets, and operators and punctuation of other scripts (CJK wave dash, Devanagari danda) are not.
+- **Standardized variation sequences.** Variation selectors 1 to 14 are accepted after the base characters that StandardizedVariants.txt lists for them (for example CJK compatibility ideographs), so the choice between those few listed selectors can carry a few hidden bits.
 - **Regular expression literals** are treated as strings, so a regular expression may contain any visible non-ASCII character, such as a character class of Cyrillic letters. Lookalikes and mixed-script words are still reported.
 - **Ideographic variation selectors** (VS17 to VS256) are always reported, also in legitimate ideographic variation sequences. Allow `U+E0100..U+E01EF` in `no-invisible-characters` if you need them.
 - **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
