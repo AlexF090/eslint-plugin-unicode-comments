@@ -286,6 +286,7 @@ describe('scanText', () => {
       ['standardized variation sequence of an ideograph', '\u6F22\uFE00'],
       ['second standardized variant of an ideograph', '\u6F22\uFE01'],
       ['standardized variation sequence of a math symbol', '\u2269\uFE00'],
+      ['Mongolian free variation selector', '\u1820\u180B'],
       ['Indic joiner after a virama', '\u0915\u094D\u200D\u0937'],
       ['Indic joiner after a vowel sign', '\u0915\u093F\u200C\u0937'],
       [
@@ -379,6 +380,17 @@ describe('scanText', () => {
           count: 4,
         }),
       ]);
+    });
+
+    it.each(['\u180B', '\u180C', '\u180D', '\u180F'])(
+      'rejects the Mongolian selector %j after an ASCII letter',
+      (selector) => {
+        expect(categoriesOf(scanAs(`a${selector}`))).toEqual(['invisible']);
+      },
+    );
+
+    it('rejects MONGOLIAN VOWEL SEPARATOR after a Mongolian letter', () => {
+      expect(categoriesOf(scanAs('\u1820\u180E'))).toContain('invisible');
     });
 
     it('rejects variation selectors after an ASCII letter', () => {

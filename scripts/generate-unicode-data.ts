@@ -13,7 +13,8 @@
  *   as confusable with one ASCII letter, digit, or character used in URLs,
  *   paths, and command-line options, and that NFKC does not map to ASCII.
  * - `standardized-variation-sequences.ts`: base characters and the
- *   variation selectors VS1 to VS16 that StandardizedVariants.txt defines
+ *   variation selectors VS1 to VS16 and the Mongolian free variation
+ *   selectors that StandardizedVariants.txt defines
  *   for them.
  * - `unicode-scripts.ts`: every Script property value, so mixed-script
  *   detection can tell any two scripts apart.
@@ -33,6 +34,11 @@ const BASE_URL = `https://www.unicode.org/Public/${UNICODE_VERSION}`;
 const LAST_LATIN_1_CODE_POINT = 0xff;
 const FIRST_VARIATION_SELECTOR = 0xfe00;
 const LAST_VARIATION_SELECTOR = 0xfe0f;
+// MONGOLIAN FREE VARIATION SELECTOR ONE to THREE and FOUR; U+180E MONGOLIAN
+// VOWEL SEPARATOR is not a selector.
+const mongolianSelectors: ReadonlySet<number> = new Set([
+  0x180b, 0x180c, 0x180d, 0x180f,
+]);
 
 const hexPattern = /^[\dA-F]+$/u;
 const printableAsciiPattern = /^[\x21-\x7E]$/u;
@@ -176,10 +182,10 @@ const collectStandardizedVariationSequences = (
       continue;
     }
     const selector = Number.parseInt(selectorField, 16);
-    if (
-      selector < FIRST_VARIATION_SELECTOR ||
-      selector > LAST_VARIATION_SELECTOR
-    ) {
+    const isStandardizedSelector =
+      selector >= FIRST_VARIATION_SELECTOR &&
+      selector <= LAST_VARIATION_SELECTOR;
+    if (!isStandardizedSelector && !mongolianSelectors.has(selector)) {
       continue;
     }
     const base = Number.parseInt(baseField, 16);
@@ -249,7 +255,7 @@ const writeStandardizedVariationSequences = (
     .join('\n');
   return writeFormatted(
     'standardized-variation-sequences.ts',
-    `/** Base code point to the variation selectors (VS1 to VS16) that StandardizedVariants.txt defines for it. */\nexport const standardizedVariationSequences: ReadonlyMap<\n  number,\n  readonly number[]\n> = new Map([\n${entries}\n]);\n`,
+    `/** Base code point to the variation selectors (VS1 to VS16 and the Mongolian free variation selectors) that StandardizedVariants.txt defines for it. */\nexport const standardizedVariationSequences: ReadonlyMap<\n  number,\n  readonly number[]\n> = new Map([\n${entries}\n]);\n`,
   );
 };
 

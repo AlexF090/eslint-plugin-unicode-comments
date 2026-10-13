@@ -10,7 +10,8 @@ import { standardizedVariationSequences } from './standardized-variation-sequenc
  *   sequence (the longest RGI sequences have three)
  * - VARIATION SELECTOR-15/16 after a pictographic emoji, and VARIATION
  *   SELECTOR-16 in a keycap sequence (digit, `#`, or `*`, then U+20E3)
- * - VARIATION SELECTOR-1 to -14 where StandardizedVariants.txt defines
+ * - VARIATION SELECTOR-1 to -14 and the Mongolian free variation selectors
+ *   where StandardizedVariants.txt defines
  *   the sequence for the base character (CJK compatibility variants, math
  *   symbols, Myanmar, ...)
  * - tag characters of the three RGI subdivision flags (England, Scotland,
@@ -75,16 +76,21 @@ const joiningScriptPattern = new RegExp(
 );
 const joinerOrSelectorPattern =
   // eslint-disable-next-line regexp/prefer-character-class -- a class containing U+200D trips no-misleading-character-class
-  /\u200C|\u200D|[\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/gu;
+  /\u200C|\u200D|[\u180B-\u180D\u180F\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/gu;
 const subdivisionFlagPattern =
   /\u{1F3F4}\u{E0067}\u{E0062}(?:\u{E0065}\u{E006E}\u{E0067}|\u{E0073}\u{E0063}\u{E0074}|\u{E0077}\u{E006C}\u{E0073})\u{E007F}/gu;
 
+const isMongolianVariationSelector = (codePoint: number): boolean =>
+  (codePoint >= 0x180b && codePoint <= 0x180d) || codePoint === 0x180f;
+
 const isVariationSelector = (codePoint: number): boolean =>
+  isMongolianVariationSelector(codePoint) ||
   (codePoint >= 0xfe00 && codePoint <= 0xfe0f) ||
   (codePoint >= 0xe0100 && codePoint <= 0xe01ef);
 
 const isStandardizedVariationSelector = (codePoint: number): boolean =>
-  codePoint >= 0xfe00 && codePoint < TEXT_PRESENTATION_SELECTOR;
+  isMongolianVariationSelector(codePoint) ||
+  (codePoint >= 0xfe00 && codePoint < TEXT_PRESENTATION_SELECTOR);
 
 const isHighSurrogate = (codeUnit: number): boolean =>
   codeUnit >= 0xd800 && codeUnit <= 0xdbff;
