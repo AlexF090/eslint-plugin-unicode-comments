@@ -192,6 +192,18 @@ describe('attack corpus: autofix as the attack vector', () => {
     expect(fixFile('config.toml', code)).toBe(code);
   });
 
+  it('does not let --fix close an HTML comment early', () => {
+    const code =
+      '<p>a</p>\n<!-- hidden -\u2192 <img src=x onerror=alert(1)> -->\n';
+    expect(fixFile('index.html', code)).toBe(code);
+  });
+
+  it('does not let fixes applied in one pass close an HTML comment together', () => {
+    const code =
+      '<p>a</p>\n<!-- hidden \u2013\u2192 <script>alert(1)</script> -->\n';
+    expect(fixFile('index.html', code)).not.toMatch(/--!?>\s*<script/u);
+  });
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

@@ -1,22 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import type { Finding } from '../../src/core/scan-text.ts';
 import type { SourceContext } from '../../src/core/source-context.ts';
-import type { LanguageAdapter } from '../../src/languages/language-adapter.ts';
 import { correctWithReplacement } from '../../src/rules/correct-with-replacement.ts';
+import type { CorrectionEnvironment } from '../../src/rules/create-finding-rule.ts';
 
-const createAdapter = (fixesText: boolean): LanguageAdapter => ({
-  name: 'test',
-  defaultContext: 'text',
-  fixesText,
-  matches: () => true,
-  collectContextRanges: () => [],
+const createEnvironment = (
+  fixesText: boolean,
+  sourceText = ' \u2014 ',
+): CorrectionEnvironment => ({
+  adapter: {
+    name: 'test',
+    defaultContext: 'text',
+    fixesText,
+    matches: () => true,
+    collectContextRanges: () => [],
+  },
+  sourceText,
 });
 
 const createFinding = (
   context: SourceContext,
   replacement?: string,
 ): Finding => ({
-  offset: 0,
+  offset: 1,
   length: 1,
   codePoint: 0x2014,
   count: 1,
@@ -40,7 +46,7 @@ describe('correctWithReplacement', () => {
       expect(
         correctWithReplacement(
           createFinding(context, '-'),
-          createAdapter(fixesText),
+          createEnvironment(fixesText),
           { fixesCode },
         )?.kind,
       ).toBe(kind);
@@ -59,7 +65,7 @@ describe('correctWithReplacement', () => {
       expect(
         correctWithReplacement(
           createFinding(context, '\n'),
-          createAdapter(fixesText),
+          createEnvironment(fixesText),
           { fixesCode },
         )?.kind,
       ).toBe(kind);
@@ -68,9 +74,33 @@ describe('correctWithReplacement', () => {
 
   it('returns nothing without a replacement', () => {
     expect(
-      correctWithReplacement(createFinding('comment'), createAdapter(true), {
-        fixesCode: true,
-      }),
+      correctWithReplacement(
+        createFinding('comment'),
+        createEnvironment(true),
+        {
+          fixesCode: true,
+        },
+      ),
     ).toBeUndefined();
   });
+
+  it.each([
+    ['-\u2192 b', '->', 'suggestion'],
+    ['\u2013\u2192', '-', 'suggestion'],
+    ['a\u2014>', '--', 'suggestion'],
+    ['*\u2215', '/', 'suggestion'],
+    ['a\u2013b', '-', 'fix'],
+    [' \u2192 ', '->', 'fix'],
+  ] as const)(
+    'in a comment %j with replacement %j returns %s',
+    (sourceText, replacement, kind) => {
+      expect(
+        correctWithReplacement(
+          createFinding('comment', replacement),
+          createEnvironment(false, sourceText),
+          { fixesCode: false },
+        )?.kind,
+      ).toBe(kind);
+    },
+  );
 });

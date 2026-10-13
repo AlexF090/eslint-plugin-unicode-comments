@@ -61,6 +61,13 @@ export type Correction =
   | { kind: 'suggestion'; text: string; messageId: string }
   | undefined;
 
+/** What a correction may depend on besides the finding itself. */
+export interface CorrectionEnvironment {
+  adapter: LanguageAdapter;
+  /** The full text of the file, to inspect the characters around a finding. */
+  sourceText: string;
+}
+
 export interface FindingRuleSettings {
   name: string;
   type: RuleType;
@@ -82,7 +89,7 @@ export interface FindingRuleSettings {
     compileAllowList: (entries: readonly string[]) => CharacterPredicate,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
-  correction?(finding: Finding, adapter: LanguageAdapter): Correction;
+  correction?(finding: Finding, environment: CorrectionEnvironment): Correction;
 }
 
 const contextPhrases: Record<SourceContext, string> = {
@@ -146,10 +153,10 @@ const reportFinding = (
   context: FindingRuleContext,
   locate: (offset: number) => Position,
   settings: FindingRuleSettings,
-  adapter: LanguageAdapter,
+  environment: CorrectionEnvironment,
   finding: Finding,
 ): void => {
-  const correction = settings.correction?.(finding, adapter);
+  const correction = settings.correction?.(finding, environment);
   const range = toRange(finding);
   const applyCorrection =
     (text: string): RuleFixer =>
@@ -222,8 +229,12 @@ export const createFindingRule = (
           return;
         }
         const locate = createOffsetLocator(sourceCode);
+        const environment: CorrectionEnvironment = {
+          adapter,
+          sourceText: sourceCode.text,
+        };
         for (const finding of groupFindings(sourceCode.text, selected)) {
-          reportFinding(context, locate, settings, adapter, finding);
+          reportFinding(context, locate, settings, environment, finding);
         }
       };
 

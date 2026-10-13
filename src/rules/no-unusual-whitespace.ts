@@ -1,4 +1,7 @@
-import { correctWithReplacement } from './correct-with-replacement.ts';
+import {
+  correctWithReplacement,
+  SUGGEST_REPLACEMENT_MESSAGE_ID,
+} from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import { selectCategories } from './allow-option.ts';
 
@@ -10,12 +13,12 @@ export const noUnusualWhitespace = createFindingRule({
   messages: {
     unusualWhitespace:
       'Unusual whitespace {{character}} in {{context}}. Use a regular space or line break.',
-    suggestReplacement:
-      'Replace with a regular space or line break (not applied automatically: it can change a string value or rendered text).',
+    [SUGGEST_REPLACEMENT_MESSAGE_ID]:
+      'Replace with a regular space or line break (not applied automatically: it could change a value or rendered text, or end a comment early).',
   },
   fixable: true,
   createSelector: selectCategories(['unusual-whitespace']),
   messageId: () => 'unusualWhitespace',
-  correction: (finding, adapter) =>
-    correctWithReplacement(finding, adapter, { fixesCode: true }),
+  correction: (finding, environment) =>
+    correctWithReplacement(finding, environment, { fixesCode: true }),
 });
