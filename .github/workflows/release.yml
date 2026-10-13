@@ -28,14 +28,18 @@ jobs:
         with:
           node-version: '24'
           registry-url: https://registry.npmjs.org
-      # Install scripts of dependencies must not run where the OIDC token for
-      # publishing is available.
+      # Every step of this job can request the OIDC token for publishing, and
+      # type-check, lint, test, and build run dependency code. Skipping install
+      # and lifecycle scripts keeps code from running implicitly; it does not
+      # isolate the token from the dependencies the steps below execute.
       - run: npm ci --ignore-scripts
-      - run: npm run type-check
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
-      - run: npm run lint:package
       - name: Verify tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
-      - run: npm publish
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - run: npm run lint:package
+      # dist/ is built above; --ignore-scripts keeps prepack (a rebuild) and
+      # prepare (husky) from running inside the publish command.
+      - run: npm publish --ignore-scripts
