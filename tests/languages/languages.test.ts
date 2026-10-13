@@ -171,14 +171,11 @@ describe('Markdown autofix never changes link destinations', () => {
     expect(ruleIdsOf('a.md', code).length).toBeGreaterThan(0);
   });
 
-  it('still fixes the text of Markdown links', () => {
-    expect(
-      fixFile(
-        'a.md',
-        '[a\u2013b](https://e.com/c\u2013d) and [e\u2013f][r]\n\n[r]: https://e.com\n',
-      ),
-    ).toBe(
-      '[a-b](https://e.com/c\u2013d) and [e-f][r]\n\n[r]: https://e.com\n',
+  it('only suggests in Markdown blocks that contain links or inline HTML', () => {
+    const code =
+      '[a\u2013b](https://e.com/c\u2013d) and [e\u2013f][r]\n\n[r]: https://e.com\n\nPlain a\u2013b\n';
+    expect(fixFile('a.md', code)).toBe(
+      code.replace('Plain a\u2013b', 'Plain a-b'),
     );
   });
 

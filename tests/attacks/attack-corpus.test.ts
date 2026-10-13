@@ -278,6 +278,18 @@ describe('attack corpus: autofix as the attack vector', () => {
     expect(fixFile(filename, code)).toBe(code);
   });
 
+  it.each([
+    'Hi <img\u00A0src=x onerror=alert(1)> there\n',
+    'Hi <img\nsrc=x\u00A0onerror=alert(1)> there\n',
+    '<div\u00A0onclick=alert(1)>\n\nx\n',
+    'x <img src=x onerror=alert(1) title=\u201Ca b\u201D>\n',
+    '[x]: https://evil.example \u201Ct\u201D\n\nSee [x].\n',
+    '[a](javascript:alert(1) \u201Ct\u201D)\n',
+    '![x](https://evil.example/t.png \u201Ct\u201D)\n',
+  ])('does not let --fix turn Markdown prose %j into markup', (code) => {
+    expect(fixFile('README.md', code)).toBe(code);
+  });
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);

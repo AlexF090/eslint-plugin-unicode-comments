@@ -22,6 +22,70 @@ const commentTerminatorCharacterPattern = /^[!*/>-]$/u;
 
 const LAST_ASCII_CODE_POINT = 0x7f;
 
+/** Characters that start Markdown inline HTML, links, images, and definitions. */
+const markdownMarkupPattern = /[<[\]]/u;
+const blankLinePattern = /\n[\t ]*\n/gu;
+
+interface MarkdownBlock {
+  start: number;
+  end: number;
+  containsMarkup: boolean;
+}
+
+/** Splits the text at blank lines into blocks in source order. */
+const splitIntoBlocks = (sourceText: string): MarkdownBlock[] => {
+  const blocks: MarkdownBlock[] = [];
+  let start = 0;
+  const addBlock = (end: number): void => {
+    blocks.push({
+      start,
+      end,
+      containsMarkup: markdownMarkupPattern.test(sourceText.slice(start, end)),
+    });
+  };
+  for (const blankLine of sourceText.matchAll(blankLinePattern)) {
+    addBlock(blankLine.index);
+    start = blankLine.index + blankLine[0].length;
+  }
+  addBlock(sourceText.length);
+  return blocks;
+};
+
+// Findings of one file are corrected one after another, so remembering the
+// blocks of the last text keeps the check linear in the file length.
+let lastSourceText: string | undefined;
+let lastBlocks: MarkdownBlock[] = [];
+
+/**
+ * Whether the Markdown block (text between blank lines) around `offset`
+ * contains `<`, `[`, or `]`. A lookalike quote or space there can be all
+ * that keeps inline HTML, a link title, or a link reference definition from
+ * parsing, so fixing it could turn inert prose into live markup.
+ */
+const isInBlockWithMarkup = (sourceText: string, offset: number): boolean => {
+  if (sourceText !== lastSourceText) {
+    lastSourceText = sourceText;
+    lastBlocks = splitIntoBlocks(sourceText);
+  }
+  let low = 0;
+  let high = lastBlocks.length - 1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const block = lastBlocks[middle];
+    if (block === undefined) {
+      return true;
+    }
+    if (offset < block.start) {
+      high = middle - 1;
+    } else if (offset >= block.end) {
+      low = middle + 1;
+    } else {
+      return block.containsMarkup;
+    }
+  }
+  return true;
+};
+
 /**
  * Whether `character` could be part of a comment terminator once fixes are
  * applied: a terminator character itself, or a non-ASCII character that
@@ -95,7 +159,10 @@ export const correctWithReplacement = (
     case 'comment':
       return fix;
     case 'text':
-      return adapter.fixesText === true ? fix : suggestion;
+      return adapter.fixesText === true &&
+        !isInBlockWithMarkup(sourceText, finding.offset)
+        ? fix
+        : suggestion;
     case 'string':
       return suggestion;
     case 'code':
