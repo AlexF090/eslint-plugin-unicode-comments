@@ -21,13 +21,13 @@
 
 The old rules were split by node type (comment, literal, template literal, identifier). The new rules are split by kind of character and check every context, including whitespace between tokens, regular expressions, JSX, and non-JavaScript files.
 
-| Old rule (`unicode-comments/...`)                                                                          | New rules (`unicode-guard/...`)                                                          |
-| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `dangerous-unicode`, `dangerous-unicode-security`                                                          | `no-bidi-control`, `no-invisible-characters`, `no-confusable-characters`                 |
-| `dangerous-unicode-literals`, `dangerous-unicode-literals-security`                                        | same as above                                                                            |
-| `dangerous-unicode-template-literals`, `dangerous-unicode-template-literals-security`                      | same as above                                                                            |
-| `dangerous-unicode-identifiers`                                                                            | `no-confusable-characters`, `allowed-characters` (identifiers are ASCII only by default) |
-| `dangerous-unicode-style`, `dangerous-unicode-literals-style`, `dangerous-unicode-template-literals-style` | `no-typographic-characters`, `no-unusual-whitespace`                                     |
+| Old rule (`unicode-comments/...`)                                                                          | New rules (`unicode-guard/...`)                                                                   |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `dangerous-unicode`, `dangerous-unicode-security`                                                          | `no-bidi-control`, `no-invisible-characters`, `no-confusable-characters`, `no-unusual-whitespace` |
+| `dangerous-unicode-literals`, `dangerous-unicode-literals-security`                                        | same as above                                                                                     |
+| `dangerous-unicode-template-literals`, `dangerous-unicode-template-literals-security`                      | same as above                                                                                     |
+| `dangerous-unicode-identifiers`                                                                            | `no-confusable-characters`, `allowed-characters` (identifiers are ASCII only by default)          |
+| `dangerous-unicode-style`, `dangerous-unicode-literals-style`, `dangerous-unicode-template-literals-style` | `no-typographic-characters`, `no-unusual-whitespace`                                              |
 
 Replace disable comments accordingly, for example:
 
@@ -42,5 +42,7 @@ Replace disable comments accordingly, for example:
 - Each problem points to the exact character and names it (`U+200B ZERO WIDTH SPACE`) instead of marking the whole comment or literal.
 - No-break, thin, and figure spaces moved from the style rules (`warn`) to `no-unusual-whitespace` (`error`), because they change string values invisibly.
 - Single angle quotation marks are fixed to `'` instead of `<` and `>`. Low-9 quotation marks are fixed to `'` and `"` instead of `,` and `,,`.
+- Words written entirely in Cyrillic or Greek are no longer reported in comments and strings under `recommended`; only words that mix scripts are. The old rules reported every Cyrillic and Greek letter. Use the `strict` preset or a narrower `allowed-characters` policy to keep that behavior.
+- Line separator, paragraph separator, and narrow no-break space (U+2028, U+2029, U+202F), which the old security rules reported, are now reported by `no-unusual-whitespace`.
 - Latin letters that imitate ASCII, such as the dotless i (U+0131), are reported by `no-confusable-characters`. Allow them with its `allow` option if you write Turkish or Azerbaijani.
 - Many more characters are reported: tag characters, variation selectors, private-use characters, control characters, Hangul fillers, all Unicode spaces, uppercase Cyrillic and Greek homoglyphs, and any non-ASCII identifier.

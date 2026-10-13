@@ -127,18 +127,38 @@ Permit Latin letters in identifiers, for a codebase with German or French names:
 }
 ```
 
-Use the strict policy but allow German umlauts in Markdown:
+Use the strict policy but allow German umlauts in Markdown prose:
 
 ```js
 {
   files: ['**/*.md'],
   rules: {
-    'unicode-guard/allowed-characters': ['error', { text: ['U+00C4', 'U+00D6', 'U+00DC', 'U+00E4', 'U+00F6', 'U+00FC', 'U+00DF'] }],
+    'unicode-guard/allowed-characters': [
+      'error',
+      {
+        code: [],
+        identifier: [],
+        comment: [],
+        string: [],
+        text: ['U+00C4', 'U+00D6', 'U+00DC', 'U+00E4', 'U+00F6', 'U+00FC', 'U+00DF'],
+      },
+    ],
   },
 }
 ```
 
+A context you leave out keeps the rule's default, which is the `recommended` policy (any visible character in comments, strings, and text), not the policy of the preset you started from. List every context to stay strict.
+
 Checks are based on Unicode scripts, not natural languages: German, French, and Spanish are all `Script=Latin`.
+
+## Known limitations
+
+- **Whole-script confusables.** A word written entirely in Cyrillic or Greek that reads like a Latin word (for example a Cyrillic `paypal` in a URL) is not reported in comments, strings, and prose under `recommended`, because only words that mix scripts are suspicious without the full UTS #39 confusables data. In code and identifiers the ASCII-only policy rejects it; use `strict` or narrow `allowed-characters` for strings if this matters to you.
+- **Joiners in joining scripts.** ZERO WIDTH JOINER and NON-JOINER between Arabic or Indic letters are accepted, so the presence or absence of a joiner there can carry a few hidden bits.
+- **Regular expression literals** are treated as strings, so a regular expression may contain any visible non-ASCII character, such as a character class of Cyrillic letters. Lookalikes and mixed-script words are still reported.
+- **Ideographic variation selectors** (VS17 to VS256) are always reported, also in legitimate ideographic variation sequences. Allow `U+E0100..U+E01EF` in `no-invisible-characters` if you need them.
+- **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
+- **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 
 ## How it works
 
