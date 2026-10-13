@@ -5,7 +5,7 @@ import {
   isLocatableSourceCode,
   type LocatableSourceCode,
 } from '../../src/rules/scan-source-code.ts';
-import { sourceCodeOf } from './lint-file.ts';
+import { sourceCodeOf } from '../languages/lint-file.ts';
 
 /** `undefined` when the language could not parse the text. */
 const toLocatable = (sourceCode: unknown): LocatableSourceCode | undefined =>
@@ -95,11 +95,18 @@ describe('createOffsetLocator', () => {
 
   it('falls back to getLocFromIndex() without a lines array', () => {
     const getLocFromIndex = vi.fn(() => ({ line: 7, column: 3 }));
-    const locate = createOffsetLocator({
+    const sourceCodeWithoutLines: LocatableSourceCode = {
       text: 'abc',
       ast: {},
+      getLoc: () => ({
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 3 },
+      }),
+      getRange: () => [0, 3],
+      traverse: () => [],
       getLocFromIndex,
-    } as unknown as LocatableSourceCode);
+    };
+    const locate = createOffsetLocator(sourceCodeWithoutLines);
     expect(locate(2)).toEqual({ line: 7, column: 3 });
   });
 });

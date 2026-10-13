@@ -21,7 +21,7 @@ const forLanguage = (
   rules: recommended.rules,
 });
 
-const configs: Linter.Config[] = [
+const configurations: Linter.Config[] = [
   { files: ['**/*.{js,jsx}'], ...recommended },
   {
     files: ['**/*.{js,jsx}'],
@@ -50,7 +50,7 @@ export const lintFile = (
   code: string,
 ): LintMessageSummary[] =>
   new Linter()
-    .verify(code, configs, { filename })
+    .verify(code, configurations, { filename })
     .map(({ ruleId, line, column, message }) => ({
       ruleId,
       line,
@@ -59,11 +59,11 @@ export const lintFile = (
     }));
 
 export const fixFile = (filename: string, code: string): string =>
-  new Linter().verifyAndFix(code, configs, { filename }).output;
+  new Linter().verifyAndFix(code, configurations, { filename }).output;
 
 /** The source code object the language of `filename` creates for `code`. */
 export const sourceCodeOf = (filename: string, code: string): unknown => {
   const linter = new Linter();
-  linter.verify(code, configs, { filename });
+  linter.verify(code, configurations, { filename });
   return linter.getSourceCode();
 };
