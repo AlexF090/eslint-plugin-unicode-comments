@@ -5,7 +5,9 @@
  * Cyrillic, Greek plus Latin, ...) is the shape of a homograph attack.
  */
 
-const detectableScripts = [
+import { unicodeScripts } from './unicode-scripts.ts';
+
+const commonlyConfusedScripts = [
   'Latin',
   'Cyrillic',
   'Greek',
@@ -49,9 +51,23 @@ const detectableScripts = [
   'Hangul',
 ] as const;
 
-const scriptPatterns = detectableScripts.map(
-  (script) => [script, new RegExp(`^\\p{Script=${script}}$`, 'u')] as const,
-);
+const createScriptPattern = (script: string): RegExp | undefined => {
+  try {
+    return new RegExp(`^\\p{Script=${script}}$`, 'u');
+  } catch {
+    // Scripts newer than the Unicode version of this JavaScript engine.
+    return undefined;
+  }
+};
+
+// Commonly confused scripts are tested first; the rest of the Unicode
+// scripts follow so that any two scripts in one word can be told apart.
+const scriptPatterns = [
+  ...new Set<string>([...commonlyConfusedScripts, ...unicodeScripts]),
+].flatMap((script) => {
+  const pattern = createScriptPattern(script);
+  return pattern === undefined ? [] : [[script, pattern] as const];
+});
 
 const neutralCharacterPattern = /^[\p{Script=Common}\p{Script=Inherited}]$/u;
 

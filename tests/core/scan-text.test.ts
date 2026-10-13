@@ -48,11 +48,24 @@ describe('scanText', () => {
     ['\uFF41', 'lookalike'],
     ['\u{1D400}', 'lookalike'],
     ['\u2160', 'lookalike'],
+    ['\u0131', 'lookalike'],
+    ['\u0251', 'lookalike'],
+    ['\u0261', 'lookalike'],
     ['\u00E4', 'other'],
     ['\u00B2', 'other'],
     ['\u4E2D', 'other'],
   ] as const)('classifies %j as %s', (character, category) => {
     expect(categoriesOf(scanAs(`a ${character} b`))).toEqual([category]);
+  });
+
+  it('reports a Latin lookalike that NFKC does not map to ASCII', () => {
+    const findings = scanAs(
+      '"https://paypal.com".replace("i", "\u0131")',
+      'string',
+    );
+    expect(findings).toEqual([
+      expect.objectContaining({ category: 'lookalike', imitates: 'i' }),
+    ]);
   });
 
   it('reports offset, length, and code point of astral characters', () => {
@@ -138,6 +151,11 @@ describe('scanText', () => {
           dominantScript: 'Cyrillic',
         }),
       ]);
+    });
+
+    it('distinguishes scripts outside the commonly confused ones', () => {
+      const gothicWithOgham = '\u{10330}\u{10331}\u1681';
+      expect(categoriesOf(scanAs(gothicWithOgham))).toContain('mixed-script');
     });
 
     it('treats Latin as dominant on a tie', () => {

@@ -11,6 +11,14 @@ The rule reports two shapes of homograph attack.
 
 **Lookalikes** are characters whose NFKC normalization is a single printable ASCII character: fullwidth forms (U+FF01 - U+FF5E), mathematical alphanumeric symbols (U+1D400 - U+1D7FF), Roman numerals, and letterlike symbols. Characters below U+0100 (such as the ordinal indicators), other numbers such as superscript digits, and emoji are not reported.
 
+Latin letters that NFKC keeps as they are but that [UTS #39](https://www.unicode.org/reports/tr39/) lists as confusable with an ASCII character are lookalikes too, for example LATIN SMALL LETTER DOTLESS I (U+0131) for `i`, LATIN SMALL LETTER ALPHA (U+0251) for `a`, and LATIN SMALL LETTER SCRIPT G (U+0261) for `g`. They stay in the Latin script, so mixed-script detection cannot catch them. The list is generated from the Unicode data files by `npm run generate:unicode-data`.
+
+Some of these letters are ordinary letters in a natural language, such as the dotless i in Turkish and Azerbaijani. Allow them where you write those languages:
+
+```js
+'unicode-guard/no-confusable-characters': ['error', { allow: ['U+0131'] }],
+```
+
 **Mixed-script words** are words that combine letters from more than one script, such as a Latin word containing a Cyrillic `a`. Following the "Highly Restrictive" level of [UTS #39](https://www.unicode.org/reports/tr39/), a word may use one script, or Latin together with Han, Hiragana, and Katakana, Han and Bopomofo, or Han and Hangul. The rule reports the letters outside the word's dominant script; on a tie, Latin is treated as dominant. ASCII letters inside a Cyrillic or Greek word are reported too.
 
 Whole-script confusables, such as a word written entirely in Cyrillic that reads like a Latin word, are not detected in comments and strings. In code and identifiers, [allowed-characters](./allowed-characters.md) rejects them because only ASCII is allowed there.

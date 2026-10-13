@@ -1,3 +1,4 @@
+import { latinConfusables } from './latin-confusables.ts';
 import { findMixedScriptCharacters } from './mixed-script.ts';
 import type { SourceContext } from './source-context.ts';
 import { typographicCharacters } from './typographic-replacements.ts';
@@ -72,7 +73,7 @@ const groupedCategories: ReadonlySet<FindingCategory> = new Set([
 const isSurrogate = (codePoint: number): boolean =>
   codePoint >= 0xd800 && codePoint <= 0xdfff;
 
-/** The ASCII character a non-ASCII character normalizes to, if it imitates one. */
+/** The ASCII character a non-ASCII character imitates: its NFKC normalization, or its UTS #39 confusable for Latin characters NFKC keeps. */
 const findImitatedAscii = (
   character: string,
   codePoint: number,
@@ -86,7 +87,7 @@ const findImitatedAscii = (
   const normalized = character.normalize('NFKC');
   return printableAsciiCharacterPattern.test(normalized)
     ? normalized
-    : undefined;
+    : latinConfusables.get(codePoint);
 };
 
 type ClassifiedCharacter = Pick<

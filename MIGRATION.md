@@ -42,4 +42,5 @@ Replace disable comments accordingly, for example:
 - Each problem points to the exact character and names it (`U+200B ZERO WIDTH SPACE`) instead of marking the whole comment or literal.
 - No-break, thin, and figure spaces moved from the style rules (`warn`) to `no-unusual-whitespace` (`error`), because they change string values invisibly.
 - Single angle quotation marks are fixed to `'` instead of `<` and `>`. Low-9 quotation marks are fixed to `'` and `"` instead of `,` and `,,`.
+- Latin letters that imitate ASCII, such as the dotless i (U+0131), are reported by `no-confusable-characters`. Allow them with its `allow` option if you write Turkish or Azerbaijani.
 - Many more characters are reported: tag characters, variation selectors, private-use characters, control characters, Hangul fillers, all Unicode spaces, uppercase Cyrillic and Greek homoglyphs, and any non-ASCII identifier.
