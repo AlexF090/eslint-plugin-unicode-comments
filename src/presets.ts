@@ -3,31 +3,55 @@ import { PLUGIN_NAMESPACE } from './plugin-namespace.ts';
 import { strictContextPolicy } from './rules/allowed-characters.ts';
 
 /**
- * Instruction and rule files read by AI coding assistants. Hidden Unicode in
- * these files is a prompt-injection vector ("Rules File Backdoor"), so the
- * `ai-instructions` preset lints them as plain text with the strict policy.
+ * Instruction and rule files read by AI coding assistants, as written in the
+ * assistants' documentation. Hidden Unicode in these files is a
+ * prompt-injection vector ("Rules File Backdoor"), so the `ai-instructions`
+ * preset lints them as plain text with the strict policy.
+ *
+ * Directory patterns end in a `?*` segment rather than a bare `**`: ESLint
+ * treats a pattern ending in a slash followed by `*` or `**` as universal and
+ * does not lint a file that only universal patterns match.
  */
-export const aiInstructionFiles = [
+export const aiInstructionFilePatterns = [
   '**/AGENTS.md',
   '**/CLAUDE.md',
   '**/CLAUDE.local.md',
   '**/GEMINI.md',
+  '**/SKILL.md',
   '**/.claude/**/*.md',
   '**/.cursorrules',
-  '**/.cursor/rules/**',
+  '**/.cursor/rules/**/?*',
   '**/*.mdc',
   '**/.windsurfrules',
-  '**/.windsurf/rules/**',
+  '**/.windsurf/rules/**/?*',
   '**/.clinerules',
-  '**/.clinerules/**',
-  '**/.roo/rules/**',
-  '**/.kiro/steering/**',
+  '**/.clinerules/**/?*',
+  '**/.roo/rules/**/?*',
+  '**/.kiro/steering/**/?*',
+  '**/.gemini/**/?*',
+  '**/.continue/rules/**/?*',
+  '**/.junie/guidelines.md',
   '**/.github/copilot-instructions.md',
-  '**/.github/instructions/**',
-  '**/.github/prompts/**',
+  '**/.github/instructions/**/?*',
+  '**/.github/prompts/**/?*',
+  '**/.github/agents/**/?*',
   '**/*.prompt.md',
   '**/*.instructions.md',
 ];
+
+/**
+ * Rewrites every ASCII letter of a glob as a character class of both cases
+ * (`md` becomes `[mM][dD]`). Flat configuration has no per-object `nocase`
+ * option, and assistants and case-insensitive file systems accept
+ * `claude.md` or `Agents.md` as well.
+ */
+export const matchAnyCase = (pattern: string): string =>
+  pattern.replace(
+    /[a-z]/gi,
+    (letter) => `[${letter.toLowerCase()}${letter.toUpperCase()}]`,
+  );
+
+export const aiInstructionFiles = aiInstructionFilePatterns.map(matchAnyCase);
 
 const rule = (name: string): string => `${PLUGIN_NAMESPACE}/${name}`;
 
@@ -94,6 +118,9 @@ export const createPresets = (): PluginPresets => {
       name: `${PLUGIN_NAMESPACE}/ai-instructions`,
       files: aiInstructionFiles,
       language: `${PLUGIN_NAMESPACE}/text`,
+      // A disable comment such as `<!-- eslint-disable -->` is invisible in
+      // rendered Markdown, so it must not switch off checks in these files.
+      linterOptions: { noInlineConfig: true },
       rules: strictRules,
     },
   };
