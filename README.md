@@ -58,6 +58,7 @@ export default defineConfig([
     files: ['**/*.md'],
     plugins: { markdown },
     language: 'markdown/gfm',
+    languageOptions: { frontmatter: 'yaml' },
     extends: [unicodeGuard.configs.recommended],
   },
   {
@@ -164,7 +165,7 @@ Checks are based on Unicode scripts, not natural languages: German, French, and 
 - **Latin lookalikes** such as the dotless i (U+0131) are reported even where they are ordinary letters, as in Turkish. Allow them in `no-confusable-characters`.
 - **Emoji sequences.** VARIATION SELECTOR-15/16 after any pictographic character (including COPYRIGHT SIGN and TRADE MARK SIGN) and up to three ZERO WIDTH JOINERs between pictographic characters are accepted, not only the recommended emoji sequences, so the choice of selector or joiner there can carry a few hidden bits.
 - **Markdown block structure.** An autofix in Markdown prose can change how a line renders: a dash on its own line can turn the paragraph above into a heading, a dash row can complete a table, and `<U+2265>` at the start of a line becomes a block quote. Fixes never create HTML, links, or definitions, but review `--fix` output in Markdown.
-- **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so `--fix` rewrites quotes and spaces in it like prose. Configure the option if your Markdown files have front matter.
+- **Markdown front matter.** Unless the Markdown language is configured with `frontmatter: 'yaml'` (or `'toml'`), front matter is parsed as prose, so `--fix` rewrites quotes and spaces in it like prose. Configure the option, as in the example above, if your Markdown files have front matter.
 - **Unicode version.** Unassigned code points and script membership come from the Unicode version of the running Node.js engine.
 
 ## How it works
