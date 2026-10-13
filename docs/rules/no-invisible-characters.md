@@ -10,10 +10,10 @@ Disallow invisible characters that can hide code or instructions from reviewers.
 Reported characters:
 
 - format characters (`\p{Cf}`) and default-ignorable code points (`\p{Default_Ignorable_Code_Point}`): zero width space, zero width joiner and non-joiner, word joiner, soft hyphen, invisible operators, zero width no-break space outside the byte order mark
-- Hangul fillers (U+115F, U+1160, U+3164, U+FFA0) and BRAILLE PATTERN BLANK (U+2800), which are invisible but valid in identifiers
+- Hangul fillers (U+115F, U+1160, U+3164, U+FFA0), BRAILLE PATTERN BLANK (U+2800), KHITAN SMALL SCRIPT FILLER (U+16FE4), and MUSICAL SYMBOL NULL NOTEHEAD (U+1D159), which render blank but are not format characters
 - tag characters (U+E0000 - U+E007F), used for ASCII smuggling: the rule decodes them and shows the hidden text in the message
 - variation selectors (U+FE00 - U+FE0F, U+E0100 - U+E01EF) that do not follow a valid base character, used to hide payloads (GlassWorm)
-- control characters (`\p{Cc}`) except tab, line feed, and carriage return, including ESCAPE (terminal escape injection) and NEXT LINE
+- control characters (`\p{Cc}`) except tab, line feed, and a carriage return directly before a line feed, including ESCAPE (terminal escape injection), NEXT LINE, and a lone CARRIAGE RETURN (a terminal returns to the start of the line and overwrites text printed before it)
 
 Runs of adjacent characters are reported as one problem.
 
@@ -23,9 +23,9 @@ In comments, strings, and prose, the rule accepts characters that are part of a 
 
 - ZERO WIDTH JOINER inside emoji ZWJ sequences (family, profession, and flag emoji), at most three per sequence like the longest RGI sequences
 - VARIATION SELECTOR-15/16 directly after a pictographic emoji, and VARIATION SELECTOR-16 in a keycap sequence (`1`, `#`, or `*`, then U+20E3); a selector after a bare digit, `#`, or `*` is reported
-- VARIATION SELECTOR-1 to -14 after a CJK ideograph (standardized variation sequences)
+- VARIATION SELECTOR-1 to -14 after a base character that StandardizedVariants.txt lists for that selector (standardized variation sequences, such as the CJK compatibility ideographs); any other pair, and any selector after an ASCII character (StandardizedVariants.txt lists DIGIT ZERO), is reported
 - the tag sequences of the England, Scotland, and Wales flags
-- ZERO WIDTH JOINER and NON-JOINER between two letters of scripts that need them for shaping (Arabic, Persian, Syriac, Indic scripts, Khmer, Myanmar, Tibetan, Mongolian)
+- ZERO WIDTH JOINER and NON-JOINER after a letter (optionally followed by combining marks) and before a letter or mark, when both belong by their Script property to a script that needs joiners for shaping (Arabic, Persian, Syriac, Indic scripts, Khmer, Myanmar, Tibetan, Mongolian); marks shared with Latin, such as U+0951, do not qualify
 
 In code and identifiers, none of these exceptions apply.
 
