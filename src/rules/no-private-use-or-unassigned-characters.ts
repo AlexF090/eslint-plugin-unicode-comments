@@ -1,9 +1,5 @@
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noPrivateUseOrUnassignedCharacters = createFindingRule({
   name: 'no-private-use-or-unassigned-characters',
@@ -18,8 +14,6 @@ export const noPrivateUseOrUnassignedCharacters = createFindingRule({
     surrogate:
       'Unpaired surrogate {{character}} in {{context}}. The text is not well-formed Unicode.',
   },
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['private-use', 'unassigned', 'surrogate']),
   messageId: (finding) => {
     if (finding.category === 'private-use') {

@@ -2,7 +2,7 @@ import type { RulesMeta } from '@eslint/core';
 import type { CharacterPredicate } from '../core/allow-list.ts';
 import type { Finding, FindingCategory } from '../core/scan-text.ts';
 
-import { isRecord } from '../languages/syntax-element.ts';
+import { isRecord } from '../core/is-record.ts';
 
 export const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((entry) => typeof entry === 'string');

@@ -1,5 +1,5 @@
 import { sourceContexts, type SourceContext } from '../core/source-context.ts';
-import { isRecord } from '../languages/syntax-element.ts';
+import { isRecord } from '../core/is-record.ts';
 import {
   allowEntrySchema,
   characterOf,

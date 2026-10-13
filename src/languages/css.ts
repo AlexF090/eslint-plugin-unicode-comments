@@ -1,8 +1,7 @@
 import type { ContextRange } from '../core/source-context.ts';
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
-  mapElementsToRanges,
-  readComments,
+  collectCommentRanges,
   readType,
   toContextRange,
   walkNodes,
@@ -24,12 +23,6 @@ export const cssAdapter: LanguageAdapter = {
         ranges.push(range);
       }
     });
-    return [
-      ...ranges,
-      ...mapElementsToRanges(
-        readComments(sourceCode, sourceCode.ast),
-        () => 'comment',
-      ),
-    ];
+    return [...ranges, ...collectCommentRanges(sourceCode)];
   },
 };

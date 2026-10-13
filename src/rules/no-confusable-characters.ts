@@ -1,9 +1,5 @@
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noConfusableCharacters = createFindingRule({
   name: 'no-confusable-characters',
@@ -17,8 +13,6 @@ export const noConfusableCharacters = createFindingRule({
       '{{script}} character {{character}} in a {{dominantScript}} word in {{context}}. Mixing scripts within one word is the shape of a homograph attack.',
     suggestAscii: 'Replace with the ASCII character "{{imitates}}".',
   },
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['lookalike', 'mixed-script']),
   messageId: (finding) =>
     finding.category === 'lookalike' ? 'lookalike' : 'mixedScript',

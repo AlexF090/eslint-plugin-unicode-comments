@@ -1,8 +1,8 @@
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
+  collectCommentRanges,
   mapElementsToRanges,
   readArray,
-  readComments,
   readType,
 } from './syntax-element.ts';
 
@@ -24,9 +24,6 @@ export const yamlAdapter: LanguageAdapter = {
     ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), (type) =>
       scalarTokenTypes.has(type) ? 'string' : undefined,
     ),
-    ...mapElementsToRanges(
-      readComments(sourceCode, sourceCode.ast),
-      () => 'comment',
-    ),
+    ...collectCommentRanges(sourceCode),
   ],
 };

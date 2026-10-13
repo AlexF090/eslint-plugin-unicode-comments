@@ -1,9 +1,9 @@
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
+  collectCommentRanges,
   mapElementsToRanges,
   readArray,
-  readComments,
   readType,
 } from './syntax-element.ts';
 
@@ -27,9 +27,6 @@ export const htmlAdapter: LanguageAdapter = {
     ...mapElementsToRanges(readArray(sourceCode.ast, 'tokens'), (type) =>
       tokenContexts.get(type),
     ),
-    ...mapElementsToRanges(
-      readComments(sourceCode, sourceCode.ast),
-      () => 'comment',
-    ),
+    ...collectCommentRanges(sourceCode),
   ],
 };

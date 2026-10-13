@@ -1,7 +1,6 @@
 import type { ConfigObject, Plugin, RulesConfig } from '@eslint/core';
+import { PLUGIN_NAMESPACE } from './plugin-namespace.ts';
 import { strictContextPolicy } from './rules/allowed-characters.ts';
-
-export const PLUGIN_NAMESPACE = 'unicode-guard';
 
 /**
  * Instruction and rule files read by AI coding assistants. Hidden Unicode in
@@ -58,26 +57,26 @@ export const relaxedRules: RulesConfig = {
   [rule('no-unusual-whitespace')]: 'warn',
 };
 
-// A type alias rather than an interface: only object literal types get the
-// implicit index signature that makes them assignable to `Plugin['configs']`.
-export interface PresetConfig extends ConfigObject {
+export interface PresetConfiguration extends ConfigObject {
   name: string;
   rules: RulesConfig;
 }
 
-export type PluginConfigs = {
-  recommended: PresetConfig;
-  strict: PresetConfig;
-  relaxed: PresetConfig;
-  'ai-instructions': PresetConfig;
+// A type alias rather than an interface: only object literal types get the
+// implicit index signature that makes them assignable to `Plugin['configs']`.
+export type PluginPresets = {
+  recommended: PresetConfiguration;
+  strict: PresetConfiguration;
+  relaxed: PresetConfiguration;
+  'ai-instructions': PresetConfiguration;
 };
 
 /**
- * Creates the preset configs. Their `plugins` entry must reference the
- * exported plugin object itself (ESLint rejects two different objects under
- * one namespace), so it is attached by `attachPlugin` once the plugin exists.
+ * Creates the presets. Their `plugins` entry must reference the exported
+ * plugin object itself (ESLint rejects two different objects under one
+ * namespace), so it is attached by `attachPlugin` once the plugin exists.
  */
-export const createConfigs = (): PluginConfigs => {
+export const createPresets = (): PluginPresets => {
   return {
     recommended: {
       name: `${PLUGIN_NAMESPACE}/recommended`,
@@ -100,8 +99,8 @@ export const createConfigs = (): PluginConfigs => {
   };
 };
 
-export const attachPlugin = (configs: PluginConfigs, plugin: Plugin): void => {
-  for (const config of Object.values(configs)) {
-    config.plugins = { [PLUGIN_NAMESPACE]: plugin };
+export const attachPlugin = (presets: PluginPresets, plugin: Plugin): void => {
+  for (const preset of Object.values(presets)) {
+    preset.plugins = { [PLUGIN_NAMESPACE]: plugin };
   }
 };

@@ -1,3 +1,4 @@
+import { isRecord, type UnknownRecord } from '../core/is-record.ts';
 import type { ContextRange, SourceContext } from '../core/source-context.ts';
 
 /**
@@ -5,11 +6,6 @@ import type { ContextRange, SourceContext } from '../core/source-context.ts';
  * ESLint languages without depending on their packages. Every language
  * plugin uses its own node shape, so values are inspected structurally.
  */
-
-export type UnknownRecord = Record<string, unknown>;
-
-export const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && value !== null;
 
 const isOffsetPair = (value: unknown): value is [number, number] =>
   Array.isArray(value) &&
@@ -142,3 +138,12 @@ export const readComments = (sourceCode: object, ast: unknown): unknown[] => {
     ...readArray(ast, 'comments'),
   ];
 };
+
+/** A `comment` context range for every comment the language exposes. */
+export const collectCommentRanges = (sourceCode: {
+  ast: unknown;
+}): ContextRange[] =>
+  mapElementsToRanges(
+    readComments(sourceCode, sourceCode.ast),
+    () => 'comment',
+  );

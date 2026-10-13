@@ -1,7 +1,8 @@
 import type { Plugin } from '@eslint/core';
-import { attachPlugin, createConfigs, PLUGIN_NAMESPACE } from './configs.ts';
 import { textLanguage } from './languages/text-language.ts';
 import { readPackageMetadata } from './package-metadata.ts';
+import { PLUGIN_NAMESPACE } from './plugin-namespace.ts';
+import { attachPlugin, createPresets } from './presets.ts';
 import { allowedCharacters } from './rules/allowed-characters.ts';
 import { noBidiControl } from './rules/no-bidi-control.ts';
 import { noConfusableCharacters } from './rules/no-confusable-characters.ts';
@@ -22,16 +23,16 @@ const rules = {
   'no-unusual-whitespace': noUnusualWhitespace,
 };
 
-const configs = createConfigs();
+const presets = createPresets();
 
 const plugin = {
   meta: { name, version, namespace: PLUGIN_NAMESPACE },
   rules,
   languages: { text: textLanguage },
-  configs,
+  configs: presets,
 } satisfies Plugin;
 
-attachPlugin(configs, plugin);
+attachPlugin(presets, plugin);
 
 export default plugin;
 

@@ -1,10 +1,6 @@
 import { correctWithReplacement } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noTypographicCharacters = createFindingRule({
   name: 'no-typographic-characters',
@@ -18,8 +14,6 @@ export const noTypographicCharacters = createFindingRule({
       'Replace with "{{replacement}}" (not applied automatically: it can change a string value or rendered text).',
   },
   fixable: true,
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['typographic']),
   messageId: () => 'typographic',
   correction: (finding, adapter) =>

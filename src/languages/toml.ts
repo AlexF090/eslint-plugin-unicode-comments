@@ -1,8 +1,8 @@
 import type { LanguageAdapter } from './language-adapter.ts';
 import {
+  collectCommentRanges,
   mapElementsToRanges,
   readArray,
-  readComments,
   readType,
 } from './syntax-element.ts';
 
@@ -20,9 +20,6 @@ export const tomlAdapter: LanguageAdapter = {
       }
       return type.endsWith('String') ? 'string' : undefined;
     }),
-    ...mapElementsToRanges(
-      readComments(sourceCode, sourceCode.ast),
-      () => 'comment',
-    ),
+    ...collectCommentRanges(sourceCode),
   ],
 };

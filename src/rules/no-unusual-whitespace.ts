@@ -1,10 +1,6 @@
 import { correctWithReplacement } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noUnusualWhitespace = createFindingRule({
   name: 'no-unusual-whitespace',
@@ -18,8 +14,6 @@ export const noUnusualWhitespace = createFindingRule({
       'Replace with a regular space or line break (not applied automatically: it can change a string value or rendered text).',
   },
   fixable: true,
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['unusual-whitespace']),
   messageId: () => 'unusualWhitespace',
   correction: (finding, adapter) =>

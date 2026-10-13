@@ -1,9 +1,5 @@
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noInvisibleCharacters = createFindingRule({
   name: 'no-invisible-characters',
@@ -18,8 +14,6 @@ export const noInvisibleCharacters = createFindingRule({
     control: 'Control character {{character}} in {{context}}.',
     suggestRemoval: 'Remove {{character}}.',
   },
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['invisible', 'control']),
   messageId: (finding) => {
     if (finding.category === 'control') {

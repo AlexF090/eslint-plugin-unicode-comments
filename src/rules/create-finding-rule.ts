@@ -22,6 +22,9 @@ import {
 } from '../core/scan-text.ts';
 import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
+import { readPackageMetadata } from '../package-metadata.ts';
+import { PLUGIN_NAMESPACE } from '../plugin-namespace.ts';
+import { allowOptionSchema, defaultAllowOptions } from './allow-option.ts';
 import { createOffsetLocator } from './create-offset-locator.ts';
 import {
   isLocatableSourceCode,
@@ -29,8 +32,7 @@ import {
   type Position,
 } from './scan-source-code.ts';
 
-const REPOSITORY_URL =
-  'https://github.com/AlexF090/eslint-plugin-unicode-guard';
+const { repositoryUrl } = readPackageMetadata();
 
 export interface FindingRuleTypeOptions {
   LangOptions: LanguageOptions;
@@ -64,8 +66,9 @@ export interface FindingRuleSettings {
   type: RuleType;
   description: string;
   messages: Record<string, string>;
-  schema: NonNullable<RulesMeta['schema']>;
-  defaultOptions: unknown[];
+  /** Defaults to the `allow` option shared by the category rules. */
+  schema?: NonNullable<RulesMeta['schema']>;
+  defaultOptions?: unknown[];
   /** Set when `correction` can return `{ kind: 'fix' }`. */
   fixable?: boolean;
   /**
@@ -126,7 +129,7 @@ const compileAllowListForRule =
       return compileAllowList(entries);
     } catch (error) {
       if (error instanceof InvalidAllowEntryError) {
-        throw new Error(`unicode-guard/${ruleName}: ${error.message}`, {
+        throw new Error(`${PLUGIN_NAMESPACE}/${ruleName}: ${error.message}`, {
           cause: error,
         });
       }
@@ -176,7 +179,8 @@ const reportFinding = (
 
 /**
  * Builds a rule that scans the raw text of any ESLint language once per file
- * and reports the findings `settings.selects` accepts. Rules do not declare
+ * and reports the findings the selector from `settings.createSelector`
+ * accepts. Rules do not declare
  * `meta.languages`, so ESLint runs them for every language.
  */
 export const createFindingRule = (
@@ -191,12 +195,12 @@ export const createFindingRule = (
       docs: {
         description: settings.description,
         recommended: true,
-        url: `${REPOSITORY_URL}/blob/main/docs/rules/${settings.name}.md`,
+        url: `${repositoryUrl}/blob/main/docs/rules/${settings.name}.md`,
       },
       ...(settings.fixable === true ? { fixable: 'code' as const } : {}),
       hasSuggestions,
-      schema: settings.schema,
-      defaultOptions: settings.defaultOptions,
+      schema: settings.schema ?? allowOptionSchema,
+      defaultOptions: settings.defaultOptions ?? defaultAllowOptions,
       messages: settings.messages,
     },
     create(context) {
@@ -209,7 +213,7 @@ export const createFindingRule = (
       const checkFile = () => {
         if (!isLocatableSourceCode(sourceCode)) {
           throw new Error(
-            `unicode-guard/${settings.name}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
+            `${PLUGIN_NAMESPACE}/${settings.name}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
           );
         }
         const { findings, adapter } = scanSourceCode(sourceCode);

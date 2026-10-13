@@ -12,6 +12,16 @@ const lintWithOptions = (ruleName: string, options: unknown) =>
     { filename: 'a.js' },
   );
 
+describe('rule metadata', () => {
+  it('links every rule to its documentation in the repository', () => {
+    for (const [name, rule] of Object.entries(unicodeGuard.rules)) {
+      expect(rule.meta?.docs?.url).toBe(
+        `https://github.com/AlexF090/eslint-plugin-unicode-guard/blob/main/docs/rules/${name}.md`,
+      );
+    }
+  });
+});
+
 describe('rule options', () => {
   it('names the rule and the entry when an allow entry is malformed', () => {
     expect(() =>

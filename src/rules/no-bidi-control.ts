@@ -1,9 +1,5 @@
 import { createFindingRule } from './create-finding-rule.ts';
-import {
-  allowOptionSchema,
-  defaultAllowOptions,
-  selectCategories,
-} from './allow-option.ts';
+import { selectCategories } from './allow-option.ts';
 
 export const noBidiControl = createFindingRule({
   name: 'no-bidi-control',
@@ -15,8 +11,6 @@ export const noBidiControl = createFindingRule({
       'Bidirectional control character {{character}} in {{context}}. It can reorder how the surrounding code is displayed (Trojan Source).',
     suggestRemoval: 'Remove {{character}}.',
   },
-  schema: allowOptionSchema,
-  defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['bidi-control']),
   messageId: () => 'bidiControl',
   correction: () => ({
