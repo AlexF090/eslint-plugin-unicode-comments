@@ -6,7 +6,7 @@ import type { CorrectionEnvironment } from '../../src/rules/create-finding-rule.
 
 const createEnvironment = (
   fixesText: boolean,
-  sourceText = ' \u2014 ',
+  sourceText = 'a \u2014 b',
 ): CorrectionEnvironment => ({
   adapter: {
     defaultContext: 'text',
@@ -22,7 +22,7 @@ const createFinding = (
   context: SourceContext,
   replacement?: string,
 ): Finding => ({
-  offset: 1,
+  offset: 2,
   length: 1,
   codePoint: 0x2014,
   count: 1,

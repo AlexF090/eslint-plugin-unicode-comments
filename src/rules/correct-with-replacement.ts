@@ -77,6 +77,27 @@ const isInBlockWithMarkup = (sourceText: string, offset: number): boolean => {
   return true;
 };
 
+const letterOrDigitPattern = /[\p{L}\p{N}]/u;
+
+/**
+ * Whether the line of the finding has no letter or digit. Such a line can
+ * only be Markdown syntax once fixed: a front matter fence (`---`), a
+ * thematic break, a setext underline, or a table delimiter row, so fixing a
+ * dash or space on it could turn the prose below into front matter.
+ */
+const isOnLineWithoutWords = (
+  sourceText: string,
+  finding: Finding,
+): boolean => {
+  const lineStart = sourceText.lastIndexOf('\n', finding.offset - 1) + 1;
+  const lineEnd = sourceText.indexOf('\n', finding.offset);
+  const line = sourceText.slice(
+    lineStart,
+    lineEnd === -1 ? sourceText.length : lineEnd,
+  );
+  return !letterOrDigitPattern.test(line);
+};
+
 /** Signs that a word is, or could become, a GFM email, www, or URL autolink. */
 const autolinkSignPattern = /[:@]|www/iu;
 const whitespacePattern = /\s/u;
@@ -123,8 +144,9 @@ const isInPossibleAutolink = (
  * Comments are only suggested because tools read them: a fixed dash turns
  * `eslint<U+2010>disable` or `@ts<U+2013>ignore` into a live directive, and a
  * fixed shebang changes the command that runs the file. In Markdown prose, a
- * block that contains `<`, `[`, or `]` and a word that could be an autolink
- * are only suggested, so a fix cannot create markup or retarget a link.
+ * block that contains `<`, `[`, or `]`, a word that could be an autolink, and
+ * a line without letters or digits are only suggested, so a fix cannot create
+ * markup or front matter or retarget a link.
  *
  * A replacement that inserts a line break is only ever suggested: in
  * Markdown it could start a new block, and in code it could end a comment
@@ -153,7 +175,8 @@ export const correctWithReplacement = (
     case 'text':
       return adapter.fixesText === true &&
         !isInBlockWithMarkup(sourceText, finding.offset) &&
-        !isInPossibleAutolink(sourceText, finding)
+        !isInPossibleAutolink(sourceText, finding) &&
+        !isOnLineWithoutWords(sourceText, finding)
         ? fix
         : suggestion;
     case 'string':

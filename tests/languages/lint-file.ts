@@ -30,6 +30,10 @@ const configurations: Linter.Config[] = [
   { files: ['**/*.ts'], ...recommended, languageOptions: { parser: tsParser } },
   forLanguage(['**/*.json'], 'json/jsonc', { json }),
   forLanguage(['**/*.md'], 'markdown/gfm', { markdown }),
+  {
+    files: ['**/*.fm.md'],
+    languageOptions: { frontmatter: 'yaml' },
+  },
   forLanguage(['**/*.css'], 'css/css', { css }),
   forLanguage(['**/*.yaml'], 'yml/yaml', { yml }),
   forLanguage(['**/*.toml'], 'toml/toml', { toml }),

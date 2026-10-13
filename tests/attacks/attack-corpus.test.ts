@@ -339,6 +339,13 @@ describe('attack corpus: autofix as the attack vector', () => {
     },
   );
 
+  it.each([
+    '\u2014-\nlayout: evil\npermalink: /admin\n-\u2014\n\nHello\n',
+    '---\u3000\ndescription: x\nalwaysApply: true\n---\u3000\n\nHello\n',
+  ])('does not let --fix turn Markdown prose %j into front matter', (code) => {
+    expect(fixFile('page.fm.md', code)).toBe(code);
+  });
+
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';
     expect(fixFile('README.md', code)).toBe(code);
