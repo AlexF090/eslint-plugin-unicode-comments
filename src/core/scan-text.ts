@@ -38,7 +38,7 @@ export interface Finding {
   context: SourceContext;
   /** ASCII text that can replace the whole finding without changing meaning. */
   replacement?: string;
-  /** For `lookalike`: the ASCII text (one to three characters) it imitates. */
+  /** For `lookalike`: the ASCII text (one to four characters) it imitates. */
   imitates?: string;
   /** For `mixed-script`: the script of the character and of its word. */
   script?: string;
@@ -69,8 +69,9 @@ const blankCharacters: ReadonlySet<number> = new Set([
 const privateUsePattern = /^\p{Co}$/u;
 const unassignedPattern = /^\p{Cn}$/u;
 const imitatedAsciiCharacterPattern = /^[\x21-\x7E]$/u;
-const imitatedAsciiLetterSequencePattern = /^[\x21-\x7E]{2,4}$/u;
+const imitatedAsciiSequencePattern = /^[\x21-\x7E]{2,4}$/u;
 const latinScriptPattern = /^\p{Script=Latin}$/u;
+const asciiPunctuationPattern = /[^\dA-Za-z]/u;
 
 const LAST_LATIN_1_CODE_POINT = 0xff;
 const FIRST_TAG_CHARACTER = 0xe0020;
@@ -109,12 +110,14 @@ const findImitatedAscii = (
   if (imitatedAsciiCharacterPattern.test(normalized)) {
     return normalized;
   }
-  // Latin ligatures, digraphs, and Roman numerals read as their letters; the
+  // Latin ligatures, digraphs, and Roman numerals read as their letters,
+  // and sequences with punctuation (U+2025 for `..`) read as syntax; the
   // squared units and abbreviations of other scripts (U+338F for `kg`,
   // U+2116 for `No`) are ordinary symbols in their prose.
   if (
-    imitatedAsciiLetterSequencePattern.test(normalized) &&
-    latinScriptPattern.test(character)
+    imitatedAsciiSequencePattern.test(normalized) &&
+    (latinScriptPattern.test(character) ||
+      asciiPunctuationPattern.test(normalized))
   ) {
     return normalized;
   }

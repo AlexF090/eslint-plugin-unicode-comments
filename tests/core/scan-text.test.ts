@@ -103,6 +103,8 @@ describe('scanText', () => {
       ['lj digraph in a domain', 'he\u01C9o.com', ['lj']],
       ['Roman numeral two', 'Version \u2161', ['II']],
       ['Roman numeral eight in a domain', 'pay\u2167.com', ['VIII']],
+      ['two dot leader in a path', '/\u2025/etc/passwd', ['..']],
+      ['double question mark', 'a\u2047', ['??']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });
