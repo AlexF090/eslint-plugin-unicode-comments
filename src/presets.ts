@@ -14,10 +14,12 @@ import { strictContextPolicy } from './rules/allowed-characters.ts';
  */
 export const aiInstructionFilePatterns = [
   '**/AGENTS.md',
+  '**/AGENT.md',
   '**/CLAUDE.md',
   '**/CLAUDE.local.md',
   '**/GEMINI.md',
   '**/SKILL.md',
+  '**/CONVENTIONS.md',
   '**/.claude/**/*.md',
   '**/.cursorrules',
   '**/.cursor/rules/**/?*',
@@ -31,10 +33,15 @@ export const aiInstructionFilePatterns = [
   '**/.gemini/**/?*',
   '**/.continue/rules/**/?*',
   '**/.junie/guidelines.md',
+  '**/.amazonq/rules/**/?*',
+  '**/.augment-guidelines',
+  '**/.augment/rules/**/?*',
+  '**/.opencode/agent/**/?*',
   '**/.github/copilot-instructions.md',
   '**/.github/instructions/**/?*',
   '**/.github/prompts/**/?*',
   '**/.github/agents/**/?*',
+  '**/.github/chatmodes/**/?*',
   '**/*.prompt.md',
   '**/*.instructions.md',
 ];
