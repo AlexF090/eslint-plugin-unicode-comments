@@ -3,7 +3,7 @@
 Disallow characters that imitate ASCII and words that mix scripts.
 
 - Recommended: `error`
-- Suggestions: replace a lookalike with the ASCII text it imitates
+- Suggestions: replace a lookalike with the ASCII text it imitates, unless that text contains syntax of its context (for example `*/` in a comment or a quote in a string), because applying it could end the comment or string
 
 ## Rule details
 

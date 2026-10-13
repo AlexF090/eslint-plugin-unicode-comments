@@ -74,7 +74,7 @@ describe('language support', () => {
       '',
     ].join('\n');
     expect(fixFile('a.md', code)).toBe(code);
-    expect(suggestionCountsOf('a.md', code)).toEqual([1, 1, 1, 1, 1]);
+    expect(suggestionCountsOf('a.md', code)).toEqual([1, 1, 1, 0, 0]);
   });
 
   it('only suggests replacements in plain text files', () => {

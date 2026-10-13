@@ -1,3 +1,4 @@
+import { isInertReplacement } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import { selectCategories } from './allow-option.ts';
 
@@ -18,7 +19,8 @@ export const noConfusableCharacters = createFindingRule({
   messageId: (finding) =>
     finding.category === 'lookalike' ? 'lookalike' : 'mixedScript',
   correction: (finding) =>
-    finding.imitates === undefined
+    finding.imitates === undefined ||
+    !isInertReplacement(finding.context, finding.imitates)
       ? undefined
       : {
           kind: 'suggestion',

@@ -31,7 +31,7 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
     },
     {
       name: 'string literal gets a suggestion instead of a fix',
-      code: 'const message = "Don\u2019t";',
+      code: 'const message = "Wait\u2026";',
       output: null,
       errors: [
         {
@@ -39,10 +39,19 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
           suggestions: [
             {
               messageId: 'suggestReplacement',
-              output: 'const message = "Don\'t";',
+              output: 'const message = "Wait...";',
             },
           ],
         },
+      ],
+    },
+    {
+      name: 'quote in a string gets no suggestion, because it could end the string',
+      code: 'const message = "x\u201D; fetch(1); \u201Cy";',
+      output: null,
+      errors: [
+        { messageId: 'typographic', suggestions: [] },
+        { messageId: 'typographic', suggestions: [] },
       ],
     },
     {

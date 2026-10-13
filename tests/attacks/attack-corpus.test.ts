@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { fixFile, lintFile } from '../languages/lint-file.ts';
+import {
+  fixFile,
+  lintFile,
+  suggestionCountsOf,
+} from '../languages/lint-file.ts';
 
 /**
  * Regression corpus of published Unicode attacks. Every sample is built from
@@ -356,6 +360,20 @@ describe('attack corpus: autofix as the attack vector', () => {
   ])('does not let --fix turn Markdown prose %j into front matter', (code) => {
     expect(fixFile('page.fm.md', code)).toBe(code);
   });
+
+  it.each([
+    ['let x = 1; /* see a\u2217/ fetch("//evil") /* end */\n', 'a.js'],
+    ['let x = 1; /* see a\uFF0A/ fetch("//evil") /* end */\n', 'a.js'],
+    ['const s = "x\u201D; fetch(1); \u201Cy";\n', 'a.js'],
+    ['<p title="a\uFF02 onmouseover=alert(1) x=\uFF02b">x</p>\n', 'a.html'],
+  ])(
+    'offers no suggestion that would end the comment or string in %j',
+    (code, filename) => {
+      expect(
+        suggestionCountsOf(filename, code).every((count) => count === 0),
+      ).toBe(true);
+    },
+  );
 
   it('does not let --fix retarget a Markdown link to a different domain', () => {
     const code = '[docs](https://pay\u2013example.com/login)\n';

@@ -3,7 +3,7 @@
 Disallow typographic characters that word processors and language models insert where a developer types ASCII.
 
 - Recommended: `warn`, strict: `error`
-- Suggestions: replace the character with its ASCII replacement. Nothing is fixed automatically: tools and renderers read comments, strings, and prose, so a fixed dash can turn `eslint<U+2010>disable` into a live directive, and a fixed quote in Markdown can complete inline HTML, a link title, or front matter. Characters in code and identifiers get no suggestion.
+- Suggestions: replace the character with its ASCII replacement. Nothing is fixed automatically: tools and renderers read comments, strings, and prose, so a fixed dash can turn `eslint<U+2010>disable` into a live directive, and a fixed quote in Markdown can complete inline HTML, a link title, or front matter. Characters in code and identifiers get no suggestion. No suggestion is offered when the replacement contains syntax of its context (an asterisk, slash, or `>` in a comment; a quote, backslash, `$`, or brace in a string; `<`, `>`, `&`, a brace, a bracket, or a backtick in text), because applying it could end the comment or string or open markup.
 
 ## Rule details
 

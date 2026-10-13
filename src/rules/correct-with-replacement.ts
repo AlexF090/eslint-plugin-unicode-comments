@@ -1,4 +1,5 @@
 import type { Finding } from '../core/scan-text.ts';
+import type { SourceContext } from '../core/source-context.ts';
 import type { LanguageAdapter } from '../languages/language-adapter.ts';
 import type { Correction } from './create-finding-rule.ts';
 
@@ -10,6 +11,25 @@ interface CorrectionOptions {
 }
 
 const lineBreakPattern = /[\n\r]/u;
+
+/**
+ * ASCII characters that end or open syntax in each context: comment
+ * terminators (an asterisk before a slash, `-->`), string delimiters, escapes, and template
+ * interpolation, and the markup openers of HTML, JSX, and Markdown text.
+ * Even a suggestion that inserts one of them could turn the rest of a
+ * comment, string, or text into live code or markup once applied.
+ */
+const syntaxCharacterPatterns: Partial<Record<SourceContext, RegExp>> = {
+  comment: /[*/>]/u,
+  string: /[$"'\\`{}]/u,
+  text: /[<>&{}[\]`]/u,
+};
+
+/** Whether `text` may replace a character in `context` without inserting syntax. */
+export const isInertReplacement = (
+  context: SourceContext,
+  text: string,
+): boolean => syntaxCharacterPatterns[context]?.test(text) !== true;
 
 /**
  * Corrects a finding with its ASCII replacement. A fix is applied
@@ -43,7 +63,9 @@ export const correctWithReplacement = (
     case 'comment':
     case 'string':
     case 'text':
-      return suggestion;
+      return isInertReplacement(finding.context, replacement)
+        ? suggestion
+        : undefined;
     case 'code':
       if (!fixesCode) {
         return undefined;
