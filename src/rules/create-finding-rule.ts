@@ -21,6 +21,7 @@ import {
   type FindingCategory,
 } from '../core/scan-text.ts';
 import type { SourceContext } from '../core/source-context.ts';
+import type { LanguageAdapter } from '../languages/language-adapter.ts';
 import {
   isLocatableSourceCode,
   scanSourceCode,
@@ -77,7 +78,7 @@ export interface FindingRuleSettings {
     compileAllowList: (entries: readonly string[]) => CharacterPredicate,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
-  correction?(finding: Finding): Correction;
+  correction?(finding: Finding, adapter: LanguageAdapter): Correction;
 }
 
 const contextPhrases: Record<SourceContext, string> = {
@@ -141,9 +142,10 @@ const reportFinding = (
   context: FindingRuleContext,
   sourceCode: LocatableSourceCode,
   settings: FindingRuleSettings,
+  adapter: LanguageAdapter,
   finding: Finding,
 ): void => {
-  const correction = settings.correction?.(finding);
+  const correction = settings.correction?.(finding, adapter);
   const range = toRange(finding);
   const applyCorrection =
     (text: string): RuleFixer =>
@@ -209,9 +211,10 @@ export const createFindingRule = (
             `unicode-guard/${settings.name}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
           );
         }
-        const selected = scanSourceCode(sourceCode).filter(selects);
+        const { findings, adapter } = scanSourceCode(sourceCode);
+        const selected = findings.filter(selects);
         for (const finding of groupFindings(sourceCode.text, selected)) {
-          reportFinding(context, sourceCode, settings, finding);
+          reportFinding(context, sourceCode, settings, adapter, finding);
         }
       };
 

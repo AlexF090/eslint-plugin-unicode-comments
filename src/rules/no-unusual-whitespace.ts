@@ -1,3 +1,4 @@
+import { correctWithReplacement } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import {
   allowOptionSchema,
@@ -14,23 +15,13 @@ export const noUnusualWhitespace = createFindingRule({
     unusualWhitespace:
       'Unusual whitespace {{character}} in {{context}}. Use a regular space or line break.',
     suggestReplacement:
-      'Replace with a regular space or line break (changes the string value).',
+      'Replace with a regular space or line break (not applied automatically: it can change a string value or rendered text).',
   },
   fixable: true,
   schema: allowOptionSchema,
   defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['unusual-whitespace']),
   messageId: () => 'unusualWhitespace',
-  correction: (finding) => {
-    if (finding.replacement === undefined) {
-      return undefined;
-    }
-    return finding.context === 'string'
-      ? {
-          kind: 'suggestion',
-          text: finding.replacement,
-          messageId: 'suggestReplacement',
-        }
-      : { kind: 'fix', text: finding.replacement };
-  },
+  correction: (finding, adapter) =>
+    correctWithReplacement(finding, adapter, { fixesCode: true }),
 });

@@ -1,6 +1,7 @@
 import type { SourceCode, TextSourceCode } from '@eslint/core';
 import { scanText, type Finding } from '../core/scan-text.ts';
 import { createContextResolver } from '../core/source-context.ts';
+import type { LanguageAdapter } from '../languages/language-adapter.ts';
 import { resolveLanguageAdapter } from '../languages/resolve-language-adapter.ts';
 
 export interface Position {
@@ -20,12 +21,17 @@ export const isLocatableSourceCode = (
   typeof Reflect.get(sourceCode, 'text') === 'string' &&
   typeof Reflect.get(sourceCode, 'getLocFromIndex') === 'function';
 
-/** Ungrouped findings for the whole file, each tagged with its source context. */
-export const scanSourceCode = (sourceCode: TextSourceCode): Finding[] => {
+export interface SourceScan {
+  /** Ungrouped findings for the whole file, each tagged with its source context. */
+  findings: Finding[];
+  adapter: LanguageAdapter;
+}
+
+export const scanSourceCode = (sourceCode: TextSourceCode): SourceScan => {
   const adapter = resolveLanguageAdapter(sourceCode.ast);
   const resolveContext = createContextResolver(
     adapter.collectContextRanges(sourceCode),
     adapter.defaultContext,
   );
-  return scanText(sourceCode.text, resolveContext);
+  return { findings: scanText(sourceCode.text, resolveContext), adapter };
 };

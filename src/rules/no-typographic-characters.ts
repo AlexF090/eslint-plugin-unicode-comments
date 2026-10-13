@@ -1,3 +1,4 @@
+import { correctWithReplacement } from './correct-with-replacement.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 import {
   allowOptionSchema,
@@ -14,26 +15,13 @@ export const noTypographicCharacters = createFindingRule({
     typographic:
       'Typographic character {{character}} in {{context}}. Use "{{replacement}}" instead.',
     suggestReplacement:
-      'Replace with "{{replacement}}" (changes the string value).',
+      'Replace with "{{replacement}}" (not applied automatically: it can change a string value or rendered text).',
   },
   fixable: true,
   schema: allowOptionSchema,
   defaultOptions: defaultAllowOptions,
   createSelector: selectCategories(['typographic']),
   messageId: () => 'typographic',
-  correction: (finding) => {
-    if (finding.replacement === undefined) {
-      return undefined;
-    }
-    if (finding.context === 'comment' || finding.context === 'text') {
-      return { kind: 'fix', text: finding.replacement };
-    }
-    return finding.context === 'string'
-      ? {
-          kind: 'suggestion',
-          text: finding.replacement,
-          messageId: 'suggestReplacement',
-        }
-      : undefined;
-  },
+  correction: (finding, adapter) =>
+    correctWithReplacement(finding, adapter, { fixesCode: false }),
 });

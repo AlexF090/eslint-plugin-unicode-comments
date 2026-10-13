@@ -44,10 +44,20 @@ ruleTester.run('no-typographic-characters', noTypographicCharacters, {
       ],
     },
     {
-      name: 'JSX text is fixed',
+      name: 'JSX text gets a suggestion because it is rendered',
       code: 'const element = <p>Loading\u2026</p>;',
-      output: 'const element = <p>Loading...</p>;',
-      errors: [{ messageId: 'typographic' }],
+      output: null,
+      errors: [
+        {
+          messageId: 'typographic',
+          suggestions: [
+            {
+              messageId: 'suggestReplacement',
+              output: 'const element = <p>Loading...</p>;',
+            },
+          ],
+        },
+      ],
     },
   ],
 });

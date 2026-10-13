@@ -10,10 +10,10 @@ import {
 const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
   ['Text', 'text'],
   ['AttributeValue', 'string'],
-  // Embedded scripts and styles are not parsed further; treat them as prose
-  // so their strings are judged by the prose policy instead of the code one.
-  ['ScriptTagContent', 'text'],
-  ['StyleTagContent', 'text'],
+  // Embedded scripts and styles are not parsed further. As strings they get
+  // the string policy and only suggestions, so no fix can break their code.
+  ['ScriptTagContent', 'string'],
+  ['StyleTagContent', 'string'],
 ]);
 
 /** `@html-eslint/eslint-plugin`. Tag and attribute names are code. */

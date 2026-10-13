@@ -17,7 +17,7 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 - Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, and NFKC lookalikes.
 - Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences, and joiners in joining scripts. Ideographic variation selectors (VS17 to VS256) are always reported.
 - `allow` options with code points, ranges, and Unicode property escapes; per-context policy for `allowed-characters`.
-- Autofixes for typographic characters and unusual whitespace outside strings, suggestions inside strings.
+- Autofixes for typographic characters and unusual whitespace in comments and Markdown prose; suggestions in strings, Markdown code, rendered JSX and HTML text, and plain text files.
 - Regression corpus of published attacks.
 
 ### Changed

@@ -42,6 +42,22 @@ ruleTester.run('no-unusual-whitespace', noUnusualWhitespace, {
       ],
     },
     {
+      name: 'no-break space in JSX text is only a suggestion',
+      code: 'const element = <p>10\u00A0km</p>;',
+      output: null,
+      errors: [
+        {
+          messageId: 'unusualWhitespace',
+          suggestions: [
+            {
+              messageId: 'suggestReplacement',
+              output: 'const element = <p>10 km</p>;',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'line separator in a comment becomes a line feed',
       code: '/* a\u2028b */',
       output: '/* a\nb */',

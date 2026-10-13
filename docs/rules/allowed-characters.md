@@ -9,13 +9,13 @@ Allow only listed non-ASCII characters per source context.
 
 ASCII is always allowed. Every other character that no other rule of this plugin reports (invisible, bidirectional, confusable, whitespace, and typographic characters are handled by their own rules) must match the allow list of its source context:
 
-| Context      | Covers                                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------------------------ |
-| `code`       | syntax outside the other contexts: operators, whitespace between tokens, CSS selectors, YAML structure |
-| `identifier` | JavaScript identifiers and keywords, TOML bare keys                                                    |
-| `comment`    | comments in every language                                                                             |
-| `string`     | string, template, and regular expression literals; JSON strings and keys; YAML and TOML values         |
-| `text`       | Markdown, HTML text, JSX text, and plain text files                                                    |
+| Context      | Covers                                                                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`       | syntax outside the other contexts: operators, whitespace between tokens, CSS selectors, YAML structure                                                                                            |
+| `identifier` | JavaScript identifiers and keywords, TOML bare keys                                                                                                                                               |
+| `comment`    | comments in every language                                                                                                                                                                        |
+| `string`     | string, template, and regular expression literals; JSON strings and keys; YAML and TOML values; Markdown code blocks, inline code, embedded HTML, and front matter; HTML script and style content |
+| `text`       | Markdown prose, HTML text, JSX text, and plain text files                                                                                                                                         |
 
 Default options (the `recommended` policy):
 

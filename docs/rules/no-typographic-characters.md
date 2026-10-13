@@ -3,7 +3,7 @@
 Disallow typographic characters that word processors and language models insert where a developer types ASCII.
 
 - Recommended: `warn`, strict: `error`
-- Fixable: in comments and prose (Markdown, JSX text, plain text); inside strings it is a suggestion, because it changes the value
+- Fixable: in comments and Markdown prose. Strings, Markdown code blocks and inline code, JSX and HTML text, embedded scripts and styles, and files linted with `unicode-guard/text` get a suggestion instead, because a fix there could change a value, rendered text, or code. Characters in code and identifiers get neither.
 
 ## Rule details
 

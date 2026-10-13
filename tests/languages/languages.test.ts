@@ -70,6 +70,41 @@ describe('language support', () => {
     ).toBe("# Title\n\nIt's done -- mostly...\n");
   });
 
+  it('does not fix code blocks and inline code in Markdown', () => {
+    const code = [
+      'Done\u2026',
+      '',
+      '```python',
+      'print("\u201Chi\u201D")',
+      '```',
+      '',
+      'Run `echo \u201Chi\u201D` first.',
+      '',
+    ].join('\n');
+    expect(fixFile('a.md', code)).toBe(code.replace('Done\u2026', 'Done...'));
+  });
+
+  it('only suggests replacements in plain text files', () => {
+    const code = 'echo "\u201Chi\u201D"\u00A0\n';
+    expect(fixFile('script.txt', code)).toBe(code);
+    expect(ruleIdsOf('script.txt', code)).toEqual([
+      'unicode-guard/no-typographic-characters',
+      'unicode-guard/no-typographic-characters',
+      'unicode-guard/no-unusual-whitespace',
+    ]);
+  });
+
+  it('treats HTML script content as a string and does not fix rendered text', () => {
+    const code =
+      '<p>Loading\u2026</p><script>alert("\u201Chi\u201D");</script>';
+    expect(fixFile('a.html', code)).toBe(code);
+    expect(lintFile('a.html', code).map((message) => message.message)).toEqual([
+      expect.stringContaining('in text'),
+      expect.stringContaining('in a string'),
+      expect.stringContaining('in a string'),
+    ]);
+  });
+
   it('honours eslint-disable comments in JSON with comments', () => {
     expect(
       lintFile(

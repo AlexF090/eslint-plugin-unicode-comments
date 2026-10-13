@@ -3,7 +3,7 @@
 Disallow whitespace other than space, tab, and line breaks.
 
 - Recommended: `error`
-- Fixable: replaces the character with a space (or a line feed for LINE SEPARATOR and PARAGRAPH SEPARATOR) outside strings; inside strings it is a suggestion, because it changes the value
+- Fixable: replaces the character with a space (or a line feed for LINE SEPARATOR and PARAGRAPH SEPARATOR) in code, comments, and Markdown prose. Strings, Markdown code blocks and inline code, JSX and HTML text, embedded scripts and styles, and files linted with `unicode-guard/text` get a suggestion instead, because a fix there could change a value, rendered text, or code.
 
 ## Rule details
 

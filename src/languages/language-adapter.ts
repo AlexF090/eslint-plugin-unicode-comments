@@ -13,4 +13,10 @@ export interface LanguageAdapter {
   collectContextRanges(sourceCode: ScannableSourceCode): ContextRange[];
   /** Context of text that no collected range covers. */
   defaultContext: SourceContext;
+  /**
+   * Whether autofixes may rewrite characters in `text` context. Only true
+   * for languages whose text is prose; rendered text (JSX, HTML) and files
+   * of unknown structure only get suggestions.
+   */
+  fixesText?: boolean;
 }
