@@ -24,30 +24,22 @@ ruleTester.run('no-bidi-control', noBidiControl, {
           line: 1,
           column: 32,
           endColumn: 33,
-          suggestions: [],
         },
         {
           messageId: 'bidiControl',
-          suggestions: [
-            {
-              messageId: 'suggestRemoval',
-              output:
-                'if (accessLevel != "user") { /*\u202E } if (isAdmin)\u2069 \u2066 begin admins only */ }',
-            },
-          ],
         },
-        { messageId: 'bidiControl', suggestions: [] },
-        { messageId: 'bidiControl', suggestions: 1 },
+        { messageId: 'bidiControl' },
+        { messageId: 'bidiControl' },
       ],
     },
     {
-      name: 'stretched string in a string literal gets no suggestion next to a slash or quote',
+      name: 'stretched string in a string literal is not corrected next to a slash or quote',
       code: 'const access = "user\u202E \u2066// Check if admin\u2069 \u2066";',
       errors: [
-        { messageId: 'bidiControl', suggestions: 1 },
-        { messageId: 'bidiControl', suggestions: [] },
-        { messageId: 'bidiControl', suggestions: 1 },
-        { messageId: 'bidiControl', suggestions: [] },
+        { messageId: 'bidiControl' },
+        { messageId: 'bidiControl' },
+        { messageId: 'bidiControl' },
+        { messageId: 'bidiControl' },
       ],
     },
     {
@@ -56,14 +48,11 @@ ruleTester.run('no-bidi-control', noBidiControl, {
       errors: [
         {
           messageId: 'bidiControl',
-          suggestions: [
-            { messageId: 'suggestRemoval', output: 'const mark = "ab";' },
-          ],
         },
       ],
     },
     {
-      name: 'grouped run of adjacent controls at the end of a comment next to a slash gets no suggestion',
+      name: 'grouped run of adjacent controls at the end of a comment next to a slash is not corrected',
       code: 'const a = 1; //\u202E\u2066',
       errors: [
         {
@@ -75,7 +64,6 @@ ruleTester.run('no-bidi-control', noBidiControl, {
           },
           column: 16,
           endColumn: 18,
-          suggestions: [],
         },
       ],
     },

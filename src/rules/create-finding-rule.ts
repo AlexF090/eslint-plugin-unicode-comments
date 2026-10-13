@@ -49,12 +49,6 @@ export interface FindingRuleTypeOptions {
  */
 export type FindingRule = RuleDefinition<FindingRuleTypeOptions>;
 
-/** How a finding may be corrected: applied automatically, offered as a suggestion, or not at all. */
-export type Correction =
-  | { kind: 'fix'; text: string }
-  | { kind: 'suggestion'; text: string; messageId: string }
-  | undefined;
-
 export interface FindingRuleSettings {
   name: string;
   type: RuleType;
@@ -63,10 +57,8 @@ export interface FindingRuleSettings {
   /** Defaults to the `allow` option shared by the category rules. */
   schema?: NonNullable<RulesMeta['schema']>;
   defaultOptions?: unknown[];
-  /** Set when `correction` can return `{ kind: 'fix' }`. */
+  /** Set when `fix` can return a replacement. */
   fixable?: boolean;
-  /** Set when `correction` can return `{ kind: 'suggestion' }`. */
-  hasSuggestions?: boolean;
   /**
    * Called once per file with the rule options; returns the predicate that
    * decides which findings this rule reports. `compileAllowEntries` turns
@@ -78,11 +70,8 @@ export interface FindingRuleSettings {
     compileAllowEntries: AllowEntryCompiler,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
-  correction?(
-    finding: Finding,
-    adapter: LanguageAdapter,
-    sourceText: string,
-  ): Correction;
+  /** The text that replaces the finding automatically, if any. */
+  fix?(finding: Finding, adapter: LanguageAdapter): string | undefined;
 }
 
 const contextPhrases: Record<SourceContext, string> = {
@@ -165,7 +154,6 @@ export const createFindingRule = (
         url: `${repositoryUrl}/blob/main/docs/rules/${settings.name}.md`,
       },
       ...(settings.fixable === true ? { fixable: 'code' as const } : {}),
-      hasSuggestions: settings.hasSuggestions === true,
       schema: settings.schema ?? allowOptionSchema,
       defaultOptions: settings.defaultOptions ?? defaultAllowOptions,
       messages: settings.messages,
@@ -190,30 +178,13 @@ export const createFindingRule = (
         }
         const locate = createOffsetLocator(sourceCode);
         const report = (finding: Finding): void => {
-          const correction = settings.correction?.(
-            finding,
-            adapter,
-            sourceCode.text,
-          );
+          const fixText = settings.fix?.(finding, adapter);
           const range = toRange(finding);
           context.report({
             loc: { start: locate(range[0]), end: locate(range[1]) },
             messageId: settings.messageId(finding),
             data: createMessageData(finding),
-            fix:
-              correction?.kind === 'fix'
-                ? replaceRange(range, correction.text)
-                : null,
-            suggest:
-              correction?.kind === 'suggestion'
-                ? [
-                    {
-                      messageId: correction.messageId,
-                      data: createMessageData(finding),
-                      fix: replaceRange(range, correction.text),
-                    },
-                  ]
-                : null,
+            fix: fixText === undefined ? null : replaceRange(range, fixText),
           });
         };
         for (const finding of groupFindings(sourceCode.text, selected)) {

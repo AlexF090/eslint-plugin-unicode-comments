@@ -64,7 +64,7 @@ describe('language support', () => {
     expect(ruleIdsOf('a.yaml', '# Gr\u00FC\u00DFe\nkey: 1\n')).toEqual([]);
   });
 
-  it('offers no suggestion for punctuation replacements in Markdown prose and code', () => {
+  it('corrects no punctuation in Markdown prose and code', () => {
     const code = [
       'It\u2019s done \u2014 mostly\u2026',
       '',
@@ -77,7 +77,7 @@ describe('language support', () => {
     expect(suggestionCountsOf('a.md', code)).toEqual([0, 0, 0, 0, 0]);
   });
 
-  it('only suggests replacements in plain text files', () => {
+  it('corrects nothing in plain text files', () => {
     const code = 'echo "\u201Chi\u201D"\u00A0\n';
     expect(fixFile('script.txt', code)).toBe(code);
     expect(ruleIdsOf('script.txt', code)).toEqual([
@@ -140,7 +140,7 @@ describe('autofix never turns a comment into live content', () => {
     ]);
   });
 
-  it('only suggests replacing a no-break space in a YAML comment', () => {
+  it('does not autofix a no-break space in a YAML comment', () => {
     const code = 'safe: true # a\u00A0note\n';
     expect(fixFile('a.yaml', code)).toBe(code);
   });

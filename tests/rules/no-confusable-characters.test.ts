@@ -57,17 +57,11 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
             context: 'a string',
             imitates: 'a',
           },
-          suggestions: [
-            {
-              messageId: 'suggestAscii',
-              output: 'const role = "admin";',
-            },
-          ],
         },
       ],
     },
     {
-      name: 'division slashes in a URL get no suggestion, because a slash is punctuation',
+      name: 'division slashes in a URL are not corrected, because a slash is punctuation',
       code: 'const url = "https:\u2215\u2215example.com";',
       errors: [
         {
@@ -78,15 +72,14 @@ ruleTester.run('no-confusable-characters', noConfusableCharacters, {
             imitates: '/',
           },
           column: 20,
-          suggestions: [],
         },
-        { messageId: 'lookalike', column: 21, suggestions: [] },
+        { messageId: 'lookalike', column: 21 },
       ],
     },
     {
       name: 'mathematical bold letter in a comment',
       code: '// \u{1D41A}pprove',
-      errors: [{ messageId: 'lookalike', suggestions: 1 }],
+      errors: [{ messageId: 'lookalike' }],
     },
   ],
 });

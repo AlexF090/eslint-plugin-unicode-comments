@@ -49,12 +49,13 @@ describe('rule options', () => {
 
 describe('rule metadata', () => {
   it.each(Object.entries(unicodeGuard.rules))(
-    '%s declares hasSuggestions exactly when it has a suggestion message',
+    '%s offers no editor correction and declares no suggestion message',
     (_name, rule) => {
-      const hasSuggestionMessage = Object.keys(rule.meta?.messages ?? {}).some(
-        (messageId) => messageId.startsWith('suggest'),
-      );
-      expect(rule.meta?.hasSuggestions).toBe(hasSuggestionMessage);
+      expect(rule.meta?.hasSuggestions).toBeFalsy();
+      const suggestionMessageIds = Object.keys(
+        rule.meta?.messages ?? {},
+      ).filter((messageId) => messageId.startsWith('suggest'));
+      expect(suggestionMessageIds).toEqual([]);
     },
   );
 });

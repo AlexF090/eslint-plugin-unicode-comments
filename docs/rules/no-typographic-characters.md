@@ -3,7 +3,7 @@
 Disallow typographic characters that word processors and language models insert where a developer types ASCII.
 
 - Recommended: `warn`, strict: `error`
-- Suggestions: only for replacements that are ASCII letters or digits, such as MULTIPLICATION SIGN to `x`. Dashes, quotes, ellipses, bullets, and arrows are only named in the message: applying them could turn a comment into a directive (`eslint<U+2010>disable`), end a comment or string, or complete Markdown or HTML markup. Nothing is fixed automatically.
+- Fix: none, not even as a suggestion. The message names the ASCII replacement; applying a dash, quote, or arrow automatically could turn a comment into a directive (`eslint<U+2010>disable`), end a comment or string, or complete Markdown or HTML markup, so replace it by hand.
 
 ## Rule details
 

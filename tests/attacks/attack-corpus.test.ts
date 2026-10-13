@@ -367,8 +367,9 @@ describe('attack corpus: autofix as the attack vector', () => {
     ['const s = "x\u201D; fetch(1); \u201Cy";\n', 'a.js'],
     ['<p title="a\uFF02 onmouseover=alert(1) x=\uFF02b">x</p>\n', 'a.html'],
   ])(
-    'offers no suggestion that would end the comment or string in %j',
+    'reports without any correction in a comment or string in %j',
     (code, filename) => {
+      expect(suggestionCountsOf(filename, code).length).toBeGreaterThan(0);
       expect(
         suggestionCountsOf(filename, code).every((count) => count === 0),
       ).toBe(true);
@@ -385,7 +386,7 @@ describe('attack corpus: autofix as the attack vector', () => {
     ['const t = `$\u200B{alert(1)}`;\n', 'a.js'],
     ['const s = "<\u200Bscript>";\n', 'a.js'],
   ])(
-    'offers no suggestion that would create syntax in %j',
+    'reports without any correction that would create syntax in %j',
     (code, filename) => {
       expect(
         suggestionCountsOf(filename, code).every((count) => count === 0),

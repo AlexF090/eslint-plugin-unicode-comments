@@ -3,7 +3,7 @@
 Disallow characters that imitate ASCII and words that mix scripts.
 
 - Recommended: `error`
-- Suggestions: replace a lookalike with the ASCII text it imitates, in comments, strings, and text, when that text consists of ASCII letters and digits. Lookalikes of punctuation (a fullwidth comma or parenthesis) get no suggestion, because applying it could split a YAML list or complete a Markdown link, and code and identifiers get none, because renaming could change which binding is used
+- Fix: none, not even as a suggestion. The message names the ASCII text a lookalike imitates; replacing it could complete a directive, tag, link, keyword, or YAML boolean, or change which binding an identifier refers to, so replace it by hand.
 
 ## Rule details
 

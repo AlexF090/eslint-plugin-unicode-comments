@@ -3,7 +3,7 @@
 Disallow bidirectional control characters, which make source code display in a different order than it is executed.
 
 - Recommended: `error`
-- Suggestions: remove the character, when the characters on both sides are ASCII letters, digits, spaces, or tabs (removing it elsewhere could join two characters into syntax, such as `$` and `{`)
+- Fix: none, not even as a suggestion. Removing the character could join its neighbors into syntax (`$` and `{`, or the letters of `return`); remove it by hand after checking what it hides.
 
 ## Rule details
 

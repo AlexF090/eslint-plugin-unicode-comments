@@ -9,7 +9,7 @@ const tokenContexts: ReadonlyMap<string, SourceContext> = new Map([
   ['Text', 'text'],
   ['AttributeValue', 'string'],
   // Embedded scripts and styles are not parsed further. As strings they get
-  // the string policy and only suggestions, so no fix can break their code.
+  // the string policy and are never fixed, so no fix can break their code.
   ['ScriptTagContent', 'string'],
   ['StyleTagContent', 'string'],
 ]);

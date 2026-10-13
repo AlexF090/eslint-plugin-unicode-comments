@@ -13,7 +13,7 @@ import {
  * Markdown nodes that are strings rather than prose: code and embedded
  * languages, and nodes holding a URL, title, alt text, or reference label.
  * An autofix there could change where a link points or which definition a
- * reference resolves to, so these only get suggestions.
+ * reference resolves to, so these are never fixed.
  */
 const stringTypes = new Set([
   'code',
