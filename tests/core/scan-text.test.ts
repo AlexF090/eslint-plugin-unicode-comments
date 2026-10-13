@@ -99,6 +99,9 @@ describe('scanText', () => {
       ['modifier letter minus in an option', 'rm \u02D7rf /', ['-']],
       ['mathematical bold small alpha in a word', 'p\u{1D6C2}ypal', ['a']],
       ['Han number zero in a domain', 'g\u3007\u3007gle.com', ['O', 'O']],
+      ['fi ligature in a path', '/con\uFB01g', ['fi']],
+      ['lj digraph in a domain', 'he\u01C9o.com', ['lj']],
+      ['Roman numeral two', 'Version \u2161', ['II']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });

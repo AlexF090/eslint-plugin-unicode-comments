@@ -241,6 +241,16 @@ const attackSamples: AttackSample[] = [
     ],
   },
   {
+    name: 'Ligatures that read as ASCII letter pairs in a path',
+    source: 'NFKC decomposes U+FB01 to "fi"',
+    filename: 'config.js',
+    code: 'if (path === "/con\uFB01g/\uFB01le") {}\n',
+    expectedRuleIds: [
+      'unicode-guard/no-confusable-characters',
+      'unicode-guard/no-confusable-characters',
+    ],
+  },
+  {
     name: 'Homoglyph dependency name in package.json',
     source: 'Typosquatting with Cyrillic letters',
     filename: 'package.json',

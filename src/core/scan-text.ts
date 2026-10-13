@@ -68,7 +68,7 @@ const blankCharacters: ReadonlySet<number> = new Set([
 ]);
 const privateUsePattern = /^\p{Co}$/u;
 const unassignedPattern = /^\p{Cn}$/u;
-const printableAsciiCharacterPattern = /^[\x21-\x7E]$/u;
+const imitatedAsciiTextPattern = /^[\x21-\x7E]{1,3}$/u;
 
 const LAST_LATIN_1_CODE_POINT = 0xff;
 const FIRST_TAG_CHARACTER = 0xe0020;
@@ -87,7 +87,12 @@ const groupedCategories: ReadonlySet<FindingCategory> = new Set([
 const isSurrogate = (codePoint: number): boolean =>
   codePoint >= 0xd800 && codePoint <= 0xdfff;
 
-/** The ASCII character a non-ASCII character imitates: its NFKC normalization, or its UTS #39 confusable for Latin characters NFKC keeps. */
+/**
+ * The ASCII text a non-ASCII character imitates: its NFKC normalization when
+ * that is one to three printable ASCII characters (fullwidth forms, the
+ * ligature U+FB01 for `fi`, the Roman numeral U+2161 for `II`), or its UTS #39
+ * confusable for Latin characters NFKC keeps.
+ */
 const findImitatedAscii = (
   character: string,
   codePoint: number,
@@ -99,7 +104,7 @@ const findImitatedAscii = (
     return undefined;
   }
   const normalized = character.normalize('NFKC');
-  return printableAsciiCharacterPattern.test(normalized)
+  return imitatedAsciiTextPattern.test(normalized)
     ? normalized
     : latinConfusables.get(codePoint);
 };
