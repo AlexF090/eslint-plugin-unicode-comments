@@ -23,7 +23,7 @@ In comments, strings, and prose, the rule accepts characters that are part of a 
 
 - ZERO WIDTH JOINER inside emoji ZWJ sequences (family, profession, and flag emoji), at most three per sequence like the longest RGI sequences
 - VARIATION SELECTOR-15/16 directly after a pictographic emoji, and VARIATION SELECTOR-16 in a keycap sequence (`1`, `#`, or `*`, then U+20E3); a selector after a bare digit, `#`, or `*` is reported
-- VARIATION SELECTOR-1 to -14 after a base character that StandardizedVariants.txt lists for that selector (standardized variation sequences, such as the CJK compatibility ideographs); any other pair, and any selector after an ASCII character (StandardizedVariants.txt lists DIGIT ZERO), is reported
+- VARIATION SELECTOR-1 to -14 and the Mongolian free variation selectors (U+180B - U+180D, U+180F) after a base character that StandardizedVariants.txt lists for that selector (standardized variation sequences, such as the CJK compatibility ideographs and Mongolian letters; MONGOLIAN VOWEL SEPARATOR, U+180E, is always reported); any other pair, and any selector after an ASCII character (StandardizedVariants.txt lists DIGIT ZERO), is reported
 - the tag sequences of the England, Scotland, and Wales flags
 - ZERO WIDTH JOINER and NON-JOINER after a letter (optionally followed by combining marks) and before a letter or mark, when both belong by their Script property to a script that needs joiners for shaping (Arabic, Persian, Syriac, Indic scripts, Khmer, Myanmar, Tibetan, Mongolian); marks shared with Latin, such as U+0951, do not qualify
 
