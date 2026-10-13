@@ -1,72 +1,98 @@
 {
-  "name": "eslint-plugin-unicode-comments",
-  "version": "2.1.3",
-  "description": "ESLint plugin flagging dangerous Unicode characters (Trojan Source, homograph attacks) and typographic tells of unedited AI-generated code (em dashes, curly quotes, ellipsis, non-breaking spaces)",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "name": "eslint-plugin-unicode-guard",
+  "version": "1.0.0",
+  "description": "ESLint plugin that makes AI-generated code safe to merge: flags invisible, bidirectional, confusable, private-use and other non-standard Unicode characters in code, comments, strings, JSON, Markdown, CSS, YAML, TOML, HTML and plain text files",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.js.map",
-    "dist/**/*.d.ts",
-    "dist/**/*.d.ts.map",
+    "dist",
+    "!dist/**/*.map",
+    "docs/rules",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "MIGRATION.md",
+    "SECURITY.md"
   ],
+  "sideEffects": false,
   "keywords": [
     "eslint",
+    "eslintplugin",
     "eslint-plugin",
     "unicode",
     "security",
     "trojan-source",
-    "homograph-attack"
+    "homograph",
+    "confusables",
+    "invisible-characters",
+    "zero-width",
+    "ascii-smuggling",
+    "ai-generated-code",
+    "llm",
+    "prompt-injection",
+    "supply-chain"
   ],
   "author": "AlexF090",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexF090/eslint-plugin-unicode-comments.git"
+    "url": "git+https://github.com/AlexF090/eslint-plugin-unicode-guard.git"
   },
   "bugs": {
-    "url": "https://github.com/AlexF090/eslint-plugin-unicode-comments/issues"
+    "url": "https://github.com/AlexF090/eslint-plugin-unicode-guard/issues"
   },
-  "homepage": "https://github.com/AlexF090/eslint-plugin-unicode-comments#readme",
-  "peerDependencies": {
-    "eslint": ">=8.40.0"
+  "homepage": "https://github.com/AlexF090/eslint-plugin-unicode-guard#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "peerDependencies": {
+    "eslint": "^9.38.0 || ^10.0.0"
+  },
+  "dependencies": {
+    "@eslint/core": "1.2.1",
+    "@eslint/plugin-kit": "0.7.3"
   },
   "scripts": {
-    "build": "tsc",
-    "type-check:tests": "tsc -p tsconfig.test.json",
+    "build": "tsc -p tsconfig.build.json",
+    "type-check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint .",
+    "lint:package": "publint --strict && attw --pack . --profile esm-only",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
+    "prepack": "npm run build",
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*.ts": [
+    "*.ts": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md}": [
+    "*.{json,md,yml}": [
+      "eslint --fix",
       "prettier --write"
     ]
   },
   "devDependencies": {
-    "@types/eslint": "9.6.1",
+    "@arethetypeswrong/cli": "0.18.5",
+    "@eslint/css": "2.0.0",
+    "@eslint/json": "2.1.1",
+    "@eslint/markdown": "8.0.3",
+    "@html-eslint/eslint-plugin": "0.66.1",
     "@types/node": "26.1.2",
     "@typescript-eslint/parser": "8.66.0",
     "@vitest/coverage-v8": "4.1.10",
@@ -74,9 +100,13 @@
     "eslint": "10.8.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-regexp": "3.1.1",
+    "eslint-plugin-toml": "1.5.0",
+    "eslint-plugin-yml": "3.9.0",
+    "fast-check": "4.10.2",
     "husky": "9.1.7",
     "lint-staged": "17.3.0",
     "prettier": "3.9.6",
+    "publint": "0.3.25",
     "typescript": "6.0.3",
     "typescript-eslint": "8.66.0",
     "vitest": "4.1.10"
