@@ -3,10 +3,9 @@ import {
   allowOptionSchema,
   defaultAllowOptions,
   selectCategories,
-  type AllowRuleOptions,
 } from './allow-option.ts';
 
-export const noConfusableCharacters = createFindingRule<AllowRuleOptions>({
+export const noConfusableCharacters = createFindingRule({
   name: 'no-confusable-characters',
   type: 'problem',
   description:

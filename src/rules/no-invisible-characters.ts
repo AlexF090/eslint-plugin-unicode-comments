@@ -3,10 +3,9 @@ import {
   allowOptionSchema,
   defaultAllowOptions,
   selectCategories,
-  type AllowRuleOptions,
 } from './allow-option.ts';
 
-export const noInvisibleCharacters = createFindingRule<AllowRuleOptions>({
+export const noInvisibleCharacters = createFindingRule({
   name: 'no-invisible-characters',
   type: 'problem',
   description:

@@ -52,6 +52,14 @@ describe('language support', () => {
     ]);
   });
 
+  it.each([
+    ['a.toml', '# Gr\u00FC\u00DFe\nkey = 1\n'],
+    ['a.html', '<!-- Gr\u00FC\u00DFe --><p>x</p>'],
+    ['a.css', '/* Gr\u00FC\u00DFe */ a { color: red; }'],
+  ])('treats comments in %s as comments', (filename, code) => {
+    expect(ruleIdsOf(filename, code)).toEqual([]);
+  });
+
   it('treats YAML comments as comments', () => {
     expect(ruleIdsOf('a.yaml', '# Gr\u00FC\u00DFe\nkey: 1\n')).toEqual([]);
   });

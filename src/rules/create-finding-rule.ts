@@ -7,7 +7,7 @@ import type {
   RulesMeta,
   RuleType,
   RuleVisitor,
-  TextSourceCode,
+  SourceCode,
 } from '@eslint/core';
 import {
   compileAllowList,
@@ -30,21 +30,25 @@ import {
 const REPOSITORY_URL =
   'https://github.com/AlexF090/eslint-plugin-unicode-guard';
 
-export interface FindingRuleTypeOptions<RuleOptions extends unknown[]> {
+export interface FindingRuleTypeOptions {
   LangOptions: LanguageOptions;
-  Code: TextSourceCode;
-  RuleOptions: RuleOptions;
+  Code: SourceCode;
+  RuleOptions: unknown[];
   Visitor: RuleVisitor;
   Node: unknown;
   MessageIds: string;
   ExtRuleDocs: unknown;
 }
 
-export type FindingRule<RuleOptions extends unknown[] = unknown[]> =
-  RuleDefinition<FindingRuleTypeOptions<RuleOptions>>;
+/**
+ * Options are typed as `unknown[]` so the rules stay assignable to the rule
+ * types of every supported ESLint version; each rule validates its options
+ * with a JSON schema and reads them through a type guard.
+ */
+export type FindingRule = RuleDefinition<FindingRuleTypeOptions>;
 
-export type FindingRuleContext<RuleOptions extends unknown[]> = RuleContext<
-  Omit<FindingRuleTypeOptions<RuleOptions>, 'Visitor' | 'ExtRuleDocs'>
+export type FindingRuleContext = RuleContext<
+  Omit<FindingRuleTypeOptions, 'Visitor' | 'ExtRuleDocs'>
 >;
 
 /** How a finding may be corrected: applied automatically, offered as a suggestion, or not at all. */
@@ -53,13 +57,13 @@ export type Correction =
   | { kind: 'suggestion'; text: string; messageId: string }
   | undefined;
 
-export interface FindingRuleSettings<RuleOptions extends unknown[]> {
+export interface FindingRuleSettings {
   name: string;
   type: RuleType;
   description: string;
   messages: Record<string, string>;
   schema: NonNullable<RulesMeta['schema']>;
-  defaultOptions: RuleOptions;
+  defaultOptions: unknown[];
   /** Set when `correction` can return `{ kind: 'fix' }`. */
   fixable?: boolean;
   /**
@@ -69,7 +73,7 @@ export interface FindingRuleSettings<RuleOptions extends unknown[]> {
    * the rule name.
    */
   createSelector(
-    options: RuleOptions,
+    options: readonly unknown[],
     compileAllowList: (entries: readonly string[]) => CharacterPredicate,
   ): (finding: Finding) => boolean;
   messageId(finding: Finding): string;
@@ -133,10 +137,10 @@ const toRange = (finding: Finding): [number, number] => [
   finding.offset + finding.length,
 ];
 
-const reportFinding = <RuleOptions extends unknown[]>(
-  context: FindingRuleContext<RuleOptions>,
+const reportFinding = (
+  context: FindingRuleContext,
   sourceCode: LocatableSourceCode,
-  settings: FindingRuleSettings<RuleOptions>,
+  settings: FindingRuleSettings,
   finding: Finding,
 ): void => {
   const correction = settings.correction?.(finding);
@@ -172,9 +176,9 @@ const reportFinding = <RuleOptions extends unknown[]>(
  * and reports the findings `settings.selects` accepts. Rules do not declare
  * `meta.languages`, so ESLint runs them for every language.
  */
-export const createFindingRule = <RuleOptions extends unknown[]>(
-  settings: FindingRuleSettings<RuleOptions>,
-): FindingRule<RuleOptions> => {
+export const createFindingRule = (
+  settings: FindingRuleSettings,
+): FindingRule => {
   const hasSuggestions = Object.keys(settings.messages).some((messageId) =>
     messageId.startsWith('suggest'),
   );
@@ -202,7 +206,7 @@ export const createFindingRule = <RuleOptions extends unknown[]>(
       const checkFile = () => {
         if (!isLocatableSourceCode(sourceCode)) {
           throw new Error(
-            `unicode-guard/${settings.name}: the source code object of this language has no getLocFromIndex() method, so findings cannot be located.`,
+            `unicode-guard/${settings.name}: the source code object of this language is not text or has no getLocFromIndex() method, so findings cannot be located.`,
           );
         }
         const selected = scanSourceCode(sourceCode).filter(selects);

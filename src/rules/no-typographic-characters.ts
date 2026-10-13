@@ -3,10 +3,9 @@ import {
   allowOptionSchema,
   defaultAllowOptions,
   selectCategories,
-  type AllowRuleOptions,
 } from './allow-option.ts';
 
-export const noTypographicCharacters = createFindingRule<AllowRuleOptions>({
+export const noTypographicCharacters = createFindingRule({
   name: 'no-typographic-characters',
   type: 'suggestion',
   description:

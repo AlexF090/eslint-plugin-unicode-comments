@@ -3,10 +3,9 @@ import {
   allowOptionSchema,
   defaultAllowOptions,
   selectCategories,
-  type AllowRuleOptions,
 } from './allow-option.ts';
 
-export const noBidiControl = createFindingRule<AllowRuleOptions>({
+export const noBidiControl = createFindingRule({
   name: 'no-bidi-control',
   type: 'problem',
   description:

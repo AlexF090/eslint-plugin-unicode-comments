@@ -3,10 +3,9 @@ import {
   allowOptionSchema,
   defaultAllowOptions,
   selectCategories,
-  type AllowRuleOptions,
 } from './allow-option.ts';
 
-export const noUnusualWhitespace = createFindingRule<AllowRuleOptions>({
+export const noUnusualWhitespace = createFindingRule({
   name: 'no-unusual-whitespace',
   type: 'problem',
   description:

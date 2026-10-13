@@ -1,10 +1,13 @@
 import { sourceContexts, type SourceContext } from '../core/source-context.ts';
-import { allowEntrySchema, characterOf } from './allow-option.ts';
+import { isRecord } from '../languages/syntax-element.ts';
+import {
+  allowEntrySchema,
+  characterOf,
+  isStringArray,
+} from './allow-option.ts';
 import { createFindingRule } from './create-finding-rule.ts';
 
 export type ContextPolicy = Partial<Record<SourceContext, string[]>>;
-
-export type AllowedCharactersOptions = [ContextPolicy];
 
 /** Any visible character: letters, marks, numbers, punctuation, and symbols (including emoji). */
 export const visibleCharacters = [
@@ -31,7 +34,7 @@ export const strictContextPolicy: Required<ContextPolicy> = {
   text: [],
 };
 
-export const allowedCharacters = createFindingRule<AllowedCharactersOptions>({
+export const allowedCharacters = createFindingRule({
   name: 'allowed-characters',
   type: 'problem',
   description:
@@ -51,10 +54,14 @@ export const allowedCharacters = createFindingRule<AllowedCharactersOptions>({
   ],
   defaultOptions: [recommendedContextPolicy],
   createSelector: ([policy], compileAllowList) => {
+    const readEntries = (context: SourceContext): string[] => {
+      const entries = isRecord(policy) ? policy[context] : undefined;
+      return isStringArray(entries) ? entries : [];
+    };
     const isAllowedIn = Object.fromEntries(
       sourceContexts.map((context) => [
         context,
-        compileAllowList(policy[context] ?? []),
+        compileAllowList(readEntries(context)),
       ]),
     );
     return (finding) =>
