@@ -98,6 +98,8 @@ describe('scanText', () => {
       ['estimated symbol in a domain', 'githu\u212E.com', ['e']],
       ['modifier letter minus in an option', 'rm \u02D7rf /', ['-']],
       ['mathematical bold small alpha in a word', 'p\u{1D6C2}ypal', ['a']],
+      ['Han number zero in a domain', 'g\u3007\u3007gle.com', ['O', 'O']],
+      ['Katakana no as a slash', 'example.com\u30CEevil', ['/']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });
@@ -113,6 +115,15 @@ describe('scanText', () => {
       ['a Japanese wave dash between digits', '1\u301C3'],
       ['a Devanagari danda', '\u0939\u0948\u0964 next'],
       ['a Hawaiian okina', 'Hawai\u02BBi'],
+      [
+        'Japanese text next to Latin',
+        'iPhone\u306E\u4F7F\u3044\u65B9\u3068Web\u30A8\u30F3\u30B8\u30CB\u30A2',
+      ],
+      ['Korean text next to Latin', 'API\uC124\uACC4\uC640 React\uAC1C\uBC1C'],
+      [
+        'Chinese text next to Latin',
+        '\u4F7F\u7528React\u5F00\u53D1\u7B2C3\u7248',
+      ],
     ])('does not report %s', (_name, text) => {
       expect(lookalikesOf(text, 'text')).toEqual([]);
     });

@@ -2,12 +2,14 @@
 // Derived from the Unicode Character Database and UTS #39 data files,
 // Copyright Unicode, Inc., Unicode License v3: https://www.unicode.org/license.txt
 
-/** Code point of no particular script to the ASCII letter, digit, or URL character it imitates (UTS #39), for characters NFKC keeps as they are. */
-export const commonScriptConfusables: ReadonlyMap<number, string> = new Map([
+/** Code point of no particular script or of a CJK script to the ASCII letter, digit, or URL character it imitates (UTS #39), for characters NFKC keeps as they are. */
+export const asciiNeighborConfusables: ReadonlyMap<number, string> = new Map([
   [0x02d0, ':'],
   [0x02d7, '-'],
   [0x02dc, '~'],
   [0x02f8, ':'],
+  [0x110b, 'o'],
+  [0x11bc, 'o'],
   [0x2010, '-'],
   [0x2011, '-'],
   [0x2012, '-'],
@@ -53,11 +55,24 @@ export const commonScriptConfusables: ReadonlyMap<number, string> = new Map([
   [0x29f9, '\\'],
   [0x2a2f, 'x'],
   [0x2e40, '='],
+  [0x2f02, '\\'],
+  [0x2f03, '/'],
+  [0x3007, 'O'],
+  [0x30ce, '/'],
+  [0x3112, 'T'],
+  [0x311a, 'Y'],
+  [0x3147, 'o'],
+  [0x4e05, 'T'],
+  [0x4e2b, 'Y'],
+  [0x4e36, '\\'],
+  [0x4e3f, '/'],
   [0xa789, ':'],
   [0xa78a, '='],
   [0xfe30, ':'],
   [0xfe31, 'l'],
   [0xfe58, '-'],
+  [0xff89, '/'],
+  [0xffb7, 'o'],
   [0xffe8, 'l'],
   [0x10190, '='],
   [0x10191, '-'],

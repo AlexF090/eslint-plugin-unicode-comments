@@ -1,4 +1,4 @@
-import { commonScriptConfusables } from './common-script-confusables.ts';
+import { asciiNeighborConfusables } from './ascii-neighbor-confusables.ts';
 import { latinConfusables } from './latin-confusables.ts';
 import {
   asciiWordOrUrlCharacterPattern,
@@ -211,9 +211,9 @@ export const groupFindings = (
   return grouped;
 };
 
-const isCommonScriptLookalikeCandidate = (finding: Finding): boolean =>
+const isAsciiNeighborLookalikeCandidate = (finding: Finding): boolean =>
   finding.category === 'other' &&
-  commonScriptConfusables.has(finding.codePoint);
+  asciiNeighborConfusables.has(finding.codePoint);
 
 const touchesAsciiWordOrUrl = (
   text: string,
@@ -237,7 +237,7 @@ const touchesAsciiWordOrUrl = (
  * digit, or URL character. Between spaces, as in `a <U+2215> b`, they are
  * ordinary symbols.
  */
-const applyCommonScriptLookalikes = (
+const applyAsciiNeighborLookalikes = (
   text: string,
   findings: Iterable<Finding>,
 ): void => {
@@ -246,7 +246,7 @@ const applyCommonScriptLookalikes = (
       return;
     }
     for (const finding of run) {
-      const imitates = commonScriptConfusables.get(finding.codePoint);
+      const imitates = asciiNeighborConfusables.get(finding.codePoint);
       if (imitates === undefined) {
         continue;
       }
@@ -257,7 +257,7 @@ const applyCommonScriptLookalikes = (
 
   let run: Finding[] = [];
   for (const finding of findings) {
-    if (!isCommonScriptLookalikeCandidate(finding)) {
+    if (!isAsciiNeighborLookalikeCandidate(finding)) {
       continue;
     }
     const previous = run.at(-1);
@@ -363,7 +363,7 @@ export const scanText = (
     });
   }
 
-  applyCommonScriptLookalikes(text, findingsByOffset.values());
+  applyAsciiNeighborLookalikes(text, findingsByOffset.values());
   applyMixedScriptFindings(text, findingsByOffset, resolveContext);
 
   return [...findingsByOffset.values()].sort(

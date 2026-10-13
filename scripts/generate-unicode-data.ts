@@ -6,11 +6,12 @@
  * - `latin-confusables.ts`: Latin characters that UTS #39 lists as
  *   confusable with one printable ASCII character and that NFKC does not
  *   already map to ASCII (those are found by normalization).
- * - `common-script-confusables.ts`: characters of no particular script
- *   (Script Common or Inherited, used in Latin text or in any script) that
- *   UTS #39 lists as confusable
- *   with one ASCII letter, digit, or character used in URLs, paths, and
- *   command-line options, and that NFKC does not map to ASCII.
+ * - `ascii-neighbor-confusables.ts`: characters that mixed-script detection
+ *   cannot catch next to Latin, because they have no particular script
+ *   (Script Common or Inherited, used in Latin text or in any script) or
+ *   belong to a CJK script that may mix with Latin, and that UTS #39 lists
+ *   as confusable with one ASCII letter, digit, or character used in URLs,
+ *   paths, and command-line options, and that NFKC does not map to ASCII.
  * - `standardized-variation-sequences.ts`: base characters and the
  *   variation selectors VS1 to VS16 that StandardizedVariants.txt defines
  *   for them.
@@ -42,6 +43,11 @@ const commonScriptPattern = /^[\p{Script=Common}\p{Script=Inherited}]$/u;
 // of those scripts' prose and stay out.
 const usedInLatinTextPattern =
   /^[\p{Script_Extensions=Common}\p{Script_Extensions=Inherited}\p{Script_Extensions=Latin}]$/u;
+// Scripts that mixed-script detection accepts next to Latin (Japanese,
+// Chinese, and Korean text); see `allowedScriptCombinations` in
+// `src/core/mixed-script.ts`.
+const scriptsMixedWithLatinPattern =
+  /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}]$/u;
 const scriptsWithoutLetters = new Set(['Common', 'Inherited', 'Unknown']);
 
 interface Confusable {
@@ -101,14 +107,16 @@ const collectAsciiConfusables = (data: string): Confusable[] => {
 const isLatinConfusable = ({ codePoint }: Confusable): boolean =>
   latinPattern.test(String.fromCodePoint(codePoint));
 
-const isCommonScriptConfusable = ({
+const isAsciiNeighborConfusable = ({
   codePoint,
   imitated,
 }: Confusable): boolean => {
   const character = String.fromCodePoint(codePoint);
-  return (
+  const isNeutral =
     commonScriptPattern.test(character) &&
-    usedInLatinTextPattern.test(character) &&
+    usedInLatinTextPattern.test(character);
+  return (
+    (isNeutral || scriptsMixedWithLatinPattern.test(character)) &&
     !lookalikeExclusionPattern.test(character) &&
     asciiWordOrUrlCharacterPattern.test(imitated)
   );
@@ -188,12 +196,12 @@ const writeLatinConfusables = (confusables: Confusable[]): Promise<void> =>
     `/** Latin code point to the ASCII character it imitates (UTS #39), for characters NFKC keeps as they are. */\nexport const latinConfusables: ReadonlyMap<number, string> = new Map([\n${confusableEntries(confusables)}\n]);\n`,
   );
 
-const writeCommonScriptConfusables = (
+const writeAsciiNeighborConfusables = (
   confusables: Confusable[],
 ): Promise<void> =>
   writeFormatted(
-    'common-script-confusables.ts',
-    `/** Code point of no particular script to the ASCII letter, digit, or URL character it imitates (UTS #39), for characters NFKC keeps as they are. */\nexport const commonScriptConfusables: ReadonlyMap<number, string> = new Map([\n${confusableEntries(confusables)}\n]);\n`,
+    'ascii-neighbor-confusables.ts',
+    `/** Code point of no particular script or of a CJK script to the ASCII letter, digit, or URL character it imitates (UTS #39), for characters NFKC keeps as they are. */\nexport const asciiNeighborConfusables: ReadonlyMap<number, string> = new Map([\n${confusableEntries(confusables)}\n]);\n`,
   );
 
 const writeStandardizedVariationSequences = (
@@ -227,8 +235,8 @@ const [confusablesData, standardizedVariantsData, aliasesData] =
   ]);
 const asciiConfusables = collectAsciiConfusables(confusablesData);
 await writeLatinConfusables(asciiConfusables.filter(isLatinConfusable));
-await writeCommonScriptConfusables(
-  asciiConfusables.filter(isCommonScriptConfusable),
+await writeAsciiNeighborConfusables(
+  asciiConfusables.filter(isAsciiNeighborConfusable),
 );
 await writeStandardizedVariationSequences(
   collectStandardizedVariationSequences(standardizedVariantsData),
