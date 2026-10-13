@@ -12,6 +12,6 @@ Terms used consistently across code, tests, and documentation.
 - **Language adapter**: maps an ESLint `SourceCode` of one language to context ranges and a default context for uncovered text.
 - **Category**: the single classification a scanned character receives: `bidi-control`, `invisible`, `control`, `private-use`, `unassigned`, `surrogate`, `unusual-whitespace`, `typographic`, `lookalike`, `mixed-script`, or `other`.
 - **Finding**: one categorised character occurrence: offset, length, code point, category, source context, and an optional ASCII replacement.
-- **Vetted sequence**: an otherwise suspicious character accepted because it is part of a legitimate sequence (emoji ZWJ sequence, emoji presentation selector, ideographic variation selector, RGI subdivision flag, joiner between letters of a joining script). Only accepted in `comment`, `string`, and `text`.
+- **Vetted sequence**: an otherwise suspicious character accepted because it is part of a legitimate sequence (emoji ZWJ sequence of at most three joiners, emoji presentation selector after a pictograph or in a keycap, standardized variation selector after an ideograph, RGI subdivision flag, joiner between letters of a joining script). Only accepted in `comment`, `string`, and `text`.
 - **Allow entry**: one item of an `allow` option: a literal character, `U+XXXX`, a range `U+XXXX..U+YYYY`, or a Unicode property escape such as `\p{Script=Latin}`.
 - **Context policy**: the allow entries per source context used by `allowed-characters`.

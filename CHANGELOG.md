@@ -15,7 +15,7 @@ First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unic
 - Plain text language `unicode-guard/text` for files without an ESLint parser.
 - Presets `recommended`, `strict`, `relaxed`, and `ai-instructions` (assistant instruction files such as `AGENTS.md`, `CLAUDE.md`, `.cursorrules`).
 - Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, and NFKC lookalikes.
-- Accepted sequences for emoji, subdivision flags, ideographic variation sequences, and joiners in joining scripts.
+- Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences, and joiners in joining scripts. Ideographic variation selectors (VS17 to VS256) are always reported.
 - `allow` options with code points, ranges, and Unicode property escapes; per-context policy for `allowed-characters`.
 - Autofixes for typographic characters and unusual whitespace outside strings, suggestions inside strings.
 - Regression corpus of published attacks.

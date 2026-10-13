@@ -169,9 +169,49 @@ describe('scanText', () => {
         '\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}',
       ],
       ['Persian ZWNJ', '\u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u0645'],
-      ['ideographic variation sequence', '\u845B\u{E0100}'],
+      ['standardized variation sequence', '\u845B\uFE00'],
+      ['text presentation selector', '\u2764\uFE0E'],
+      [
+        'kiss ZWJ sequence with three joiners',
+        '\u{1F469}\u200D\u2764\uFE0F\u200D\u{1F48B}\u200D\u{1F468}',
+      ],
     ])('accepts a %s in prose', (_name, text) => {
       expect(categoriesOf(scanAs(text, 'string'))).not.toContain('invisible');
+    });
+
+    it.each([
+      ['an ASCII digit', '1\uFE0F'],
+      ['an ASCII digit with text presentation', '1\uFE0E'],
+      ['a number sign', '#\uFE0F'],
+      ['an asterisk', '*\uFE0E\u20E3'],
+    ])('rejects a variation selector after %s', (_name, text) => {
+      expect(categoriesOf(scanAs(text, 'string'))).toContain('invisible');
+    });
+
+    it('rejects variation selectors hidden between digits', () => {
+      const findings = scanAs('Version 1\uFE0F0\uFE0E2\uFE0F', 'text');
+      expect(categoriesOf(findings)).toEqual([
+        'invisible',
+        'invisible',
+        'invisible',
+      ]);
+    });
+
+    it('rejects an ideographic variation selector (VS17 to VS256)', () => {
+      expect(categoriesOf(scanAs('\u845B\u{E0100}', 'string'))).toEqual([
+        'other',
+        'invisible',
+      ]);
+    });
+
+    it('rejects emoji ZWJ chains with more joiners than any RGI sequence', () => {
+      const chain = Array.from({ length: 5 }, () => '\u{1F600}').join('\u200D');
+      const findings = scanAs(chain, 'string').filter(
+        (finding) => finding.category === 'invisible',
+      );
+      expect(findings).toEqual([
+        expect.objectContaining({ category: 'invisible', codePoint: 0x200d }),
+      ]);
     });
 
     it('rejects a ZWJ between Latin letters', () => {
@@ -192,8 +232,8 @@ describe('scanText', () => {
       expect(findings).toEqual([
         expect.objectContaining({
           category: 'invisible',
-          codePoint: 0xe0101,
-          count: 3,
+          codePoint: 0xe0100,
+          count: 4,
         }),
       ]);
     });

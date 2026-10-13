@@ -21,13 +21,19 @@ Runs of adjacent characters are reported as one problem.
 
 In comments, strings, and prose, the rule accepts characters that are part of a legitimate sequence:
 
-- ZERO WIDTH JOINER inside emoji ZWJ sequences (family, profession, and flag emoji)
-- VARIATION SELECTOR-15/16 directly after an emoji, including keycaps
-- one variation selector after a CJK ideograph (standardized and ideographic variation sequences)
+- ZERO WIDTH JOINER inside emoji ZWJ sequences (family, profession, and flag emoji), at most three per sequence like the longest RGI sequences
+- VARIATION SELECTOR-15/16 directly after a pictographic emoji, and VARIATION SELECTOR-16 in a keycap sequence (`1`, `#`, or `*`, then U+20E3); a selector after a bare digit, `#`, or `*` is reported
+- VARIATION SELECTOR-1 to -14 after a CJK ideograph (standardized variation sequences)
 - the tag sequences of the England, Scotland, and Wales flags
 - ZERO WIDTH JOINER and NON-JOINER between two letters of scripts that need them for shaping (Arabic, Persian, Syriac, Indic scripts, Khmer, Myanmar, Tibetan, Mongolian)
 
 In code and identifiers, none of these exceptions apply.
+
+Ideographic variation selectors (VS17 to VS256, U+E0100 - U+E01EF) are always reported: one selector after any ideograph can carry a hidden byte, and telling legitimate ideographic variation sequences apart would need the Ideographic Variation Database. If your text uses them, allow them explicitly:
+
+```js
+'unicode-guard/no-invisible-characters': ['error', { allow: ['U+E0100..U+E01EF'] }],
+```
 
 Examples of **incorrect** code (`<U+3164>` stands for the invisible character):
 

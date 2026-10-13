@@ -15,6 +15,8 @@ const ZERO_WIDTH_SPACE = '\u200B';
 const ZERO_WIDTH_JOINER = '\u200D';
 const CYRILLIC_SMALL_A = '\u0430';
 const CYRILLIC_SMALL_O = '\u043E';
+const TEXT_PRESENTATION_SELECTOR = '\uFE0E';
+const EMOJI_PRESENTATION_SELECTOR = '\uFE0F';
 
 const toTagCharacters = (text: string): string =>
   [...text]
@@ -130,6 +132,26 @@ const attackSamples: AttackSample[] = [
     expectedRuleIds: [
       'unicode-guard/no-bidi-control',
       'unicode-guard/no-bidi-control',
+    ],
+  },
+  {
+    name: 'Bits hidden in emoji presentation selectors after digits',
+    source: 'Variation selector smuggling on keycap emoji bases',
+    filename: 'CLAUDE.md',
+    code: `Use version 1${EMOJI_PRESENTATION_SELECTOR}0${TEXT_PRESENTATION_SELECTOR}2${EMOJI_PRESENTATION_SELECTOR} of the API.\n`,
+    expectedRuleIds: Array.from(
+      { length: 3 },
+      () => 'unicode-guard/no-invisible-characters',
+    ),
+  },
+  {
+    name: 'One byte per ideograph in ideographic variation selectors',
+    source: 'Variation selector smuggling on CJK bases',
+    filename: 'notes.js',
+    code: `// \u4E2D\u{E0110}\u6587\u{E0120}\nexport {};\n`,
+    expectedRuleIds: [
+      'unicode-guard/no-invisible-characters',
+      'unicode-guard/no-invisible-characters',
     ],
   },
   {
