@@ -1,111 +1,36 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
+All notable changes to this project are documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
+## [1.0.0]
 
-- CI now runs a matrix against ESLint `8.x`, `9.x`, and `10.x`, verifying
-  the `peerDependencies.eslint: ">=8.40.0"` claim across all three majors
-  instead of only the pinned devDependency version.
-- CI now runs `npm audit --audit-level=moderate` as a required gate.
-- Weekly automated dependency updates via Dependabot (`npm` and
-  `github-actions` ecosystems).
-
-### Fixed
-
-- Test suite's `RuleTester` usage now works under ESLint 8, whose default
-  `RuleTester` rejects flat-config options like `languageOptions`.
-
-## [2.1.0] - 2026-08-07
+First release as `eslint-plugin-unicode-guard`, a rewrite of `eslint-plugin-unicode-comments` 2.1.3. See [MIGRATION.md](MIGRATION.md).
 
 ### Added
 
-- New `-style` rule variants (`dangerous-unicode-style`,
-  `dangerous-unicode-literals-style`, `dangerous-unicode-template-literals-style`)
-  covering typographic tells of unedited AI-generated text (Unicode
-  hyphens/dashes, Unicode quotes, ellipsis, non-breaking/thin/figure space,
-  bullet). Registered at `warn` severity in the `recommended` presets,
-  separate from the `error`-level security rules (Trojan Source, homograph,
-  math spoofing, fullwidth ASCII, invisible characters).
-- Detection of three additional typographic AI-generated text tells: thin
-  space (U+2009), figure space (U+2007), and bullet (U+2022), all
-  auto-fixable in comments via the existing `unicodeToAsciiMap`.
-- CI workflow (`.github/workflows/ci.yml`) running build, lint, format-check,
-  and tests on every push/PR against `main`.
-- Release workflow (`.github/workflows/release.yml`) publishing to npm via
-  Trusted Publishing on tagged releases.
-- Pre-commit hooks via Husky + lint-staged.
-- `.npmrc` with supply-chain hardening (`save-exact`, `engine-strict`,
-  `strict-ssl`).
-- `LICENSE` file (MIT).
+- Seven rules split by kind of character: `no-bidi-control`, `no-invisible-characters`, `no-private-use-or-unassigned-characters`, `no-confusable-characters`, `no-unusual-whitespace`, `no-typographic-characters`, `allowed-characters`.
+- Scanning of the raw source text of every ESLint language: JavaScript, TypeScript, JSX, JSON, Markdown, CSS, YAML, TOML, HTML.
+- Plain text language `unicode-guard/text` for files without an ESLint parser.
+- Presets `recommended`, `strict`, `relaxed`, and `ai-instructions` (assistant instruction files such as `AGENTS.md`, `CLAUDE.md`, `SKILL.md`, `.cursorrules`, matched in any letter case, with inline configuration comments disabled).
+- Detection of tag characters (with the hidden text decoded in the message), stray variation selectors, private-use characters, unassigned code points, control characters, Hangul fillers, all Unicode spaces, mixed-script words, NFKC lookalikes (including ligatures and Roman numerals that read as ASCII letter pairs), and Latin lookalikes from UTS #39 such as the dotless i and letters that imitate two ASCII letters (U+A74F for `oo`), lookalikes of no particular script or of CJK scripts next to ASCII (division and fraction slashes, modifier letter colon, mathematical Greek, IDEOGRAPHIC NUMBER ZERO), blank fillers, and carriage returns that are not followed by a line feed.
+- Accepted sequences for emoji, keycaps, subdivision flags, standardized variation sequences listed in StandardizedVariants.txt (including the Mongolian free variation selectors), and joiners between letters of a joining script. Ideographic variation selectors (VS17 to VS256) are always reported.
+- Messages put the replacement and the imitated ASCII text in backticks. The `ai-instructions` preset also covers `QWEN.md`, `CRUSH.md`, `WARP.md`, `.goosehints`, `.openhands/microagents`, and `.claude/skills`.
+- `allow` options with code points, ranges, and Unicode property escapes (escapes that would allow almost everything are rejected); per-context policy for `allowed-characters`.
+- Autofix for unusual whitespace between JavaScript and TypeScript tokens. No other fixes and no editor suggestions: messages name the ASCII replacement, because any automatic or suggested change could create syntax.
+- Regression corpus of published attacks.
 
 ### Changed
 
-- Narrowed Cyrillic/Greek homograph detection across all rules to a
-  consistent, visually-confusable subset (previously inconsistent between
-  `dangerous-literals` and the other rules, which used full alphabet ranges).
-- Corrected the Mathematical Alphanumeric Symbols check in
-  `dangerous-comments`/`dangerous-template-literals` to match the full
-  UTF-16 surrogate pair instead of the bare high surrogate.
-- The original rule names (`dangerous-unicode`, `dangerous-unicode-literals`,
-  `dangerous-unicode-template-literals`) now cover security categories only;
-  enable the corresponding `-style` rule to keep flagging Unicode
-  dashes/quotes/typographic artifacts under those rule names.
-- Updated dependencies to latest compatible versions: ESLint 10, Vitest 4,
-  TypeScript 6.0, `@types/node` 20.
-- Corrected `peerDependencies.eslint` floor from `>=8.0.0` to `>=8.40.0`
-  (the minimum version providing `context.sourceCode`, which the
-  `dangerous-unicode` rule relies on).
-- Raised `engines.node` to `>=20.0.0` to track the current Active LTS line.
-- Added a modern `exports` map alongside `main`/`types` in `package.json`.
+- Requires ESLint `^9.38.0 || ^10.0.0` and Node.js `^22.13.0 || >=24`; ESM only; flat configuration only.
+- Problems point to the exact character and name its code point.
+- Escape sequences in literals are no longer reported.
 
-### Fixed
+### Removed
 
-- Removed dead/unreachable zero-width character check in
-  `dangerous-literals` (shadowed by an identical earlier check).
-- The `dangerous-comments` fixer no longer reports a no-op fix for
-  categories it cannot actually fix (Trojan Source, homographs, math
-  spoofing, fullwidth ASCII, invisible characters) — those categories moved
-  to the detect-only security rule, while fixable categories moved to the
-  new `-style` rule.
-- Added `dist/**/*.js.map` and `dist/**/*.d.ts.map` to the published `files`
-  allowlist so source maps ship with the package.
-- Added a Flat Config-compatible preset (`configs['flat/recommended']`) so
-  ESLint 9+ users no longer have to list all rules manually.
+- ESLint 8 and `.eslintrc` support.
+- All rule names of `eslint-plugin-unicode-comments`.
 
-## [2.0.1] - 2025-08-22
-
-### Fixed
-
-- CommonJS compatibility fix for legacy ESLint 8 `.eslintrc` consumers.
-
-## [2.0.0] - 2025-08-22
-
-### Added
-
-- Legacy ESLint config support (`.eslintrc`) alongside the flat config
-  `recommended` export.
-
-### Changed
-
-- Restructured the plugin into one rule per file under `src/rules/`.
-
-## [1.0.0] - 2025-08-22
-
-### Added
-
-- Initial release: `dangerous-unicode`, `dangerous-unicode-literals`,
-  `dangerous-unicode-template-literals`, and `dangerous-unicode-identifiers`
-  rules detecting Trojan Source, homograph, invisible/zero-width, and
-  fullwidth Unicode characters in comments, literals, and identifiers.
-
-[unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.1.0...HEAD
-[2.1.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.0.1...v2.1.0
-[2.0.1]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v2.0.0...v2.0.1
-[2.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-comments/releases/tag/v1.0.0
+[Unreleased]: https://github.com/AlexF090/eslint-plugin-unicode-guard/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/AlexF090/eslint-plugin-unicode-guard/releases/tag/v1.0.0

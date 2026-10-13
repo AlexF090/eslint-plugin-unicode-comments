@@ -1,64 +1,40 @@
-import type { Rule } from 'eslint';
-import dangerousComments from './rules/dangerous-comments';
-import dangerousCommentsStyle from './rules/dangerous-comments-style';
-import dangerousIdentifiers from './rules/dangerous-identifiers';
-import dangerousLiterals from './rules/dangerous-literals';
-import dangerousLiteralsStyle from './rules/dangerous-literals-style';
-import dangerousTemplateLiterals from './rules/dangerous-template-literals';
-import dangerousTemplateLiteralsStyle from './rules/dangerous-template-literals-style';
+import type { Plugin } from '@eslint/core';
+import { textLanguage } from './languages/text-language.ts';
+import { readPackageMetadata } from './package-metadata.ts';
+import { PLUGIN_NAMESPACE } from './plugin-namespace.ts';
+import { attachPlugin, createPresets } from './presets.ts';
+import { allowedCharacters } from './rules/allowed-characters.ts';
+import { noBidiControl } from './rules/no-bidi-control.ts';
+import { noConfusableCharacters } from './rules/no-confusable-characters.ts';
+import { noInvisibleCharacters } from './rules/no-invisible-characters.ts';
+import { noPrivateUseOrUnassignedCharacters } from './rules/no-private-use-or-unassigned-characters.ts';
+import { noTypographicCharacters } from './rules/no-typographic-characters.ts';
+import { noUnusualWhitespace } from './rules/no-unusual-whitespace.ts';
 
-const plugin: {
-  rules: Record<string, Rule.RuleModule>;
-  configs: Record<string, unknown>;
-} = {
-  rules: {
-    // Security rules (Trojan Source, homographs, obfuscation) - also registered under
-    // their original names for backwards compatibility with existing configs.
-    'dangerous-unicode': dangerousComments,
-    'dangerous-unicode-security': dangerousComments,
-    'dangerous-unicode-literals': dangerousLiterals,
-    'dangerous-unicode-literals-security': dangerousLiterals,
-    'dangerous-unicode-template-literals': dangerousTemplateLiterals,
-    'dangerous-unicode-template-literals-security': dangerousTemplateLiterals,
-    'dangerous-unicode-identifiers': dangerousIdentifiers,
+const { name, version } = readPackageMetadata();
 
-    // Style rules: typographic tells of unedited AI-generated text (dashes, quotes,
-    // ellipsis, non-breaking/thin/figure space, bullet). Not a security concern.
-    'dangerous-unicode-style': dangerousCommentsStyle,
-    'dangerous-unicode-literals-style': dangerousLiteralsStyle,
-    'dangerous-unicode-template-literals-style': dangerousTemplateLiteralsStyle,
-  },
-  configs: {},
+const rules = {
+  'allowed-characters': allowedCharacters,
+  'no-bidi-control': noBidiControl,
+  'no-confusable-characters': noConfusableCharacters,
+  'no-invisible-characters': noInvisibleCharacters,
+  'no-private-use-or-unassigned-characters': noPrivateUseOrUnassignedCharacters,
+  'no-typographic-characters': noTypographicCharacters,
+  'no-unusual-whitespace': noUnusualWhitespace,
 };
 
-const recommendedRules = {
-  'unicode-comments/dangerous-unicode': 'error',
-  'unicode-comments/dangerous-unicode-literals': 'error',
-  'unicode-comments/dangerous-unicode-template-literals': 'error',
-  'unicode-comments/dangerous-unicode-identifiers': 'error',
-  'unicode-comments/dangerous-unicode-style': 'warn',
-  'unicode-comments/dangerous-unicode-literals-style': 'warn',
-  'unicode-comments/dangerous-unicode-template-literals-style': 'warn',
-};
+const presets = createPresets();
 
-plugin.configs = {
-  recommended: {
-    // Legacy config (ESLint 8 and below)
-    plugins: ['unicode-comments'],
-    rules: recommendedRules,
-  },
-  'flat/recommended': {
-    // Flat config (ESLint 9+)
-    plugins: { 'unicode-comments': plugin },
-    rules: recommendedRules,
-  },
-};
+const plugin = {
+  meta: { name, version, namespace: PLUGIN_NAMESPACE },
+  rules,
+  languages: { text: textLanguage },
+  configs: presets,
+} satisfies Plugin;
 
-// ESLint Flat Config support
+attachPlugin(presets, plugin);
+
 export default plugin;
 
-// Legacy ESLint Config support - ensure CommonJS compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = plugin;
-  module.exports.default = plugin;
-}
+// Lets CommonJS configuration files use `require('eslint-plugin-unicode-guard')` without `.default`.
+export { plugin as 'module.exports' };

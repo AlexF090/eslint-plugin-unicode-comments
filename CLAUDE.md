@@ -4,58 +4,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-ESLint plugin (`eslint-plugin-unicode-comments`) that detects dangerous and suspicious Unicode characters in comments, string literals, template literals, and identifiers. Rules are split into two severity-driven families:
+`eslint-plugin-unicode-guard`: ESLint plugin that reports hidden and deceptive Unicode (bidirectional controls, invisible characters, tag characters, confusables, unusual whitespace, typographic characters) in every file type ESLint can lint, so AI-generated code and AI instruction files are safe to review. It replaces the deprecated `eslint-plugin-unicode-comments` (same repository, see `MIGRATION.md` and `docs/adr/0004-new-package-name.md`).
 
-- **Security** (`error` in `recommended`): Trojan Source bidi overrides, homograph attacks (Cyrillic/Greek), zero-width/invisible characters, fullwidth ASCII variants, mathematical alphanumeric spoofing — real obfuscation/attack vectors.
-- **Style** (`warn` in `recommended`, `-style` rule name suffix): Unicode hyphens/dashes, Unicode quotes, and other typographic artifacts (ellipsis, non-breaking/thin/figure space, bullet) — this is the plugin's primary practical use case: flagging tells of unedited, AI-generated code. Not a security concern, hence lower default severity.
+Terms (source context, category, finding, vetted sequence, allow entry) are defined in `CONTEXT.md`. Design decisions are in `docs/adr/`.
 
 ## Commands
 
 ```bash
-npm run build          # Compile src/ -> dist/ via tsc
-npm test                # Run full test suite (vitest run)
-npm run test:watch      # Watch mode
-npm run test:coverage   # Coverage report (v8 provider)
-npm run test:ui         # Vitest UI
-npm run lint            # eslint src/**/*.ts (flat config in eslint.config.mjs)
-npm run format:check    # prettier --check .
-npm run format:write    # prettier --write .
+npm run build           # tsc -p tsconfig.build.json: src/ -> dist/
+npm run type-check      # tsc -p tsconfig.json --noEmit (src and tests)
+npm test                # vitest run
+npm run test:coverage
+npm run lint            # eslint . (dogfoods the plugin from src/, needs Node.js with type stripping: >=22.18)
+npm run lint:package    # publint + are-the-types-wrong against the packed tarball
+npm run format:check
+npm run generate:unicode-data  # regenerate the generated files in src/core/ after changing UNICODE_VERSION
 ```
 
-Run a single test file: `npx vitest run tests/dangerous-comments.test.ts`
-
-`npm run build` (tsc) is the type-check for `src/`. Test files are checked separately via `npm run type-check:tests` (`tsc -p tsconfig.test.json`), run in CI right after `npm run build`.
-
-`eslint.config.mjs` is ESM (`.mjs` extension) even though the package itself is CommonJS (`package.json` has no `"type": "module"`) — a plain `eslint.config.js` with `import` statements would fail to load under Node's default CJS resolution.
-
-## CI/CD & Release
-
-- `.github/workflows/ci.yml` — runs on every push/PR against `main` with two jobs. `audit` runs once (`npm ci`, `npm audit --audit-level=moderate`) against the checked-in `package-lock.json` — it's a single job rather than part of the matrix below because the lockfile is identical across all three ESLint majors, so auditing it three times would be redundant. `build-lint-test` (`needs: audit`) runs `npm ci`, `build`, `type-check:tests`, `lint`, `format:check`, `test`, `test:coverage` as a matrix over `eslint-version: ['8.57.1', '9.39.5', '10.8.1']` with `fail-fast: false` (so a failure on one ESLint major doesn't cancel the others) — after `npm ci` (which installs the `devDependencies`-pinned ESLint), each matrix leg overrides it via `npm install eslint@<version> --no-save` before the rest of the steps run, verifying the `peerDependencies.eslint: ">=8.40.0"` claim actually holds across all three majors. Merging to `main` does **not** publish anything by itself.
-- `.github/dependabot.yml` — weekly automated PRs for npm dependencies and GitHub Actions versions; ignores semver-major bumps of `eslint` since the CI matrix above pins specific ESLint majors by hand and needs a deliberate update, not an unattended Dependabot PR.
-- `.github/workflows/release.yml` — triggers only on a pushed tag matching `v*.*.*`. Publishes to npm via **Trusted Publishing (OIDC)** — no `NPM_TOKEN` secret, but requires the npmjs.com package's "Trusted Publisher" settings to reference this repo (`AlexF090/eslint-plugin-unicode-comments`) and workflow filename `release.yml`.
-- Tagging is **manual, not automated** (no semantic-release/release-please). After merging to `main`, cut a release with:
-  ```bash
-  git checkout main && git pull
-  npm version patch   # or minor/major — bumps package.json and creates the local git tag
-  git push --tags     # this push is what triggers release.yml
-  ```
-- `.husky/pre-commit` runs `lint-staged` (`eslint --fix` + `prettier --write` on staged files) — configured in `package.json`'s `lint-staged` field.
-- `.npmrc` pins `save-exact=true`, so all `devDependencies` are exact versions (no `^`/`~`); `ignore-scripts` is deliberately _not_ set since it would break Husky's own `prepare` hook.
+Run one test file: `npx vitest run tests/rules/no-bidi-control.test.ts`
 
 ## Architecture
 
-- `src/index.ts` — plugin entry point. Registers 10 rule ids in `rules` (4 security rules — also exposed under their original pre-split names for backwards compatibility — plus 3 `-security` aliases, 3 `-style` rules, and `dangerous-unicode-identifiers`), and exports `configs.recommended`/`configs['flat/recommended']` with mixed severities (`error` for security rule names, `warn` for `-style` rule names). Exports as both an ESM default export and, defensively, via `module.exports` for legacy CommonJS consumers (ESLint 8 `.eslintrc` `plugins`/`extends`). `index.ts` at the repo root re-exports from `dist` after build; `dist/index.js` is what `package.json`'s `main` points to.
-- `src/rules/*.ts` — each file is a standalone `Rule.RuleModule`, split by file type into a security variant and a style variant:
-  - `dangerous-comments.ts` (`dangerous-unicode`) / `dangerous-comments-style.ts` (`dangerous-unicode-style`) — scan all comments via `sourceCode.getAllComments()`. Only the style rule is **auto-fixable**: it replaces dangerous chars using `unicodeToAsciiMap` and rewrites the comment text; the security rule has no ASCII equivalent for its categories (Trojan Source, homographs, math spoofing) so it's detect-only.
-  - `dangerous-literals.ts` (`dangerous-unicode-literals`) / `dangerous-literals-style.ts` (`dangerous-unicode-literals-style`) — check `Literal` string nodes against a sequence of category-specific regexes, reporting the first category that matches with a category-specific message. Not fixable (raw string literal editing isn't attempted).
-  - `dangerous-template-literals.ts` (`dangerous-unicode-template-literals`) / `dangerous-template-literals-style.ts` (`dangerous-unicode-template-literals-style`) — check `TemplateLiteral` quasis (raw text) against one combined pattern per variant. Not fixable.
-  - `dangerous-identifiers.ts` (`dangerous-unicode-identifiers`) — checks `Identifier` names, only for Cyrillic/Greek homograph ranges (security-only; no style variant, since NBSP/ellipsis/etc. aren't valid identifier characters).
-- `src/utils/unicode-mapping.ts` — the only fix-data source: `unicodeToAsciiMap` maps individual dangerous Unicode dashes/quotes/spacing/bullet characters to ASCII equivalents. Used exclusively by `dangerous-comments-style.ts`'s fixer.
+- `src/core/`: ESLint-free scanner. `scan-text.ts` classifies every character outside printable ASCII into exactly one category (priority order in `classifyCharacter`) and adds `mixed-script` findings per word (`mixed-script.ts`). `vetted-sequences.ts` exempts legitimate emoji, keycap, flag, standardized variation, and joining-script sequences in comments, strings, and text (`acceptsVettedSequences`). `latin-confusables.ts`, `ascii-neighbor-confusables.ts`, `standardized-variation-sequences.ts`, and `unicode-scripts.ts` are generated by `scripts/generate-unicode-data.ts`; do not edit them by hand. `groupFindings` merges runs of invisible-type characters. `allow-list.ts` compiles allow entries into a predicate.
+- `src/languages/`: one adapter per ESLint language mapping tokens/nodes to source contexts (`resolve-language-adapter.ts` picks one by AST shape; order matters because YAML, TOML, and HTML roots are also `Program`). `text-language.ts` is the plugin's own `unicode-guard/text` language.
+- `src/rules/`: `create-finding-rule.ts` builds every rule: scan once from the root node visitor, filter by the rule's categories and `allow` option, group, report with exact `loc`. Each category belongs to exactly one rule, so nothing is reported twice. Rule options are typed `unknown[]` and read through type guards so the rules stay assignable to ESLint 9 and 10 rule types.
+- `src/presets.ts`: presets `recommended`, `strict`, `relaxed`, `ai-instructions` (exported under ESLint's `configs` key). `attachPlugin` sets `plugins` on each preset to the exported plugin object itself.
+- `src/index.ts`: plugin object with `meta` read from `package.json` by `package-metadata.ts` (also the repository URL for rule documentation links); `plugin-namespace.ts` holds the `unicode-guard` prefix and `qualifyName`, which prefixes rule, language, and preset names with it.
 
-### Important asymmetry between rules
+To add a dangerous character: decide its category in `classifyCharacter` (or extend a Unicode property there), add a name to `character-names.ts` if it is common, and add a case to `tests/core/scan-text.test.ts` and, for real-world attacks, `tests/attacks/attack-corpus.test.ts`.
 
-The security/style rule pairs do **not** share a single canonical pattern set across file types — `dangerous-comments(-style)` and `dangerous-template-literals(-style)` each redefine their own combined regex inline (same categories, same union pattern), while `dangerous-literals(-style)` defines the categories as a separate `unicodePatterns` object and checks them one-by-one for granular messages. `dangerous-identifiers` only checks the homograph categories (no style equivalent). When adding a new dangerous Unicode category or character, update it in all relevant rule files individually — there is no single shared pattern module to edit. Decide first whether the new category is a security concern (add to the non-style file, `error` severity) or a stylistic/AI-tell (add to the `-style` file and `unicodeToAsciiMap`, `warn` severity).
+## Conventions
 
-### Testing
+- Source files use `.ts` import extensions (`allowImportingTsExtensions` + `rewriteRelativeImportExtensions`) and only erasable TypeScript syntax, so `eslint.config.js` can import `src/index.ts` natively.
+- `npm run lint` also applies `eslint-plugin-eslint-plugin` (recommended rule and test checks) to `src/rules` and `tests/rules`.
+- No literal non-ASCII characters in source, tests, or docs: write `\uXXXX` escapes, or `<U+XXXX>` placeholders in Markdown examples. Exception: visible emoji in the README legend and rules table. `npm run lint` checks every file with the plugin itself (ASCII only in code and identifiers; hidden and deceptive characters everywhere).
+- Tests: `tests/core` (scanner units, fast-check properties), `tests/rules` (ESLint `RuleTester` from `tests/rule-tester.ts`), `tests/languages` (all languages through `Linter`, see `lint-file.ts`, plus adapter units with hand-built ASTs for parsers the repository does not install), `tests/attacks` (regression corpus). Type-checking tests requires the pinned ESLint 10 types; CI checks `src` types against every ESLint version in the matrix.
 
-Tests live in `tests/*.test.ts`, one file per rule, using vitest (`globals: true`, `environment: "node"`). Import `RuleTester` from `./rule-tester` (not directly from `'eslint'`) — `tests/rule-tester.ts` picks `FlatRuleTester` from `eslint/use-at-your-own-risk` on ESLint <9 and the default flat-config-native `RuleTester` on 9+, since ESLint 8's default `RuleTester` rejects flat-config options like `languageOptions` that these tests use. Follow this import pattern consistent with the existing test files when adding cases for new dangerous-character categories.
+## CI/CD and release
+
+- `.github/workflows/ci.yml`: audit, then build, type-check, lint, format, package lint, and tests on a matrix of ESLint 9 and 10 and Node.js 22 and 24, plus the lower bounds ESLint 9.38.0 on Node.js 22.13.0 (with engine-strict off, because lint-staged needs a newer Node.js 22); lint runs on Node.js 24 only. Actions are pinned by commit SHA.
+- `.github/workflows/codeql.yml` and `scorecard.yml`: code scanning and OpenSSF Scorecard.
+- `.github/workflows/release.yml`: on a pushed `v*.*.*` tag, publishes to npm with Trusted Publishing (OIDC, no token) and provenance. The npm package's Trusted Publisher must reference this repository and `release.yml`.
+- Releases are tagged manually: `npm version <patch|minor|major>` then `git push --follow-tags`.
+- `.husky/pre-commit` runs `lint-staged`. `.npmrc` pins exact versions (`save-exact=true`).

@@ -6,42 +6,98 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   audit:
     name: npm audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: npm
-
       - run: npm ci
       - run: npm audit --audit-level=moderate
+      - run: npm audit signatures
 
-  build-lint-test:
-    name: build-lint-test (eslint ${{ matrix.eslint-version }})
+  verify:
+    name: verify (eslint ${{ matrix.eslint-version }}, node ${{ matrix.node-version }})
     needs: audit
     runs-on: ubuntu-latest
+    # The development dependency lint-staged requires a newer Node.js 22 than
+    # the plugin's lower bound. npm checks the engines of the whole tree on
+    # every install, so engine-strict from .npmrc would reject it in the
+    # lower-bound job, although the job never runs it.
+    env:
+      NPM_CONFIG_ENGINE_STRICT: ${{ matrix.node-version == '22.13.0' && 'false' || 'true' }}
     strategy:
       fail-fast: false
       matrix:
-        eslint-version: ['8.57.1', '9.39.5', '10.8.1']
+        eslint-version: ['9.39.5', '10.12.0']
+        node-version: ['22', '24']
+        # The lower bounds of peerDependencies.eslint and engines.node.
+        include:
+          - eslint-version: '9.38.0'
+            node-version: '22.13.0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      # Type-check tests and lint with the pinned ESLint 10 before switching
+      # versions: test files use ESLint 10 RuleTester types, and the lint
+      # configuration imports src/index.ts, which needs Node.js type stripping.
+      - run: npm run type-check
+      - if: matrix.node-version == '24'
+        run: npm run lint
+      - if: matrix.node-version == '24'
+        run: npm run format:check
+      - run: npm install eslint@${{ matrix.eslint-version }} --no-save
+      - name: Type-check public sources against this ESLint version
+        run: npx tsc -p tsconfig.build.json --noEmit
+      - run: npm run build
+      # CommonJS configurations load the ESM-only package through require(esm).
+      - name: Load the built plugin with require()
+        run: node --eval "const plugin = require('./dist/index.js'); if (plugin.meta.namespace !== 'unicode-guard' || !plugin.configs.recommended) throw new Error('require() did not return the plugin object');"
+      - run: npm run test:coverage
 
-      - uses: actions/setup-node@v4
+  package:
+    name: package
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: npm
-
       - run: npm ci
-      - run: npm install eslint@${{ matrix.eslint-version }} --no-save
       - run: npm run build
-      - run: npm run type-check:tests
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm test
-      - run: npm run test:coverage
+      - run: npm run lint:package
+      - name: Read the pinned ESLint version
+        run: echo "ESLINT_VERSION=$(node -p "require('./package.json').devDependencies.eslint")" >> "$GITHUB_ENV"
+      - name: Smoke test the packed tarball in a fresh project
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/smoke" && cd "$RUNNER_TEMP/smoke"
+          npm init --yes > /dev/null
+          npm install --save-dev "eslint@$ESLINT_VERSION" "$RUNNER_TEMP"/eslint-plugin-unicode-guard-*.tgz
+          printf '%s\n' "import unicodeGuard from 'eslint-plugin-unicode-guard';" "export default [unicodeGuard.configs.recommended];" > eslint.config.mjs
+          node -e "require('fs').writeFileSync('attack.js', 'const name = \"user' + String.fromCodePoint(0x202e) + '\";\n')"
+          if npx eslint attack.js; then echo "expected a bidi control finding" && exit 1; fi
+          printf 'const name = "user";\n' > clean.js
+          npx eslint clean.js
+          printf '%s\n' "const unicodeGuard = require('eslint-plugin-unicode-guard');" "module.exports = [unicodeGuard.configs.recommended];" > eslint.config.cjs
+          if npx eslint --config eslint.config.cjs attack.js; then echo "expected a bidi control finding with a CommonJS configuration" && exit 1; fi
+          npx eslint --config eslint.config.cjs clean.js
