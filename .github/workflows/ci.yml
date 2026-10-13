@@ -34,6 +34,10 @@ jobs:
       matrix:
         eslint-version: ['9.39.5', '10.12.0']
         node-version: ['22', '24']
+        # The lower bounds of peerDependencies.eslint and engines.node.
+        include:
+          - eslint-version: '9.38.0'
+            node-version: '22.13.0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -55,6 +59,9 @@ jobs:
       - name: Type-check public sources against this ESLint version
         run: npx tsc -p tsconfig.build.json --noEmit
       - run: npm run build
+      # CommonJS configurations load the ESM-only package through require(esm).
+      - name: Load the built plugin with require()
+        run: node --eval "const plugin = require('./dist/index.js'); if (plugin.meta.namespace !== 'unicode-guard' || !plugin.configs.recommended) throw new Error('require() did not return the plugin object');"
       - run: npm run test:coverage
 
   package:
@@ -85,3 +92,6 @@ jobs:
           if npx eslint attack.js; then echo "expected a bidi control finding" && exit 1; fi
           printf 'const name = "user";\n' > clean.js
           npx eslint clean.js
+          printf '%s\n' "const unicodeGuard = require('eslint-plugin-unicode-guard');" "module.exports = [unicodeGuard.configs.recommended];" > eslint.config.cjs
+          if npx eslint --config eslint.config.cjs attack.js; then echo "expected a bidi control finding with a CommonJS configuration" && exit 1; fi
+          npx eslint --config eslint.config.cjs clean.js
