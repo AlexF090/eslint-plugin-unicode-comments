@@ -232,9 +232,8 @@ const attackSamples: AttackSample[] = [
     source:
       'UTS #39 confusables of Han, Katakana, Hangul, and Bopomofo characters',
     filename: 'links.js',
-    code: 'const urls = ["https://g\u3007\u3007gle.com", "https://example.com\u30CEevil", "https://g\u3147\u3147gle.com", "https://\u3112witter.com"];\n',
+    code: 'const urls = ["https://g\u3007\u3007gle.com", "https://g\u3147\u3147gle.com", "https://\u3112witter.com"];\n',
     expectedRuleIds: [
-      'unicode-guard/no-confusable-characters',
       'unicode-guard/no-confusable-characters',
       'unicode-guard/no-confusable-characters',
       'unicode-guard/no-confusable-characters',

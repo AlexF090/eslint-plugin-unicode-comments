@@ -99,7 +99,6 @@ describe('scanText', () => {
       ['modifier letter minus in an option', 'rm \u02D7rf /', ['-']],
       ['mathematical bold small alpha in a word', 'p\u{1D6C2}ypal', ['a']],
       ['Han number zero in a domain', 'g\u3007\u3007gle.com', ['O', 'O']],
-      ['Katakana no as a slash', 'example.com\u30CEevil', ['/']],
     ])('reports a %s', (_name, text, imitated) => {
       expect(lookalikesOf(text)).toEqual(imitated);
     });
@@ -120,6 +119,10 @@ describe('scanText', () => {
         'iPhone\u306E\u4F7F\u3044\u65B9\u3068Web\u30A8\u30F3\u30B8\u30CB\u30A2',
       ],
       ['Korean text next to Latin', 'API\uC124\uACC4\uC640 React\uAC1C\uBC1C'],
+      [
+        'Japanese loanwords after a Latin word',
+        'Kubernetes\u30CE\u30FC\u30C9 Web\u30CE\u30FC\u30C8',
+      ],
       [
         'Chinese text next to Latin',
         '\u4F7F\u7528React\u5F00\u53D1\u7B2C3\u7248',

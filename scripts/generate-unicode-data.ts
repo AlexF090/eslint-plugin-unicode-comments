@@ -48,6 +48,12 @@ const usedInLatinTextPattern =
 // `src/core/mixed-script.ts`.
 const scriptsMixedWithLatinPattern =
   /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}]$/u;
+// Kana and conjoining Hangul jamo spell ordinary words next to Latin
+// (KATAKANA LETTER NO starts the loanwords for "node" and "note"), so they
+// are left out; Han radicals, IDEOGRAPHIC NUMBER ZERO, and compatibility
+// jamo rarely stand in a Latin word.
+const wordLettersNextToLatinPattern =
+  /^[\p{Script=Hiragana}\p{Script=Katakana}\u1100-\u11FF]$/u;
 const scriptsWithoutLetters = new Set(['Common', 'Inherited', 'Unknown']);
 
 interface Confusable {
@@ -116,7 +122,9 @@ const isAsciiNeighborConfusable = ({
     commonScriptPattern.test(character) &&
     usedInLatinTextPattern.test(character);
   return (
-    (isNeutral || scriptsMixedWithLatinPattern.test(character)) &&
+    (isNeutral ||
+      (scriptsMixedWithLatinPattern.test(character) &&
+        !wordLettersNextToLatinPattern.test(character))) &&
     !lookalikeExclusionPattern.test(character) &&
     asciiWordOrUrlCharacterPattern.test(imitated)
   );
