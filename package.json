@@ -70,6 +70,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "generate:unicode-data": "node scripts/generate-unicode-data.ts && prettier --write src/core/latin-confusables.ts src/core/unicode-scripts.ts",
     "lint": "eslint .",
     "lint:package": "publint --strict && attw --pack . --profile esm-only",
     "format:check": "prettier --check .",
