@@ -46,7 +46,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
+      # The development dependency lint-staged requires a newer Node.js 22
+      # than the plugin's lower bound; engine-strict from .npmrc would reject
+      # it, although the job never runs it.
       - run: npm ci
+        env:
+          NPM_CONFIG_ENGINE_STRICT: ${{ matrix.node-version == '22.13.0' && 'false' || 'true' }}
       # Type-check tests and lint with the pinned ESLint 10 before switching
       # versions: test files use ESLint 10 RuleTester types, and the lint
       # configuration imports src/index.ts, which needs Node.js type stripping.
